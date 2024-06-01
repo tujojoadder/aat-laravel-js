@@ -35,18 +35,19 @@ class LoginController extends Controller
         }
     }
 
-
-    public function registerWithAdditionalInfo(Request $request)
+    public function additionalinformation(Request $request)
     {
+        
+
         // Validate the form data
-        $request->validate([
-            'gender' => 'required|in:male,female,others',
+        $validatedData =$request->validate([
+            'formData.gender' => 'required|in:male,female,others',
             'email' => 'required|email|unique:users,email',
-            'fname' => 'required|string|max:50',
-            'lname' => 'required|string|max:50',
-            'birthdate_day' => 'required|integer|between:1,31',
-            'birthdate_month' => 'required|integer|between:1,12',
-            'birthdate_year' => [
+            'formData.fname' => 'required|string|max:50',
+            'formData.lname' => 'required|string|max:50',
+            'formData.birthdate_day' => 'required|integer|between:1,31',
+            'formData.birthdate_month' => 'required|integer|between:1,12',
+            'formData.birthdate_year' => [
                 'required',
                 'integer',
                 'date_format:Y',
@@ -63,8 +64,9 @@ class LoginController extends Controller
         ]);
 
 
+
         // Concatenate birthdate components into a single date format
-        $birthdate = $request->input('birthdate_year') . '-' . $request->input('birthdate_month') . '-' . $request->input('birthdate_day');
+        $birthdate = $request->formData['birthdate_year'] . '-' . $request->formData['birthdate_month'] . '-' . $request->formData['birthdate_day'];
 
         // Set the default profile photo based on gender
         $photoPath = '';
@@ -82,47 +84,54 @@ class LoginController extends Controller
 
 
         // Create the user
-        return DB::transaction(function () use ($request, $photoPath, $birthdate) {
+        return DB::transaction(function () use ($request, $photoPath, $birthdate,$validatedData) {
 
-            $fname = cleanInput($request->input('fname'));
-            $lname = cleanInput($request->input('lname'));
-            $email = cleanInput($request->input('email'));
-            $profile_picture = cleanInput($photoPath);
-            $password = cleanInput($request->input('password'));
-            $gender = cleanInput($request->input('gender'));
-            $birthdate = cleanInput($birthdate);
-            // Concatenate first name and last name and remove spaces
-            $fullName = $fname . $lname;
+ // If validation passes, extract the validated data
+    $formData = $validatedData['formData'];
+    $email = cleanInput($request->input('email'));
 
-            // Remove spaces and unwanted characters using regular expression
-            $fullName = preg_replace('/[^\p{L}0-9]+/u', '', $fullName);
+    // Other data
+    $fname = cleanInput($formData['fname']);
+    $lname = cleanInput($formData['lname']);
+    $profile_picture = cleanInput($photoPath);
+    $password = cleanInput($request->input('password'));
+    $gender = cleanInput($formData['gender']);
+    $birthdate = cleanInput($birthdate);
 
-            // Convert to lowercase
-            $fullName = strtolower($fullName);
+    // Concatenate first name and last name and remove spaces
+    $fullName = $fname . $lname;
 
-            // Generate the identifier
-            $identifier = $this->generateIdentifier($fullName);
-            $newUser = User::create([
-                'user_id' => Str::uuid(),
-                'user_fname' => $fname,
-                'user_lname' => $lname,
-                'email' => $email,
-                'profile_picture' => $profile_picture,
-                'password' => Hash::make($password),
-                'gender' => $gender,
-                'birthdate' => $birthdate,
-                'identifier' => $identifier,
-                'cover_photo' => 'storage/defaultCover/user.jpg'
-            ]);
+    // Remove spaces and unwanted characters using regular expression
+    $fullName = preg_replace('/[^\p{L}0-9]+/u', '', $fullName);
 
-            $token = $newUser->createToken('user')->plainTextToken;
+    // Convert to lowercase
+    $fullName = strtolower($fullName);
 
-            return view('home')->with([
-                'message' => 'Registration successful',
-                'token' => $token
-            ]);
-        });
+    // Generate the identifier
+    $identifier = $this->generateIdentifier($fullName);
+
+    // Create the user
+    $newUser = User::create([
+        'user_id' => Str::uuid(),
+        'user_fname' => $fname,
+        'user_lname' => $lname,
+        'email' => $email,
+        'profile_picture' => $profile_picture,
+        'password' => Hash::make($password),
+        'gender' => $gender,
+        'birthdate' => $birthdate,
+        'identifier' => $identifier,
+        'cover_photo' => 'storage/defaultCover/user.jpg'
+    ]);
+
+    // Generate token for the user
+    $token = $newUser->createToken('user')->plainTextToken;
+
+    return response()->json(['message' => 'Registration successful', 'token' => $token]);
+});
+
     }
+
     // Function to generate a unique identifier with at least three numbers appended
     private function generateIdentifier($baseIdentifier)
     {

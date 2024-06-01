@@ -39,7 +39,10 @@ use PHPUnit\TextUI\XmlConfiguration\GroupCollection;
 
 
 //<-- public Routes -->
+
+  /* for google */
 Route::post('/googlehandle', [LoginController::class, 'googlehandle']);
+Route::post('/additionalinformation', [LoginController::class, 'additionalinformation']);
 
 
 
