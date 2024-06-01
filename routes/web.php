@@ -1,4 +1,4 @@
-register<?php
+<?php
 
 use App\Http\Controllers\DemoRegisterController;
 use App\Http\Controllers\IAccountController;
