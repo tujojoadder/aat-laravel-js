@@ -16,30 +16,25 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
-
+use Google_Client;
 class LoginController extends Controller
 {
-    public function googleLogin()
+   
+    public function googleHandle(Request $request)
     {
+     
+        $client = new Google_Client(['client_id' => '921280622729-651dvf4na3lejbnqn7tbsutvirne3hn2.apps.googleusercontent.com']);
+        $payload = $client->verifyIdToken($request->token);
 
-        return Socialite::driver('google')->redirect();
-    }
-    public function googleHandle()
-    {
-        $user = Socialite::driver('google')->user();
-        $existingUser = User::where('email', $user->email)->first();
-
-        if ($existingUser) {
-            // User already exists, you can redirect or perform any other action
-            return response()->json(['message' => "Already has an account"]);
-        }
-
-        // Check if additional information is required
-        else {
-            // Additional information is required, show the form
-            return view('google.register', ['user' => $user]);
+        if ($payload) {
+            $userid = $payload['sub'];
+            // Here, you can find or create a user in your database using the user information from $payload
+            return response()->json(['message' => 'Login successful', 'user' => $payload]);
+        } else {
+            return response()->json(['message' => 'Invalid token'], 401);
         }
     }
+
 
     public function registerWithAdditionalInfo(Request $request)
     {

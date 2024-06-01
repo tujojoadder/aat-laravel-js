@@ -39,6 +39,11 @@ use PHPUnit\TextUI\XmlConfiguration\GroupCollection;
 
 
 //<-- public Routes -->
+Route::post('/googlehandle', [LoginController::class, 'googlehandle']);
+
+
+
+
 Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 Route::middleware('auth:sanctum')->post('/user', function (Request $request) {
