@@ -44,6 +44,8 @@ use PHPUnit\TextUI\XmlConfiguration\GroupCollection;
 Route::post('/googlehandle', [LoginController::class, 'googlehandle']);
 Route::post('/additionalinformation', [LoginController::class, 'additionalinformation']);
 
+       /* normal login */
+ Route::post('/login', [LoginController::class, 'login']);
 
 
 

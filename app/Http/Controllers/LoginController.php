@@ -17,19 +17,30 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use Google_Client;
+
 class LoginController extends Controller
 {
-   
+
+
+    /*  google login  */
     public function googleHandle(Request $request)
     {
-     
+
         $client = new Google_Client(['client_id' => '921280622729-651dvf4na3lejbnqn7tbsutvirne3hn2.apps.googleusercontent.com']);
         $payload = $client->verifyIdToken($request->token);
 
         if ($payload) {
-            $userid = $payload['sub'];
+            $email = $payload['email'];
+            $user = User::where('email', $email)->first();
+
+            //if user already have account
+            if ($user) {
+                // Generate token for the user
+                $token = $user->createToken('user')->plainTextToken;
+                return response()->json(['message' => 'have account', 'token' => $token]);
+            }
             // Here, you can find or create a user in your database using the user information from $payload
-            return response()->json(['message' => 'Login successful', 'user' => $payload]);
+            return response()->json(['message' => 'no account', 'email' => $email]);
         } else {
             return response()->json(['message' => 'Invalid token'], 401);
         }
@@ -37,14 +48,15 @@ class LoginController extends Controller
 
     public function additionalinformation(Request $request)
     {
-        
+
 
         // Validate the form data
-        $validatedData =$request->validate([
+        $validatedData = $request->validate([
             'formData.gender' => 'required|in:male,female,others',
             'email' => 'required|email|unique:users,email',
             'formData.fname' => 'required|string|max:50',
             'formData.lname' => 'required|string|max:50',
+            'formData.password' => 'required|min:8',
             'formData.birthdate_day' => 'required|integer|between:1,31',
             'formData.birthdate_month' => 'required|integer|between:1,12',
             'formData.birthdate_year' => [
@@ -84,52 +96,51 @@ class LoginController extends Controller
 
 
         // Create the user
-        return DB::transaction(function () use ($request, $photoPath, $birthdate,$validatedData) {
+        return DB::transaction(function () use ($request, $photoPath, $birthdate, $validatedData) {
 
- // If validation passes, extract the validated data
-    $formData = $validatedData['formData'];
-    $email = cleanInput($request->input('email'));
+            // If validation passes, extract the validated data
+            $formData = $validatedData['formData'];
+            $email = cleanInput($request->input('email'));
 
-    // Other data
-    $fname = cleanInput($formData['fname']);
-    $lname = cleanInput($formData['lname']);
-    $profile_picture = cleanInput($photoPath);
-    $password = cleanInput($request->input('password'));
-    $gender = cleanInput($formData['gender']);
-    $birthdate = cleanInput($birthdate);
+            // Other data
+            $fname = cleanInput($formData['fname']);
+            $lname = cleanInput($formData['lname']);
+            $profile_picture = cleanInput($photoPath);
+            $password = cleanInput($formData['password']);
+            $gender = cleanInput($formData['gender']);
+            $birthdate = cleanInput($birthdate);
 
-    // Concatenate first name and last name and remove spaces
-    $fullName = $fname . $lname;
+            // Concatenate first name and last name and remove spaces
+            $fullName = $fname . $lname;
 
-    // Remove spaces and unwanted characters using regular expression
-    $fullName = preg_replace('/[^\p{L}0-9]+/u', '', $fullName);
+            // Remove spaces and unwanted characters using regular expression
+            $fullName = preg_replace('/[^\p{L}0-9]+/u', '', $fullName);
 
-    // Convert to lowercase
-    $fullName = strtolower($fullName);
+            // Convert to lowercase
+            $fullName = strtolower($fullName);
 
-    // Generate the identifier
-    $identifier = $this->generateIdentifier($fullName);
+            // Generate the identifier
+            $identifier = $this->generateIdentifier($fullName);
 
-    // Create the user
-    $newUser = User::create([
-        'user_id' => Str::uuid(),
-        'user_fname' => $fname,
-        'user_lname' => $lname,
-        'email' => $email,
-        'profile_picture' => $profile_picture,
-        'password' => Hash::make($password),
-        'gender' => $gender,
-        'birthdate' => $birthdate,
-        'identifier' => $identifier,
-        'cover_photo' => 'storage/defaultCover/user.jpg'
-    ]);
+            // Create the user
+            $newUser = User::create([
+                'user_id' => Str::uuid(),
+                'user_fname' => $fname,
+                'user_lname' => $lname,
+                'email' => $email,
+                'profile_picture' => $profile_picture,
+                'password' => Hash::make($password),
+                'gender' => $gender,
+                'birthdate' => $birthdate,
+                'identifier' => $identifier,
+                'cover_photo' => 'storage/defaultCover/user.jpg'
+            ]);
 
-    // Generate token for the user
-    $token = $newUser->createToken('user')->plainTextToken;
+            // Generate token for the user
+            $token = $newUser->createToken('user')->plainTextToken;
 
-    return response()->json(['message' => 'Registration successful', 'token' => $token]);
-});
-
+            return response()->json(['message' => 'Registration successful', 'token' => $token]);
+        });
     }
 
     // Function to generate a unique identifier with at least three numbers appended
@@ -165,5 +176,32 @@ class LoginController extends Controller
         }
 
         return $baseIdentifier;
+    }
+
+
+
+    /* Normal login */
+
+    public function login(Request $request)
+    {
+
+        $validatedData = $request->validate([
+
+            'email' => 'required|email',
+            'password' => 'required|min:8',
+        ]);
+        $email = cleanInput($request->email);
+        $password = cleanInput($request->password);
+        $user = User::where('email', $request->email)->first();
+        if ($user) {
+            if (!Hash::check($password, $user->password)) {
+                return response()->json(['message' => 'passwordInvalid']);
+            } else {
+                $token = $user->createToken('login')->plainTextToken;
+                return response()->json(['message' => 'sucessful', 'token' => $token]);
+            }
+        } else {
+            return response()->json(['message' => 'noEmail']);
+        }
     }
 }
