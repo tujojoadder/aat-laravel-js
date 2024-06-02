@@ -46,6 +46,14 @@ Route::post('/additionalinformation', [LoginController::class, 'additionalinform
 
        /* normal login */
  Route::post('/login', [LoginController::class, 'login']);
+//forgot password
+Route::post('/forgotpassword', [LoginController::class, 'forgotpassword']);
+//password reset
+Route::post('/resetpassword', [LoginController::class, 'resetpassword']);
+//confirm password to reset
+Route::post('/confirmpassword', [LoginController::class, 'confirmpassword']);
+
+
 
 
 

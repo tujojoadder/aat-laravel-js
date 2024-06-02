@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Groups;
 use App\Models\Pages;
+use App\Models\PasswordReset;
 use App\Models\UniqeUser;
 use App\Models\User;
 use Carbon\Carbon;
@@ -17,6 +18,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use Google_Client;
+use Illuminate\Mail\Message;
+use Illuminate\Support\Facades\Mail;
+
 
 class LoginController extends Controller
 {
@@ -204,4 +208,87 @@ class LoginController extends Controller
             return response()->json(['message' => 'noEmail']);
         }
     }
+
+
+    //forgot password
+    public function forgotpassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+        $email = cleanInput($request->email);
+
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return response()->json(['message' => 'Email does not exist']);
+        }
+
+        // Delete the old password reset request
+        $passwordResetRequest = PasswordReset::where('email', $email)->first();
+        if ($passwordResetRequest) {
+            $passwordResetRequest->delete();
+        }
+
+        // Create new token and password reset record
+        $token = Str::uuid();
+        PasswordReset::create([
+            'email' => $email,
+            'token' => $token,
+            'created_at' => Carbon::now()
+        ]);
+
+        // Send Email with Reset Link
+        Mail::send('R_reset', ['token' => $token], function (Message $message) use ($email) {
+            $message->subject('Reset Your Password');
+            $message->to($email);
+        });
+
+        return response()->json(['message' => 'Email sent to your mail']);
+    }
+
+    //reset password
+
+    public function resetpassword(Request $request)
+    {
+
+        $token = cleanInput($request->token);
+$emailuser=PasswordReset::where('token',$token)->first();
+
+        //we will move 404 
+        PasswordReset::where('token',$token)->firstOrFail();
+
+        //Delete Token older then 1 minute
+        $formatted = Carbon::now()->subMinutes(1);
+        $user = PasswordReset::where('created_at', '<=', $formatted)->first();
+
+        if ($user) {
+            $user->delete();
+            return response()->json(['message' => 'Token validation time over']);
+        }else{
+            //user accessing before 1 minute 
+            return response()->json(['success' => 'success','email'=>$emailuser->email]);
+
+        }
+
+    }
+    public function confirmpassword(Request $request) {
+
+
+        $password=cleanInput($request->password);
+        $confirm_password=cleanInput($request->confirm_password);
+if ($password ==$confirm_password ) {
+    $user=User::where('email',$request->email)->first();
+    if ($user) { 
+        $user->password = Hash::make($password);
+        $user->save();
+        return response()->json(['message' => 'sucess'], 200);
+    } else {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+}else{
+    return response()->json(['message' =>'Passwords do not match']);
+}
+
+    }
+
 }
