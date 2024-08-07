@@ -15,14 +15,14 @@ return new class extends Migration
     {
         Schema::create('pages', function (Blueprint $table) {
             $table->string('page_id')->primary();
-            $table->string('identifier')->unique();
             $table->string('page_name');
             $table->text('page_details');
             $table->string('page_creator');
             $table->longText('page_admins');
+            $table->integer('reported_count')->default(0);
+            $table->string('identifier')->unique();   
             $table->string('page_picture');
             $table->string('page_cover');
-            $table->integer('reported_count')->default(0);
             $table->timestamps();
         });
     }

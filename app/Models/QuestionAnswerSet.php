@@ -21,12 +21,12 @@ class QuestionAnswerSet extends Model
        'question',
        'wrong_ans',
        'correct_ans',
-       'story_id',
+       'hadith_id',
 
     ];
     public function story()
     {
-        return $this->belongsTo(Story::class, 'story_id', 'story_id');
+        return $this->belongsTo(Hadith::class, 'story_id', 'story_id');
     }
 
 

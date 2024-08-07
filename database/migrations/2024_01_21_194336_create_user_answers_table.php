@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('user_answers', function (Blueprint $table) {
             $table->string('user_answer_id')->primary();
             $table->string('user_id');
-            $table->string('story_id');
+            $table->string('hadith_id');
             $table->string('question_id');
             $table->string('selected_ans');
             $table->boolean('is_correct');
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->foreign('user_id')->references('user_id')->on('users')
             ->onDelete('cascade')
             ->onUpdate('cascade');
-            $table->foreign('story_id')->references('story_id')->on('stories')
+            $table->foreign('hadith_id')->references('hadith_id')->on('hadith')
             ->onDelete('cascade')
             ->onUpdate('cascade');
             $table->foreign('question_id')->references('question_id')->on('question_answer_sets')

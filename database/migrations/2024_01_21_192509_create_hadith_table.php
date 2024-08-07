@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Hadith;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,9 +14,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('stories', function (Blueprint $table) {
-            $table->string('story_id')->primary();
-            $table->text('story');
+        Schema::create('hadith', function (Blueprint $table) {
+            $table->string('hadith_id')->primary();
+            $table->string('has_ques')->default('no');
+            $table->string('book')->default('bukhari');
+            $table->string('language')->default('bangla');
+            $table->text('hadith');
+            
+           
             $table->timestamps();
         });
     }
@@ -27,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('stories');
+        Schema::dropIfExists('hadith');
     }
 };

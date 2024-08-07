@@ -18,11 +18,11 @@ return new class extends Migration
             $table->text('question');
             $table->string('wrong_ans');
             $table->string('correct_ans');
-            $table->string('story_id');
+            $table->string('hadith_id');
             $table->timestamps();
 
 
-            $table->foreign('story_id')->references('story_id')->on('stories')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('hadith_id')->references('hadith_id')->on('hadith')->onDelete('cascade')->onUpdate('cascade');
 
         });
     }

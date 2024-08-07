@@ -19,7 +19,7 @@ class UserAnswer extends Model
      protected $fillable = [
        'user_answer_id',
        'user_id',
-       'story_id',
+       'hadith_id',
        'question_id',
        'selected_ans',
        'is_correct',

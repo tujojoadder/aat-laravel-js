@@ -7,18 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class Story extends Model
+class Hadith extends Model
 {
      use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'stories'; // Specify the custom table name
-    protected $primaryKey = 'story_id';
+    protected $table = 'hadith'; // Specify the custom table name
+    protected $primaryKey = 'hadith_id';
     public $incrementing = false; // if primay key is string
 
 
      protected $fillable = [
-       'story_id',
-       'story'
+       'hadith_id',
+       'hadith',
+       'book'
 
     ];
     public function questionAnswerSets()

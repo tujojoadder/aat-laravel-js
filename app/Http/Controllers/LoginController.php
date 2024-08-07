@@ -83,10 +83,12 @@ class LoginController extends Controller
 
         // Concatenate birthdate components into a single date format
         $birthdate = $request->formData['birthdate_year'] . '-' . $request->formData['birthdate_month'] . '-' . $request->formData['birthdate_day'];
-
+        
+        
+        $formData = $validatedData['formData'];
         // Set the default profile photo based on gender
         $photoPath = '';
-        switch ($request->input('gender')) {
+        switch (cleanInput($formData['gender'])) {
             case 'male':
                 $photoPath = 'storage/defaultProfile/male.png';
                 break;
@@ -100,10 +102,10 @@ class LoginController extends Controller
 
 
         // Create the user
-        return DB::transaction(function () use ($request, $photoPath, $birthdate, $validatedData) {
+        return DB::transaction(function () use ($request, $photoPath, $birthdate, $validatedData,$formData) {
 
             // If validation passes, extract the validated data
-            $formData = $validatedData['formData'];
+          
             $email = cleanInput($request->input('email'));
 
             // Other data
@@ -143,7 +145,7 @@ class LoginController extends Controller
             // Generate token for the user
             $token = $newUser->createToken('user')->plainTextToken;
 
-            return response()->json(['message' => 'Registration successful', 'token' => $token]);
+            return response()->json(['message' => 'Registration successful', 'token' => $token,'data'=>$newUser]);
         });
     }
 
@@ -202,7 +204,7 @@ class LoginController extends Controller
                 return response()->json(['message' => 'passwordInvalid']);
             } else {
                 $token = $user->createToken('login')->plainTextToken;
-                return response()->json(['message' => 'sucessful', 'token' => $token]);
+                return response()->json(['message' => 'sucessful', 'token' => $token,'data'=>$user]);
             }
         } else {
             return response()->json(['message' => 'noEmail']);
@@ -290,5 +292,17 @@ if ($password ==$confirm_password ) {
 }
 
     }
+
+
+
+    //logut
+    public function logOut(Request $request)
+    {
+        // Revoke the token that was used to authenticate the current request
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Logged out successfully'], 200);
+    }
+
 
 }

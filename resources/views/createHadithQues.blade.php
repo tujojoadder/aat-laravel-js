@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submit Story</title>
+    <title>Make Hadith Ques</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -18,7 +18,8 @@
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
         }
 
-        h1, h2 {
+        h1,
+        h2 {
             color: #333;
         }
 
@@ -40,38 +41,45 @@
             margin-top: 10px;
             margin-right: 10px;
         }
-        
+
         #submit-btn {
             margin-top: 10px;
         }
 
         /* Color customization */
-        label[for="story"],
+        label[for="hadith"],
         label[for^="question"],
         input[name^="questions"],
         input[name^="currectAnswers"],
         input[name^="wrongAnswers"] {
-            color: #007bff; /* Blue color for story, question, and answer fields */
+            color: #007bff;
+            /* Blue color for hadith, question, and answer fields */
         }
+
     </style>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="mb-4">Submit Story</h1>
-        @if (isset($message))
-        <div class="alert alert-success">{{ $message }}</div>
+        {{-- show success message --}}
+        @if (session('message'))
+        <div class="alert alert-success">{{ session('message') }}</div>
         @endif
-       
-        <form id="story-form" method="POST"  action="{{ route('createStoryAndQues.story') }}">
+
+        <h1 class="mb-4">Make Hadith Questions</h1>
+
+        <div class="form-group">
+            <label for="hadith">Hadith:</label>
+            <p id="hadith" name="hadith">{{ $randomHadith->hadith ?? 'No Hadith available' }}</p>
+        </div>
+
+        <form id="hadith-form" method="POST" action="{{ route('createhadithandques') }}">
             @csrf
-            <div class="form-group">
-                <label for="story">Story:</label>
-                <textarea class="form-control" id="story" name="story" rows="5" required placeholder="Write your story here..."></textarea>
-            </div>
+            <input type="hidden" name="hadith_id" value="{{ $randomHadith->hadith_id ?? '' }}">
             <div class="d-flex justify-content-start mb-3">
                 <button type="button" class="btn btn-primary mr-2" id="add-question">Add Question</button>
-                <button type="submit" class="btn btn-success" id="submit-btn" disabled>Submit</button>
+                <button type="submit" class="btn btn-success mr-2" id="submit-btn">Submit</button>
+                <button type="button" class="btn btn-danger mr-2 ml-5" id="too-short-btn">Too Short</button>
             </div>
             <h2>Questions</h2>
             <div id="questions-container">
@@ -88,14 +96,18 @@
                 </div>
             </div>
         </form>
+
+        <form id="too-short-form" method="POST" action="{{ route('mark.hadith.short') }}" class="d-none">
+            @csrf
+            <input type="hidden" name="hadith_id" value="{{ $randomHadith->hadith_id ?? '' }}">
+        </form>
     </div>
-    
 
     <script>
         $(document).ready(function() {
             let questionCount = 1;
-    
-            $('#add-question').click(function(){
+
+            $('#add-question').click(function() {
                 questionCount++;
                 let questionHtml = `
                 <div class="form-group question">
@@ -109,22 +121,27 @@
                     </div>
                 </div>`;
                 $('#questions-container').prepend(questionHtml); // Prepend instead of append
-    
+
                 // Enable submit button if at least three questions are added
                 if (questionCount >= 3) {
                     $('#submit-btn').prop('disabled', false);
                 }
             });
-    
+
             // Validation to prevent form submission if less than three questions are added
-            $('#story-form').submit(function(event) {
-                if (questionCount < 3) {
+            $('#hadith-form').submit(function(event) {
+                if (questionCount < 1) {
                     event.preventDefault();
                     alert('Please add at least three questions.');
                 }
             });
+
+            $('#too-short-btn').click(function() {
+                $('#too-short-form').submit();
+            });
         });
+
     </script>
-    
+
 </body>
 </html>

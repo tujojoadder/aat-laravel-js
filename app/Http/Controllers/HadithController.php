@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\QuestionAnswerSet;
-use App\Models\Story;
+use App\Models\Hadith;
 use App\Models\UniqeUser;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\RelationNotFoundException;
@@ -13,40 +13,79 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-class StoryController extends Controller
+class HadithController extends Controller
 {
-    public function createStoryAndQues(Request $request)
+
+    /* Insert hadith */
+    public function hadithInsert(Request $request)
     {
         // Validate the form input
         $this->validate($request, [
-            'story' => 'required|string',
+            'hadith' => 'required|string',
+        ]);
+
+        // Clean input data
+        $hadith =cleanInput($request->hadith);
+
+        // Create unique id for hadith
+        $hadithId = Str::uuid();
+
+        // Use DB transaction
+        DB::transaction(function () use ($hadith, $hadithId) {
+            // Store the hadith
+            $data = [
+                'hadith_id' => $hadithId,
+                'hadith' => $hadith,
+            ];
+            Hadith::create($data);
+        });
+
+        // Redirect back with success message
+        return redirect()->back()->with('message', 'Hadith submitted successfully!');
+    }
+
+
+
+/* Random hadith */
+public function getRandomHadith()
+    {
+        $randomHadith = Hadith::inRandomOrder()->first();
+        return view('hadith-form', compact('randomHadith'));
+    }
+
+/* make hadith too sort */
+public function markHadithAsShort(Request $request)
+{
+    $hadithId = $request->input('hadith_id');
+    $hadith = Hadith::find($hadithId);
+    if ($hadith) {
+        $hadith->has_ques = 'too_sort';
+        $hadith->save();
+    }
+
+           // Redirect back with success message
+           return redirect()->back()->with('message', 'Hadith is seted as too_sort');
+}
+
+    public function createHadithQues(Request $request)
+    {
+        // Validate the form input
+        $this->validate($request, [
+            'hadith_id' => 'required|string',
             'questions.*' => 'required|string',
             'currectAnswers.*' => 'required|string',
             'wrongAnswers.*' => 'required|string',
         ]);
 
         // Clean input data
-        $story = cleanInput($request->story);
+        $hadithId= cleanInput($request->hadith_id);
         $questions = $request->questions;
         $currectAnswers = $request->currectAnswers;
         $wrongAnswers = $request->wrongAnswers;
 
-        // Verify minimum 3 questions
-        if (count($questions) < 3) {
-            return redirect()->back()->withErrors(['message' => 'Please provide at least 3 questions.']);
-        }
-
-        // Create unique id for story
-        $storyId = Str::uuid();
 
         // Use DB transaction
-        DB::transaction(function () use ($story, $storyId, $questions, $currectAnswers, $wrongAnswers) {
-            // Store the story
-            $data = [
-                'story_id' => $storyId,
-                'story' => $story,
-            ];
-            Story::create($data);
+        DB::transaction(function () use ($hadithId, $questions, $currectAnswers, $wrongAnswers) {
 
             // Store the questions and answers
             foreach ($questions as $key => $question) {
@@ -54,7 +93,7 @@ class StoryController extends Controller
 
                 $questionData = [
                     'question_id' => $quesId,
-                    'story_id' => $storyId,
+                    'hadith_id' => $hadithId,
                     'question' => $question,
                     'correct_ans' => $currectAnswers[$key],
                     'wrong_ans' => $wrongAnswers[$key],
@@ -64,21 +103,25 @@ class StoryController extends Controller
             }
         });
 
-        return redirect()->back()->with('message', 'Story inserted successfully');
+        return redirect()->back()->with('message', 'Hadith question inserted successfully');
     }
 
-    public function showRandomStory()
-    {
-        $randomStory = Story::inRandomOrder()->first();
 
-        // You may add error handling if no story is found
-        return view('randomstory', compact('randomStory'));
+
+    public function showRandomHadith()
+    {
+        $randomHadith = Hadith::where('has_ques', 'no')->inRandomOrder()->first();
+        return view('createHadithQues', compact('randomHadith'));
     }
 
-    public function viewQuestions($story_id)
+
+
+
+
+    public function viewQuestions($hadith_id)
     {
-        // Fetch the questions for the story
-        $questions = QuestionAnswerSet::where('story_id', $story_id)->get();
+        // Fetch the questions for the hadith
+        $questions = QuestionAnswerSet::where('hadith_id', $hadith_id)->get();
 
         // Shuffle the answers for each question
         $questions->each(function ($question) {
@@ -87,24 +130,24 @@ class StoryController extends Controller
             $question->ans2 = $answers->shift(); // Second answer
         });
 
-        return view('view-questions', compact('questions', 'story_id'));
+        return view('view-questions', compact('questions', 'hadith_id'));
     }
 
     
-public function submitAnswers(Request $request, $story_id)
+public function submitAnswers(Request $request, $hadith_id)
 {
     // Retrieve submitted answers from the request
     $submittedAnswers = $request->input('answer');
     
-    // Fetch the story along with its associated question-answer sets
-    $story = Story::with('questionAnswerSets')->find($story_id);
+    // Fetch the hadith along with its associated question-answer sets
+    $hadith = Hadith::with('questionAnswerSets')->find($hadith_id);
 
     // Initialize a variable to count the correct answers
     $correctAnswers = 0;
 
-    // Loop through each question-answer set in the story
+    // Loop through each question-answer set in the hadith
     
-    foreach ($story->questionAnswerSets as $questionAnswerSet) {
+    foreach ($hadith->questionAnswerSets as $questionAnswerSet) {
         // Check if the user has submitted an answer for this question
         if (isset($submittedAnswers[$questionAnswerSet->question_id])) {
             // Compare the submitted answer with the correct answer for this question

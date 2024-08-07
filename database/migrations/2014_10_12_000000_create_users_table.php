@@ -15,18 +15,23 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->string('user_id')->primary();
-            $table->string('identifier')->unique();
+            $table->string('profile_picture');
             $table->string('user_fname');
             $table->string('user_lname');
-            $table->string('profile_picture');
-            $table->string('cover_photo');
             $table->string('email');
             $table->string('password');
-            $table->date('birthdate');
             $table->enum('gender', ['male', 'female', 'others']);
-            $table->integer('total_quiz_point')->default(0);
             $table->enum('privacy_setting',['public', 'locked'])->default('public');
+            $table->integer('total_quiz_point')->default(0);
             $table->boolean('blueticks')->default(false); // Adding blueticks column with boolean data type
+            $table->string('identifier')->unique();
+
+
+
+
+            $table->string('cover_photo');
+
+            $table->date('birthdate');
             $table->integer('reported_count')->default(0);
             $table->timestamps();
         });

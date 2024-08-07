@@ -10,6 +10,7 @@ use App\Http\Controllers\FriendListController;
 use App\Http\Controllers\FriendRequestController;
 use App\Http\Controllers\GroupJoinRequestController;
 use App\Http\Controllers\GroupsController;
+use App\Http\Controllers\HadithController;
 use App\Http\Controllers\HiController;
 use App\Http\Controllers\IAccountController;
 use App\Http\Controllers\IAccountFollowersController;
@@ -40,12 +41,13 @@ use PHPUnit\TextUI\XmlConfiguration\GroupCollection;
 
 //<-- public Routes -->
 
-  /* for google */
+/* for google */
+
 Route::post('/googlehandle', [LoginController::class, 'googlehandle']);
 Route::post('/additionalinformation', [LoginController::class, 'additionalinformation']);
 
-       /* normal login */
- Route::post('/login', [LoginController::class, 'login']);
+/* normal login */
+Route::post('/login', [LoginController::class, 'login']);
 //forgot password
 Route::post('/forgotpassword', [LoginController::class, 'forgotpassword']);
 //password reset
@@ -60,34 +62,38 @@ Route::post('/confirmpassword', [LoginController::class, 'confirmpassword']);
 Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 Route::middleware('auth:sanctum')->post('/user', function (Request $request) {
-    // Get the authenticated user
-    $user = $request->user();
+       // Get the authenticated user
+       $user = $request->user();
 
-    // Check if the user is authenticated
-    if (!$user) {
-        return response()->json(['message' => 'Unauthenticated'], 403);
-    }
-   
-    // Authorize the user for private channel access
-    return Broadcast::auth($request);
+       // Check if the user is authenticated
+       if (!$user) {
+              return response()->json(['message' => 'Unauthenticated'], 403);
+       }
+
+       // Authorize the user for private channel access
+       return Broadcast::auth($request);
 });
 
 Route::middleware('auth:sanctum')->get('/profile', function (Request $request) {
 
        // Get the authenticated user
-    $authUser = $request->user();
+       $authUser = $request->user();
 
-    // Get all users except the authenticated user
-    $users = User::where('user_id', '!=', $authUser->user_id)->get();
+       // Get all users except the authenticated user
+       $users = User::where('user_id', '!=', $authUser->user_id)->get();
 
-    return response()->json($users);
-   
-   });
-   
+       return response()->json($users);
+});
+
 //Story and Ques
+
+/* insert Hadith */
+Route::post('/hadith/insert', [HadithController::class, 'hadithInsert'])
+       ->name('hadithInsert');
+
 //<-- no auth now
-Route::post('/storyandques/create', [StoryController::class, 'createStoryAndQues'])
-->name('createStoryAndQues.story');
+Route::post('/storyandques/create', [HadithController::class, 'createHadithQues'])
+       ->name('createhadithandques');
 
 
 
@@ -153,7 +159,16 @@ Route::post('/setcoverphoto', [CoverPhotoController::class, 'setcoverphoto'])->n
 
 
 
+
+
+/* Private Routes */
+
 Route::middleware('auth:sanctum')->group(function () {
+
+
+Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDetails');
+
+
        //<-- Bluetick Users (Everyone gender) -->
        Route::post('/uploadprofilepicture', [BluetickUserController::class, 'uploadprofilepicture'])->name('uploadpp');
        //delete profile update post of male(we will not delete the physical image becase we need the profile picture of user )
@@ -462,30 +477,29 @@ Route::middleware('auth:sanctum')->group(function () {
 
        //toggle Like 
        Route::post('/like/toggle/{reactionType}/{likeOnType}/{likeOnId}', [LikesController::class, 'toggleLike'])
-       ->name('toggleLike.likes');
+              ->name('toggleLike.likes');
        //getUsersWhoLiked 
        Route::get('/like/wholiked/{likeOnType}/{likeOnId}', [LikesController::class, 'getUsersWhoLiked'])
               ->name('getUsersWhoLiked.likes');
 
 
+      /* <--- LogOut --> */
+      Route::post('/logout', [LoginController::class, 'logOut'])
+      ->name('logOut');
+       /*  <<< --- Report --->>> */
+
+       //Report any Model
+       Route::post('/report/create/{ReportOnType}/{ReportOnId}', [ReportController::class, 'createReport'])
+              ->name('createReport.report');
+       //getUsersWithReports
+       Route::get('/report/getuserswithreports', [ReportController::class, 'getUsersWithReports'])
+              ->name('getUsersWithReports.report');
+
 
 
        /*  <<< --- Report --->>> */
 
-    //Report any Model
-    Route::post('/report/create/{ReportOnType}/{ReportOnId}', [ReportController::class, 'createReport'])
-    ->name('createReport.report');
-    //getUsersWithReports
-    Route::get('/report/getuserswithreports', [ReportController::class, 'getUsersWithReports'])
-    ->name('getUsersWithReports.report');
-
-
-
-  /*  <<< --- Report --->>> */
-
-  Route::get('/message', [DemoRegisterController::class, 'loaddashboard']);
-/*    <---- chat ----> */
-  Route::post('/chat', [DemoRegisterController::class, 'chat']);
-   
- 
+       Route::get('/message', [DemoRegisterController::class, 'loaddashboard']);
+       /*    <---- chat ----> */
+       Route::post('/chat', [DemoRegisterController::class, 'chat']);
 });

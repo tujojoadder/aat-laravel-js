@@ -17,6 +17,37 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
+
+
+    /*  Retrive user details */
+
+    public function userDetails(Request $request)
+    {
+        // Get Auth user
+        $user = auth()->user();
+    
+        if ($user) {
+            // Extract the necessary fields
+            $userDetails = [
+                'profile_picture' => $user->profile_picture,
+                'user_fname' => $user->user_fname,
+                'user_lname' => $user->user_lname,
+                'email' => $user->email,
+                'identifier' => $user->identifier, // assuming 'identifier' is the user id
+            ];
+    
+            return response()->json(['data' => $userDetails]);
+        } else {
+            return response()->json(['message' => 'Invalid token or user not authenticated.',401]);
+        }
+    }
+    
+    
+
+
+
+
+
     public function update_username(Request $request)
     {
 
