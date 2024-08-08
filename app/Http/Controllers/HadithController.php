@@ -25,7 +25,7 @@ class HadithController extends Controller
         ]);
 
         // Clean input data
-        $hadith =cleanInput($request->hadith);
+        $hadith = cleanInput($request->hadith);
 
         // Create unique id for hadith
         $hadithId = Str::uuid();
@@ -46,26 +46,21 @@ class HadithController extends Controller
 
 
 
-/* Random hadith */
-public function getRandomHadith()
+
+
+    /* make hadith too sort for make ques */
+    public function markHadithAsShort(Request $request)
     {
-        $randomHadith = Hadith::inRandomOrder()->first();
-        return view('hadith-form', compact('randomHadith'));
-    }
+        $hadithId = $request->input('hadith_id');
+        $hadith = Hadith::find($hadithId);
+        if ($hadith) {
+            $hadith->has_ques = 'too_sort';
+            $hadith->save();
+        }
 
-/* make hadith too sort */
-public function markHadithAsShort(Request $request)
-{
-    $hadithId = $request->input('hadith_id');
-    $hadith = Hadith::find($hadithId);
-    if ($hadith) {
-        $hadith->has_ques = 'too_sort';
-        $hadith->save();
+        // Redirect back with success message
+        return redirect()->back()->with('message', 'Hadith is seted as too_sort');
     }
-
-           // Redirect back with success message
-           return redirect()->back()->with('message', 'Hadith is seted as too_sort');
-}
 
     public function createHadithQues(Request $request)
     {
@@ -78,7 +73,7 @@ public function markHadithAsShort(Request $request)
         ]);
 
         // Clean input data
-        $hadithId= cleanInput($request->hadith_id);
+        $hadithId = cleanInput($request->hadith_id);
         $questions = $request->questions;
         $currectAnswers = $request->currectAnswers;
         $wrongAnswers = $request->wrongAnswers;
@@ -108,15 +103,6 @@ public function markHadithAsShort(Request $request)
 
 
 
-    public function showRandomHadith()
-    {
-        $randomHadith = Hadith::where('has_ques', 'no')->inRandomOrder()->first();
-        return view('createHadithQues', compact('randomHadith'));
-    }
-
-
-
-
 
     public function viewQuestions($hadith_id)
     {
@@ -133,34 +119,56 @@ public function markHadithAsShort(Request $request)
         return view('view-questions', compact('questions', 'hadith_id'));
     }
 
-    
-public function submitAnswers(Request $request, $hadith_id)
-{
-    // Retrieve submitted answers from the request
-    $submittedAnswers = $request->input('answer');
-    
-    // Fetch the hadith along with its associated question-answer sets
-    $hadith = Hadith::with('questionAnswerSets')->find($hadith_id);
 
-    // Initialize a variable to count the correct answers
-    $correctAnswers = 0;
+    public function submitAnswers(Request $request, $hadith_id)
+    {
+        // Retrieve submitted answers from the request
+        $submittedAnswers = $request->input('answer');
 
-    // Loop through each question-answer set in the hadith
-    
-    foreach ($hadith->questionAnswerSets as $questionAnswerSet) {
-        // Check if the user has submitted an answer for this question
-        if (isset($submittedAnswers[$questionAnswerSet->question_id])) {
-            // Compare the submitted answer with the correct answer for this question
-            if ($submittedAnswers[$questionAnswerSet->question_id] == $questionAnswerSet->correct_ans) {
-                // If the answers match, increment the count of correct answers
-                $correctAnswers++;
+        // Fetch the hadith along with its associated question-answer sets
+        $hadith = Hadith::with('questionAnswerSets')->find($hadith_id);
+
+        // Initialize a variable to count the correct answers
+        $correctAnswers = 0;
+
+        // Loop through each question-answer set in the hadith
+
+        foreach ($hadith->questionAnswerSets as $questionAnswerSet) {
+            // Check if the user has submitted an answer for this question
+            if (isset($submittedAnswers[$questionAnswerSet->question_id])) {
+                // Compare the submitted answer with the correct answer for this question
+                if ($submittedAnswers[$questionAnswerSet->question_id] == $questionAnswerSet->correct_ans) {
+                    // If the answers match, increment the count of correct answers
+                    $correctAnswers++;
+                }
             }
         }
+
+        // Now you have the count of correct answers, you can do whatever you want with it
+        // For example, you can return a view with the result
+        return response()->json(['message' => $correctAnswers]);
     }
 
-    // Now you have the count of correct answers, you can do whatever you want with it
-    // For example, you can return a view with the result
-    return response()->json(['message' => $correctAnswers]);
-  
-}
+
+
+
+    /*<---- Random hadith ----> */
+   /*  for laravel js  ->web.php*/
+   public function showRandomHadith()
+    {
+        $randomHadith = Hadith::where('has_ques', 'no')->inRandomOrder()->first();
+        return view('createHadithQues', compact('randomHadith'));
+    }
+
+    /*  for wreact js  ->app.php*/
+    public function getRandomHadith()
+    {
+        $randomHadith = Hadith::inRandomOrder()->first();
+        return view('hadith-form', compact('randomHadith'));
+    }
+
+
+    
+
+    
 }

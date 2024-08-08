@@ -88,14 +88,26 @@ Route::middleware('auth:sanctum')->get('/profile', function (Request $request) {
 //Story and Ques
 
 /* insert Hadith */
-Route::post('/hadith/insert', [HadithController::class, 'hadithInsert'])
+
+/* Route::post('/hadith/insert', [HadithController::class, 'hadithInsert'])
        ->name('hadithInsert');
 
 //<-- no auth now
 Route::post('/storyandques/create', [HadithController::class, 'createHadithQues'])
-       ->name('createhadithandques');
+       ->name('createhadithandques'); */
+
+/* Hadith for show in hadith box */
+ Route::get('/get-random-hadith', [HadithController::class, 'getRandomHadith'])
+       ->name('getRandomhadith');
 
 
+
+
+
+
+
+
+       
 
 
 /* <---  Demo registration   ---> */
