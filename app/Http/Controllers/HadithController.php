@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DayHadith;
+use App\Models\DayLike;
 use App\Models\QuestionAnswerSet;
 use App\Models\Hadith;
 use App\Models\UniqeUser;
+use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Http\Request;
@@ -153,22 +156,113 @@ class HadithController extends Controller
 
 
     /*<---- Random hadith ----> */
-   /*  for laravel js  ->web.php*/
-   public function showRandomHadith()
+    /*  for laravel js  ->web.php*/
+    public function showRandomHadith()
     {
         $randomHadith = Hadith::where('has_ques', 'no')->inRandomOrder()->first();
         return view('createHadithQues', compact('randomHadith'));
     }
 
-    /*  for wreact js  ->app.php*/
+    /*  for react js  ->app.php*/
     public function getRandomHadith()
     {
         $randomHadith = Hadith::inRandomOrder()->first();
-        return view('hadith-form', compact('randomHadith'));
+        return response()->json(['data' => $randomHadith]);
     }
 
 
+    /* set day hadith */
+
+    public function setDayHadith(Request $request)
+    {
+        // Get Authenticated user
+        $user = auth()->user();
+    
+        // Validate request data
+        $validatedData = $request->validate([
+            'hadith_id' => 'required|exists:hadith,hadith_id',
+        ]);
+    
+        // Clean the input
+        $hadith_id = cleanInput($request->hadith_id);
+    
+        // Use a transaction for database operations
+        DB::transaction(function () use ($validatedData, $user, $hadith_id) {
+            // Delete any existing record for this user
+            DayHadith::where('user_id', $user->user_id)->delete();
+    
+            // Insert data into the 'day_hadiths' table
+            DayHadith::create([
+                'day_hadith_id' => (string) Str::uuid(), // Generate a UUID for the primary key
+                'hadith_id' => $hadith_id,
+                'user_id' => $user->user_id, // Use the authenticated user's ID
+            ]);
+        });
+    
+        // Return a response (e.g., a success message)
+        return response()->json(['message' => 'Day Hadith added successfully'], 201);
+    }
     
 
-    
+/* Get all user day hadith */
+public function getDayHadiths()
+{
+    $user = auth()->user();
+
+    // Retrieve all users except the currently authenticated user in random order
+    $otherUsers = User::where('user_id', '!=', $user->user_id)
+        ->with('dayHadith.hadith') // Eager load the dayHadith and related Hadith
+        ->inRandomOrder() // Randomize the order of the results
+        ->get();
+
+    return response()->json([
+        'data' => $otherUsers
+    ]);
+}
+
+
+
+
+/* like day hadith */
+public function likeDayHadith(Request $request)
+{
+    // Get Authenticated user
+    $user = auth()->user();
+
+    // Validate request data
+    $validatedData = $request->validate([
+        'day_hadith_id' => 'required|exists:day_hadiths,day_hadith_id',
+        // Add more validations here
+    ]);
+
+    // Clean all input variables
+    $cleanedData = [
+        'day_hadith_id' => cleanInput($request->day_hadith_id),
+        // Add other variables here if needed
+    ];
+
+    // Use a transaction for database operations
+    DB::transaction(function () use ($cleanedData, $user) {
+        // Check if a like already exists for the same user_id and day_hadith_id
+        $existingLike = DayLike::where('day_hadith_id', $cleanedData['day_hadith_id'])
+                               ->where('user_id', $user->user_id)
+                               ->first();
+
+        // If an existing like is found, delete it
+        if ($existingLike) {
+            $existingLike->delete();
+        }
+
+        // Insert a new like
+        DayLike::create([
+            'day_likes_id' => Str::uuid(), // Generate a UUID for the primary key
+            'day_hadith_id' => $cleanedData['day_hadith_id'],
+            'user_id' => $user->user_id, // Use the authenticated user's ID
+        ]);
+    });
+
+    // Return a response (e.g., a success message)
+    return response()->json(['message' => 'Like successful'], 201);
+}
+
 }

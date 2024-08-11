@@ -17,7 +17,7 @@ return new class extends Migration
         Schema::create('hadith', function (Blueprint $table) {
             $table->string('hadith_id')->primary();
             $table->string('has_ques')->default('no');
-            $table->string('book')->default('bukhari');
+            $table->string('book')->default('Sahih Bukhari');
             $table->string('language')->default('bangla');
             $table->text('hadith');
             

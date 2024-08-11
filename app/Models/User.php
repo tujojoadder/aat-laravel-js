@@ -44,6 +44,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Posts::class,'author_id' );
     }
+    //Created groups
     public function group()
     {
         return $this->hasMany(Groups::class,'group_creator' );
@@ -106,7 +107,10 @@ class User extends Authenticatable
         return $this->morphMany(Report::class, 'reportable');
     }
 
-
+    public function dayHadith()
+    {
+        return $this->hasOne(DayHadith::class, 'user_id', 'user_id');
+    }
 
 
 

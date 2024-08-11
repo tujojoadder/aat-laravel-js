@@ -87,18 +87,14 @@ Route::middleware('auth:sanctum')->get('/profile', function (Request $request) {
 
 //Story and Ques
 
-/* insert Hadith */
+/* insert Hadith with laravel */
 
-/* Route::post('/hadith/insert', [HadithController::class, 'hadithInsert'])
+Route::post('/hadith/insert', [HadithController::class, 'hadithInsert'])
        ->name('hadithInsert');
 
 //<-- no auth now
 Route::post('/storyandques/create', [HadithController::class, 'createHadithQues'])
-       ->name('createhadithandques'); */
-
-/* Hadith for show in hadith box */
- Route::get('/get-random-hadith', [HadithController::class, 'getRandomHadith'])
-       ->name('getRandomhadith');
+       ->name('createhadithandques');
 
 
 
@@ -514,4 +510,28 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        Route::get('/message', [DemoRegisterController::class, 'loaddashboard']);
        /*    <---- chat ----> */
        Route::post('/chat', [DemoRegisterController::class, 'chat']);
+
+/* <---- Hadith ----> */
+/* Hadith for show in hadith box */
+Route::get('/get-random-hadith', [HadithController::class, 'getRandomHadith'])
+->name('getRandomhadith');
+
+
+/*<---- Day Hadith ---> */
+
+/* setdayhadith */
+Route::post('/setdayhadith', [HadithController::class, 'setDayHadith'])
+->name('setDayHadith');
+/*  Get all user day hadith  */
+Route::get('/getdayhadiths', [HadithController::class, 'getDayHadiths'])
+->name('getDayHadiths');
+/* like day hadith */
+Route::post('/likedayhadith', [HadithController::class, 'likeDayHadith'])
+->name('likeDayHadith');
+
+
+
+
+
+
 });

@@ -10,10 +10,3 @@ if (!function_exists('cleanInput')) {
     }
 }
 
-if (!function_exists('dbug')) {
-    function dbug()
-    {
-        dd("Hello");
-        
-    }
-}
