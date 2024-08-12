@@ -205,6 +205,7 @@ class HadithController extends Controller
     
 
 /* Get all user day hadith */
+/* 
 public function getDayHadiths()
 {
     $user = auth()->user();
@@ -216,14 +217,53 @@ public function getDayHadiths()
         ->get();
 
     return response()->json([
-        'data' => $otherUsers
+        'data' => $otherUsers,
+       
+    ]);
+} */
+
+
+
+public function getDayHadiths()
+{
+    $authUser = auth()->user(); // Authenticated user
+
+    // Retrieve all users except the currently authenticated user with eager loading of dayHadith and related Hadith
+    $otherUsers = User::where('user_id', '!=', $authUser->user_id)
+        ->with(['dayHadith.hadith'])
+        ->get()
+        ->map(function($user) use ($authUser) {
+            if ($user->dayHadith) {
+                // Check if the authenticated user has liked this day_hadith_id
+                $user->dayHadith->isLiked = DayLike::where('day_hadith_id', $user->dayHadith->day_hadith_id)
+                    ->where('user_id', $authUser->user_id)
+                    ->exists();
+            }
+            return $user;
+        });
+
+    // Sort the users so that those with liked dayHadith are at the end of the list
+    $sortedUsers = $otherUsers->sortBy(function($user) {
+        return $user->dayHadith && $user->dayHadith->isLiked ? 1 : 0;
+    })->values();
+
+    return response()->json([
+        'data' => $sortedUsers, // Return the sorted users with the isLiked info
     ]);
 }
 
 
 
 
-/* like day hadith */
+
+
+
+
+
+
+
+
+
 public function likeDayHadith(Request $request)
 {
     // Get Authenticated user
@@ -232,7 +272,7 @@ public function likeDayHadith(Request $request)
     // Validate request data
     $validatedData = $request->validate([
         'day_hadith_id' => 'required|exists:day_hadiths,day_hadith_id',
-        // Add more validations here
+        // Add more validations here if needed
     ]);
 
     // Clean all input variables
@@ -241,18 +281,18 @@ public function likeDayHadith(Request $request)
         // Add other variables here if needed
     ];
 
-    // Use a transaction for database operations
+    // Check if a like already exists for the same user_id and day_hadith_id
+    $existingLike = DayLike::where('day_hadith_id', $cleanedData['day_hadith_id'])
+                           ->where('user_id', $user->user_id)
+                           ->first();
+
+    if ($existingLike) {
+        // If an existing like is found, return a response indicating already liked
+        return response()->json(['message' => 'Already liked'], 200);
+    }
+
+    // Use a transaction for database operations to ensure data integrity
     DB::transaction(function () use ($cleanedData, $user) {
-        // Check if a like already exists for the same user_id and day_hadith_id
-        $existingLike = DayLike::where('day_hadith_id', $cleanedData['day_hadith_id'])
-                               ->where('user_id', $user->user_id)
-                               ->first();
-
-        // If an existing like is found, delete it
-        if ($existingLike) {
-            $existingLike->delete();
-        }
-
         // Insert a new like
         DayLike::create([
             'day_likes_id' => Str::uuid(), // Generate a UUID for the primary key
@@ -261,8 +301,30 @@ public function likeDayHadith(Request $request)
         ]);
     });
 
-    // Return a response (e.g., a success message)
-    return response()->json(['message' => 'Like successful'], 201);
+    // Return a response indicating success after transaction is completed
+    return response()->json(['message' => 'Love sended'], 201);
 }
+
+public function dayHadithDetails(Request $request) {
+//Get Auth user
+$authUser=auth()->user(); 
+$dayHadith = DayHadith::where('user_id', $authUser->user_id)
+    ->with(['likes.user' => function ($query) {
+        $query->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier');
+    }])
+    ->get()
+    ->map(function ($dayHadith) {
+        // Replace the 'likes' relationship with only the user data
+        $dayHadith->likes = $dayHadith->likes->map(function ($like) {
+            return $like->user;
+        });
+        return $dayHadith;
+    });
+
+return response()->json(['message' => $dayHadith]);
+
+}
+
+
 
 }

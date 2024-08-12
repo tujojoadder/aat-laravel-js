@@ -21,6 +21,28 @@ class DayLike extends Model
         'day_hadith_id',
         'user_id'
     ];
+
+
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * The attributes that should be hidden for serialization.
      *

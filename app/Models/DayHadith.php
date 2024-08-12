@@ -35,17 +35,16 @@ class DayHadith extends Model
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 /* get hadith details from Day hadith */
-    public function hadith()
-    {
-        return $this->belongsTo(Hadith::class, 'hadith_id', 'hadith_id');
-    }
+// DayHadith.php
+public function hadith()
+{
+    return $this->belongsTo(Hadith::class, 'hadith_id', 'hadith_id');
+}
 
-
-    /* who liked  */
-    public function liker()
-    {
-        return $this->belongsTo(User::class,'day_likes', 'day_hadith_id', 'user_id');
-    }
+public function likes()
+{
+    return $this->hasMany(DayLike::class, 'day_hadith_id', 'day_hadith_id');
+}
 
 
     

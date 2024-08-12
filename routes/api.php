@@ -528,6 +528,9 @@ Route::get('/getdayhadiths', [HadithController::class, 'getDayHadiths'])
 /* like day hadith */
 Route::post('/likedayhadith', [HadithController::class, 'likeDayHadith'])
 ->name('likeDayHadith');
+/* Day hadith Details  */
+Route::post('/dayhadithdetails', [HadithController::class, 'dayHadithDetails'])
+->name('dayHadithDetails');
 
 
 
