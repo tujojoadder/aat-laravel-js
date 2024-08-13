@@ -209,7 +209,7 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        /* <---  Post ---> */
 
        // Create User Post
-       Route::post('post//create', [PostsController::class, 'createUserPost'])
+       Route::post('post/create', [PostsController::class, 'createUserPost'])
               ->name('createUserPost');
        //Create group post
        Route::post('/group/{groupId}/post/create', [PostsController::class, 'createGroupPost'])
