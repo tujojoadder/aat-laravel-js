@@ -454,4 +454,22 @@ class PostsController extends Controller
         // Return response with appropriate status code
         return response()->json(['message' => $message]);
     }
+
+
+
+
+
+
+    public function getPosts(Request $request)
+{
+    // Get pagination parameters from the request, with default values
+    $perPage = $request->query('per_page', 10); // Number of items per page
+    $page = $request->query('page', 1); // Current page
+
+    // Fetch paginated posts
+    $posts = Posts::paginate($perPage, ['*'], 'page', $page);
+
+    // Return paginated posts as JSON
+    return response()->json($posts);
+}
 }

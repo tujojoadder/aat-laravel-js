@@ -320,6 +320,9 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
 
 
 
+
+
+
        /* <--- IAccount Blueticks Request --->  */
 
        //IAccount Profile Photo  Request
@@ -534,7 +537,9 @@ Route::post('/dayhadithdetails', [HadithController::class, 'dayHadithDetails'])
 
 
 
-
+/* Post */
+Route::get('/getposts', [PostsController::class, 'getPosts'])
+->name('dayHadithDetails');
 
 
 });

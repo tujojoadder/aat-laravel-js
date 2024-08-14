@@ -6,6 +6,7 @@ use App\Models\DayHadith;
 use App\Models\DayLike;
 use App\Models\QuestionAnswerSet;
 use App\Models\Hadith;
+use App\Models\Posts;
 use App\Models\UniqeUser;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
