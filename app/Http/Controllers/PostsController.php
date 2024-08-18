@@ -24,76 +24,83 @@ use PHPUnit\TextUI\XmlConfiguration\Group;
 
 class PostsController extends Controller
 {
-    //Create a user post
-    public function createUserPost(Request $request)
-    {
-        $user = auth()->user();
-        $userId = $user->user_id;
-
-        $this->validate($request, [
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
-            'text' => 'nullable|max:20000|string',
-            'image_or_text' => 'required_without_all:image,text',
-            'audience' => 'required|in:public,private,only_me', // Validation for audience
-        ]);
-
-        $text = cleanInput($request->text);
-        $audience = cleanInput($request->audience);
-
-        $post_id = Str::uuid();
-        $postData = [
-            'post_id' => $post_id,
-            'author_id' => $userId,
-            'post_type' => 'general',
-            'timeline_ids' => $userId,
-            'audience' => $audience
-        ];
-
-        return DB::transaction(function () use ($request, $post_id, $text, $postData) {
-            // Create the main post
-            Posts::create($postData);
-
-            // Handle both text and image
-            if ($request->filled('text') && $request->hasFile('image')) {
-                // Handle text
-                TextPosts::create([
-                    'text_post_id' => Str::uuid(),
-                    'post_id' => $post_id,
-                    'post_text' => $text,
-                ]);
-
-                // Handle image
-                $customFileName = $request->file('image')->hashName();
-                $path = $request->file('image')->storeAs('public/upload/images', $customFileName);
-                $imageUrl = Storage::url($path);
-                ImagePosts::create([
-                    'image_posts_id' => Str::uuid(),
-                    'post_id' => $post_id,
-                    'post_url' => $imageUrl,
-                ]);
-
-                return response()->json(['message' => 'Text and Image successfully stored']);
-            } elseif ($request->filled('text') && !$request->hasFile('image')) {
-                TextPosts::create([
-                    'text_post_id' => Str::uuid(),
-                    'post_id' => $post_id,
-                    'post_text' => $text,
-                ]);
-                return response()->json(['message' => 'Text successfully stored']);
-            } elseif (!$request->filled('text') && $request->hasFile('image')) {
-                $customFileName = $request->file('image')->hashName();
-                $path = $request->file('image')->storeAs('public/upload/images', $customFileName);
-                $imageUrl = Storage::url($path);
-                ImagePosts::create([
-                    'image_posts_id' => Str::uuid(),
-                    'post_id' => $post_id,
-                    'post_url' => $imageUrl,
-                ]);
-                return response()->json(['message' => 'Image successfully stored']);
-            }
-        });
-    }
-
+        //Create a user post
+        public function createUserPost(Request $request)
+        {
+            $user = auth()->user();
+            $userId = $user->user_id;
+    
+            $this->validate($request, [
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+                'text' => 'nullable|max:20000|string',
+                'image_or_text' => 'required_without_all:image,text',
+                'audience' => 'required|in:public,private,only_me', // Validation for audience
+            ]);
+    
+            $text = cleanInput($request->text);
+            $audience = cleanInput($request->audience);
+    
+            $post_id = Str::uuid();
+            $postData = [
+                'post_id' => $post_id,
+                'author_id' => $userId,
+                'post_type' => 'general',
+                'timeline_ids' => $userId,
+                'audience' => $audience
+            ];
+    
+            return DB::transaction(function () use ($request, $post_id, $text, $postData) {
+                // Create the main post
+                Posts::create($postData);
+    
+                // Handle both text and image
+                if ($request->filled('text') && $request->hasFile('image')) {
+                    // Handle text
+                    TextPosts::create([
+                        'text_post_id' => Str::uuid(),
+                        'post_id' => $post_id,
+                        'post_text' => $text,
+                    ]);
+    
+                    // Handle image
+                    $customFileName = $request->file('image')->hashName();
+    
+                    // Move file to public directory directly
+                    $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
+                    $imageUrl = asset('storage/upload/images/' . $customFileName); // Generate a public URL
+    
+                    ImagePosts::create([
+                        'image_posts_id' => Str::uuid(),
+                        'post_id' => $post_id,
+                        'post_url' => $imageUrl,
+                    ]);
+    
+                    return response()->json(['message' => 'Text and Image successfully stored']);
+                } elseif ($request->filled('text') && !$request->hasFile('image')) {
+                    TextPosts::create([
+                        'text_post_id' => Str::uuid(),
+                        'post_id' => $post_id,
+                        'post_text' => $text,
+                    ]);
+                    return response()->json(['message' => 'Text successfully stored']);
+                } elseif (!$request->filled('text') && $request->hasFile('image')) {
+                    $customFileName = $request->file('image')->hashName();
+    
+                    // Move file to public directory directly
+                    $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
+                    $imageUrl = asset('storage/upload/images/' . $customFileName); // Generate a public URL
+    
+                    ImagePosts::create([
+                        'image_posts_id' => Str::uuid(),
+                        'post_id' => $post_id,
+                        'post_url' => $imageUrl,
+                    ]);
+    
+                    return response()->json(['message' => 'Image successfully stored']);
+                }
+            });
+        }
+    
     //Create a group post
     public function createGroupPost(Request $request, $groupId)
     {
@@ -461,15 +468,19 @@ class PostsController extends Controller
 
 
     public function getPosts(Request $request)
-{
-    // Get pagination parameters from the request, with default values
-    $perPage = $request->query('per_page', 10); // Number of items per page
-    $page = $request->query('page', 1); // Current page
-
-    // Fetch paginated posts
-    $posts = Posts::paginate($perPage, ['*'], 'page', $page);
-
-    // Return paginated posts as JSON
-    return response()->json($posts);
-}
+    {
+        $user = auth()->user();
+    
+        // Get pagination parameters from the request, with default values
+        $perPage = $request->query('per_page',5); // Number of items per page
+        $page = $request->query('page', 1); // Current page
+    
+        // Fetch paginated posts
+        $posts = Posts::where('author_id', $user->user_id)
+                      ->with(['author', 'textPost', 'imagePost'])
+                      ->paginate($perPage, ['*'], 'page', $page);
+    
+        // Return paginated posts as JSON
+        return response()->json($posts);
+    }
 }

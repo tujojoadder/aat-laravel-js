@@ -225,6 +225,7 @@ public function getDayHadiths()
 
 
 
+/* Get All day hadith of your friends */
 public function getDayHadiths()
 {
     $authUser = auth()->user(); // Authenticated user
@@ -243,13 +244,20 @@ public function getDayHadiths()
             return $user;
         });
 
-    // Sort the users so that those with liked dayHadith are at the end of the list
-    $sortedUsers = $otherUsers->sortBy(function($user) {
-        return $user->dayHadith && $user->dayHadith->isLiked ? 1 : 0;
-    })->values();
+    // Partition the collection into two: liked and not liked
+    $partitionedUsers = $otherUsers->partition(function($user) {
+        return $user->dayHadith && $user->dayHadith->isLiked === false;
+    });
+
+    // Shuffle both partitions
+    $notLikedUsers = $partitionedUsers[0]->shuffle();
+    $likedUsers = $partitionedUsers[1]->shuffle();
+
+    // Merge the two collections, with liked users at the end
+    $sortedUsers = $notLikedUsers->merge($likedUsers)->values();
 
     return response()->json([
-        'data' => $sortedUsers, // Return the sorted users with the isLiked info
+        'data' => $sortedUsers, // Return the shuffled users with the liked users at the end
     ]);
 }
 

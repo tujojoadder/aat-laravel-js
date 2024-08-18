@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-
+use Ramsey\Uuid\Uuid;
 class UserController extends Controller
 {
 
@@ -230,4 +230,43 @@ class UserController extends Controller
 
         return response()->json(['profile' => $profileData]);
     }
+
+
+/*     Get other user information (name,identifire,profile,cover_photo) */
+public function getUserInfo($id) {
+  // Sanitize and validate the ID
+  if (empty($id) || !Uuid::isValid($id)) {
+    Log::warning("Invalid User ID format: {$id}");
+
+    return response()->json([
+        'error' => 'Invalid User ID format'
+    ], 400); // Bad Request
+}
+
+
+     // Retrieve the user by ID
+     $user = User::where('user_id', $id)->first();
+// Check if user exists
+if (!$user) {
+    Log::warning("User not found for ID: {$id}");
+
+    return response()->json([
+        'error' => 'User not found'
+    ], 404); // Not Found
+}
+
+
+
+  // Return the user data as JSON
+  return response()->json([
+    'user' => $user
+], 200); // OK
+
+
+
+
+}
+
+
+
 }

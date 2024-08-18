@@ -192,7 +192,14 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        //view any users profile
        Route::get('/profile/{user_id}', [UserController::class, 'view_profile'])->name('profile.show');
 
-       /* <--- Friend Request ---> */
+       /* <--- Friend  ---> */
+     //get friend sugestion 7 record for home
+       Route::get('/friendsuggestionhome', [FriendRequestController::class, 'getFriendSuggestionHome']);
+//get User info for show others profile 
+Route::get('/userdetails/{id}', [FriendRequestController::class, 'getUserInfo']);
+
+
+       
        //send friend request
        Route::post('/sendfriendrequest/{receiver_id}', [FriendRequestController::class, 'send_friendrequest'])->name('sendfriendrequest');
        // view auth user friend requests
@@ -532,8 +539,7 @@ Route::get('/getdayhadiths', [HadithController::class, 'getDayHadiths'])
 Route::post('/likedayhadith', [HadithController::class, 'likeDayHadith'])
 ->name('likeDayHadith');
 /* Day hadith Details  */
-Route::post('/dayhadithdetails', [HadithController::class, 'dayHadithDetails'])
-->name('dayHadithDetails');
+Route::post('/dayhadithdetails', [HadithController::class, 'dayHadithDetails']);
 
 
 

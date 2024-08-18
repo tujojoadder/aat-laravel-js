@@ -6,6 +6,7 @@ use App\Models\FriendList;
 use App\Models\FriendRequest;
 use App\Models\UniqeUser;
 use App\Models\User;
+use Ramsey\Uuid\Uuid;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Http\Request;
@@ -326,4 +327,66 @@ class FriendRequestController extends Controller
             return response()->json(['message' => 'Friend list not found for the user.'], 404);
         }
     }
+
+
+
+
+
+
+//get friend sugestion 7 record for home
+
+public function getFriendSuggestionHome()
+{
+    $authUser = auth()->user(); // Authenticated user
+
+    // Fetch 5 users, excluding the authenticated user, and select specific columns
+   $otherUsers = User::where('user_id', '!=', $authUser->user_id)
+   ->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier')
+   ->inRandomOrder() // Randomize the results
+   ->limit(5) // Limit to 5 results
+   ->get();
+    return response()->json(['data' => $otherUsers]);
+}
+
+ 
+//get User info for show others profile 
+public function getUserInfo($id)
+{
+ /*    // Sanitize and validate the ID
+    if (empty($id) || !Uuid::isValid($id)) {
+        Log::warning("Invalid User ID format: {$id}");
+        return response()->json([
+            'error' => 'Invalid User ID format'
+        ], 400); // Bad Request
+    }
+ */
+    // Retrieve the user by ID, selecting specific fields
+    $user = User::where('user_id', $id)
+        ->select('cover_photo', 'identifier', 'profile_picture', 'user_fname', 'user_lname')
+        ->first();
+
+    // Check if user exists
+    if (!$user) {
+        Log::warning("User not found for ID: {$id}");
+        return response()->json([
+            'error' => 'User not found'
+        ], 404); // Not Found
+    }
+
+    // Return the user data as JSON
+    return response()->json([
+        'data' => $user
+    ], 200); // OK
+}
+
+
+
+
+
+
+
+
+
+
+
 }
