@@ -33,6 +33,7 @@ class UserController extends Controller
                 'user_fname' => $user->user_fname,
                 'user_lname' => $user->user_lname,
                 'email' => $user->email,
+                'cover_photo' => $user->cover_photo,
                 'identifier' => $user->identifier, // assuming 'identifier' is the user id
             ];
     
