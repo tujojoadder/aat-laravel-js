@@ -465,8 +465,7 @@ class PostsController extends Controller
 
 
 
-
-
+/* get for home feed  */
     public function getPosts(Request $request)
     {
         $user = auth()->user();
@@ -483,4 +482,12 @@ class PostsController extends Controller
         // Return paginated posts as JSON
         return response()->json($posts);
     }
+
+
+
+
+
+
+
+
 }

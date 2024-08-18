@@ -20,6 +20,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MprofilePicturesController;
 use App\Http\Controllers\PagesController;
 use App\Http\Controllers\PostsController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfilePictureController;
 use App\Http\Controllers\RepliesController;
 use App\Http\Controllers\ReportController;
@@ -544,8 +545,13 @@ Route::post('/dayhadithdetails', [HadithController::class, 'dayHadithDetails']);
 
 
 /* Post */
-Route::get('/getposts', [PostsController::class, 'getPosts'])
-->name('dayHadithDetails');
+Route::get('/getposts', [PostsController::class, 'getPosts']);
+
+
+
+/* Profile */
+
+Route::get('/getspecificuserposts', [ProfileController::class, 'getSpecificUserPosts']);
 
 
 });
