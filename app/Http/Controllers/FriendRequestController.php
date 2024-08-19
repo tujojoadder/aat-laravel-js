@@ -291,18 +291,23 @@ class FriendRequestController extends Controller
 
 
     //Retrive specific users friendlist
-
     public function getSpecificUserFriendDetails(Request $request)
     {
         // Clean the input and get the user ID from the request query
         $specificUserId = cleanInput($request->query('id'));
     
         // Define the number of friends per page
-        $perPage = 3;
+        $perPage = 10;
+    
+        // Get the authenticated user's ID
+        $authUserId = auth()->id();
+    
+        // Retrieve the friend list for the authenticated user
+        $authFriendList = FriendList::where('user_id', $authUserId)->first();
     
         // Retrieve the friend list for the specified user ID
         $friendList = FriendList::where('user_id', $specificUserId)->first();
-
+    
         if ($friendList) {
             // Access the user_friends_ids column
             $userFriendsIds = $friendList->user_friends_ids;
@@ -312,12 +317,30 @@ class FriendRequestController extends Controller
                 // Split the comma-separated string into an array of friend IDs
                 $friendIdsArray = explode(',', $userFriendsIds);
     
+                // Retrieve the authenticated user's friend IDs if available
+                $authFriendIdsArray = [];
+                if ($authFriendList && !empty($authFriendList->user_friends_ids)) {
+                    $authFriendIdsArray = explode(',', $authFriendList->user_friends_ids);
+                }
+    
                 // Retrieve friend details from the users table with pagination
                 $friends = User::whereIn('user_id', $friendIdsArray)
-                    ->select('user_id', 'user_fname', 'user_lname', 'profile_picture','identifier')
+                    ->select('user_id', 'user_fname', 'user_lname', 'profile_picture', 'identifier')
                     ->paginate($perPage);
     
-                // Return the friend details as JSON response
+                // Iterate over the paginated friends to add the is_friend field
+                $friends->getCollection()->transform(function ($user) use ($authFriendIdsArray) {
+                    return [
+                        'user_id' => $user->user_id,
+                        'user_fname' => $user->user_fname,
+                        'user_lname' => $user->user_lname,
+                        'profile_picture' => $user->profile_picture,
+                        'identifier' => $user->identifier,
+                        'is_friend' => in_array($user->user_id, $authFriendIdsArray) ? true : false // Set is_friend to true if the friend is in the auth user's friend list, false otherwise
+                    ];
+                });
+    
+                // Return the friend details as JSON response, including the is_friend field
                 return response()->json($friends);
             } else {
                 // Handle the case where user_friends_ids column is empty
