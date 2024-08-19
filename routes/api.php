@@ -206,7 +206,7 @@ Route::get('/userdetails/{id}', [FriendRequestController::class, 'getUserInfo'])
        // view auth user friend requests
        Route::get('/users/friendrequestlist', [FriendRequestController::class, 'friend_requestlist'])->name('friendrequestlist');
        // view specific user friend list
-       Route::get('/users/getspecificuserFriendids/{userid}', [FriendRequestController::class, 'getSpecificUserFriendIds'])->name('getSpecificUserFriendIds');
+       Route::get('/getspecificuserfriendids', [FriendRequestController::class, 'getSpecificUserFriendDetails'])->name('getSpecificUserFriendIds');
        // Manage friend request(Accepted,rejected)
        Route::post('/users/managefriendrequest/{requested_id}', [FriendRequestController::class, 'manageFriendRequest'])->name('manageFriendRequest');
        // unfriend any friend

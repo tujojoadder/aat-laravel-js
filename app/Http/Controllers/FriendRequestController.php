@@ -292,32 +292,33 @@ class FriendRequestController extends Controller
 
     //Retrive specific users friendlist
 
-    public function getSpecificUserFriendIds($userid,Request $request)
+    public function getSpecificUserFriendDetails(Request $request)
     {
-
-        $request->merge(['userid' => $userid]);
-
-        // Validate input parameters
-        $this->validate($request, [
-            'userid' => "required|string|max:50"
-        ]);
-        // Clean the input if necessary
-        $userid = cleanInput($userid);
-
+        // Clean the input and get the user ID from the request query
+        $specificUserId = cleanInput($request->query('id'));
+    
+        // Define the number of friends per page
+        $perPage = 3;
+    
         // Retrieve the friend list for the specified user ID
-        $friendList = FriendList::where('user_id', $userid)->first();
+        $friendList = FriendList::where('user_id', $specificUserId)->first();
 
         if ($friendList) {
             // Access the user_friends_ids column
             $userFriendsIds = $friendList->user_friends_ids;
-
+    
             // Check if user_friends_ids column is not empty
             if (!empty($userFriendsIds)) {
                 // Split the comma-separated string into an array of friend IDs
                 $friendIdsArray = explode(',', $userFriendsIds);
-
-                // Return the friend IDs as JSON response
-                return response()->json(['friend_ids' => $friendIdsArray]);
+    
+                // Retrieve friend details from the users table with pagination
+                $friends = User::whereIn('user_id', $friendIdsArray)
+                    ->select('user_id', 'user_fname', 'user_lname', 'profile_picture','identifier')
+                    ->paginate($perPage);
+    
+                // Return the friend details as JSON response
+                return response()->json($friends);
             } else {
                 // Handle the case where user_friends_ids column is empty
                 return response()->json(['message' => 'No friends found for the user.'], 404);
@@ -327,7 +328,7 @@ class FriendRequestController extends Controller
             return response()->json(['message' => 'Friend list not found for the user.'], 404);
         }
     }
-
+    
 
 
 

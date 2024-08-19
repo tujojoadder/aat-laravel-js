@@ -21,7 +21,7 @@ public function getSpecificUserPosts(Request $request)
     $user = auth()->user();
     $specificUserId = cleanInput($request->query('id'));
     // Debug the value of $specificUserId
-    $perPage = $request->query('per_page', 2);
+    $perPage = $request->query('per_page', 5);
     $page = $request->query('page', 1);
 
     $posts = Posts::where('author_id', $specificUserId)
