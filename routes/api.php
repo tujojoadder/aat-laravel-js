@@ -554,4 +554,7 @@ Route::get('/getposts', [PostsController::class, 'getPosts']);
 Route::get('/getspecificuserposts', [ProfileController::class, 'getSpecificUserPosts']);
 
 
+Route::get('/getspecificuserphotos', [ProfileController::class, 'getSpecificUserPhotos']);
+
+
 });
