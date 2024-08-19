@@ -475,7 +475,7 @@ class PostsController extends Controller
         $page = $request->query('page', 1); // Current page
     
         // Fetch paginated posts
-        $posts = Posts::where('author_id', $user->user_id)
+        $posts = Posts::where('author_id','!=', $user->user_id)
                       ->with(['author', 'textPost', 'imagePost'])
                       ->paginate($perPage, ['*'], 'page', $page);
     
