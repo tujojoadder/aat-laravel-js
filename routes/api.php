@@ -550,11 +550,17 @@ Route::get('/getposts', [PostsController::class, 'getPosts']);
 
 
 /* Profile */
-
 Route::get('/getspecificuserposts', [ProfileController::class, 'getSpecificUserPosts']);
-
-
 Route::get('/getspecificuserphotos', [ProfileController::class, 'getSpecificUserPhotos']);
+
+
+/* Follow User */
+
+/* get all followers for specific user on profile*/
+Route::get('/getspecificuserfollower', [ProfileController::class, 'getAllUserFollower']);
+
+
+
 
 
 });

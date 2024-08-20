@@ -66,9 +66,7 @@ class User extends Authenticatable
         return $this->hasMany(Replies::class,'replied_by_id' );
     }
 
-
-
-
+  
 
 
 
@@ -112,6 +110,15 @@ class User extends Authenticatable
         return $this->hasOne(DayHadith::class, 'user_id', 'user_id');
     }
 
+
+
+
+      // Define the relationship to retrieve the followers
+      public function followers()
+      {
+          return $this->hasMany(UserFollower::class, 'user_id', 'user_id');
+      }
+  
 
 
     /**
