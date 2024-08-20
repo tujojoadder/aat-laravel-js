@@ -54,6 +54,7 @@ class ProfileController extends Controller
     }
 
 
+  /*   Get all user follower for profile */
     public function getAllUserFollower(Request $request)
     {
         $specificUserId = cleanInput($request->query('id'));
@@ -64,7 +65,7 @@ class ProfileController extends Controller
             return response()->json(['error' => 'User not found.'], 404);
         }
     
-        $perPage = $request->query('per_page', 3);
+        $perPage = $request->query('per_page', 7);
         $page = $request->query('page', 1);
     
         $followers = $user->followers()->with(['follower' => function ($query) {
@@ -76,9 +77,29 @@ class ProfileController extends Controller
 
 
 
+  /*   Get all user following  for profile */
 
 
-
+    public function getAllUserFollowing(Request $request)
+    {
+        $specificUserId = cleanInput($request->query('id'));
+    
+        $user = User::where('user_id', $specificUserId)->first();
+    
+        if (!$user) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+    
+        $perPage = $request->query('per_page', 7);
+        $page = $request->query('page', 1);
+    
+        $followings = $user->followings()->with(['following' => function ($query) {
+            $query->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier');
+        }])->paginate($perPage, ['*'], 'page', $page);
+    
+        return response()->json($followings);
+    }
+    
 
 
 

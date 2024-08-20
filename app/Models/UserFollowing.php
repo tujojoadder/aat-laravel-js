@@ -23,6 +23,16 @@ class UserFollowing extends Model
   
 
     ];
+
+
+
+    public function following()
+    {
+        return $this->belongsTo(User::class, 'following_id', 'user_id');
+    }
+
+
+
      /**
      * The attributes that should be hidden for serialization.
      *

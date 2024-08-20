@@ -111,16 +111,18 @@ class User extends Authenticatable
     }
 
 
-
-
+                /* User  */
       // Define the relationship to retrieve the followers
       public function followers()
       {
           return $this->hasMany(UserFollower::class, 'user_id', 'user_id');
       }
-  
-
-
+      public function followings()
+      {
+          return $this->hasMany(UserFollowing::class, 'user_id', 'user_id');
+      }
+      
+ 
     /**
      * The attributes that should be cast.
      *

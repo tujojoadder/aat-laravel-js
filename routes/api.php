@@ -558,6 +558,8 @@ Route::get('/getspecificuserphotos', [ProfileController::class, 'getSpecificUser
 
 /* get all followers for specific user on profile*/
 Route::get('/getspecificuserfollower', [ProfileController::class, 'getAllUserFollower']);
+/* Following User */
+Route::get('/getspecificuserfollowing', [ProfileController::class, 'getAllUserFollowing']);
 
 
 
