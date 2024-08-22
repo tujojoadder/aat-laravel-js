@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AboutController;
 use App\Http\Controllers\BluetickUserController;
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\CompanyDecisionsController;
@@ -205,8 +206,9 @@ Route::get('/userdetails/{id}', [FriendRequestController::class, 'getUserInfo'])
        Route::post('/sendfriendrequest/{receiver_id}', [FriendRequestController::class, 'send_friendrequest'])->name('sendfriendrequest');
        // view auth user friend requests
        Route::get('/users/friendrequestlist', [FriendRequestController::class, 'friend_requestlist'])->name('friendrequestlist');
-       // view specific user friend list
-       Route::get('/getspecificuserfriendids', [FriendRequestController::class, 'getSpecificUserFriendDetails'])->name('getSpecificUserFriendIds');
+
+
+
        // Manage friend request(Accepted,rejected)
        Route::post('/users/managefriendrequest/{requested_id}', [FriendRequestController::class, 'manageFriendRequest'])->name('manageFriendRequest');
        // unfriend any friend
@@ -549,18 +551,33 @@ Route::get('/getposts', [PostsController::class, 'getPosts']);
 
 
 
-/* Profile */
+        /* Others Profile   */
+
 Route::get('/getspecificuserposts', [ProfileController::class, 'getSpecificUserPosts']);
 Route::get('/getspecificuserphotos', [ProfileController::class, 'getSpecificUserPhotos']);
-
-
-/* Follow User */
-
 /* get all followers for specific user on profile*/
 Route::get('/getspecificuserfollower', [ProfileController::class, 'getAllUserFollower']);
 /* Following User */
 Route::get('/getspecificuserfollowing', [ProfileController::class, 'getAllUserFollowing']);
+// view specific user friend list
+Route::get('/getspecificuserfriendids', [FriendRequestController::class, 'getSpecificUserFriendDetails'])->name('getSpecificUserFriendIds');
 
+
+
+            /* Auth user Profile   */
+
+Route::get('/getauthuserposts', [ProfileController::class, 'getAuthUserPosts']);
+Route::get('/getauthuserphotos', [ProfileController::class, 'getAuthUserPhotos']);
+/* get all followers for specific user on profile*/
+Route::get('/getauthuserfollower', [ProfileController::class, 'getAllAuthUserFollower']);
+/* Following User */
+Route::get('/getauthuserfollowing', [ProfileController::class, 'getAllAuthUserFollowing']);
+// view auth user friend list
+Route::get('/getauthuserfriendids', [FriendRequestController::class, 'getAuthUserFriendDetails']);
+
+
+/*  About */
+Route::post('/about/createorupdate', [AboutController::class, 'storeOrUpdate']);
 
 
 

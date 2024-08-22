@@ -353,8 +353,44 @@ class FriendRequestController extends Controller
     }
     
 
-
-
+/* Get friend for Auth user */
+    public function getAuthUserFriendDetails(Request $request)
+    {
+        // Define the number of friends per page
+        $perPage = 10;
+       $user=auth()->user();
+        // Get the authenticated user's ID
+        $authUserId = $user->user_id;
+    
+        // Retrieve the friend list for the authenticated user
+        $authFriendList = FriendList::where('user_id', $authUserId)->first();
+    
+        if ($authFriendList) {
+            // Access the user_friends_ids column
+            $userFriendsIds = $authFriendList->user_friends_ids;
+    
+            // Check if user_friends_ids column is not empty
+            if (!empty($userFriendsIds)) {
+                // Split the comma-separated string into an array of friend IDs
+                $friendIdsArray = explode(',', $userFriendsIds);
+    
+                // Retrieve friend details from the users table with pagination
+                $friends = User::whereIn('user_id', $friendIdsArray)
+                    ->select('user_id', 'user_fname', 'user_lname', 'profile_picture', 'identifier')
+                    ->paginate($perPage);
+    
+                // Return the friend details as JSON response
+                return response()->json($friends);
+            } else {
+                // Handle the case where user_friends_ids column is empty
+                return response()->json(['message' => 'No friends found.'], 404);
+            }
+        } else {
+            // Handle the case where the friend list is not found for the authenticated user
+            return response()->json(['message' => 'Friend list not found.'], 404);
+        }
+    }
+    
 
 
 //get friend sugestion 7 record for home
@@ -367,7 +403,7 @@ public function getFriendSuggestionHome()
    $otherUsers = User::where('user_id', '!=', $authUser->user_id)
    ->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier')
    ->inRandomOrder() // Randomize the results
-   ->limit(5) // Limit to 5 results
+   ->limit(10) // Limit to 5 results
    ->get();
     return response()->json(['data' => $otherUsers]);
 }
