@@ -35,6 +35,8 @@ class UserController extends Controller
                 'email' => $user->email,
                 'cover_photo' => $user->cover_photo,
                 'identifier' => $user->identifier, // assuming 'identifier' is the user id
+                'gender' => $user->gender, // assuming 'identifier' is the user id
+                'birthdate' => $user->birthdate, // assuming 'identifier' is the user id
             ];
     
             return response()->json(['data' => $userDetails]);
@@ -122,7 +124,7 @@ class UserController extends Controller
         });
 
         // Optionally, you can return a response indicating success
-        return response()->json(['message' => 'User gender updated successfully']);
+        return response()->json(['data' => 'User gender updated successfully']);
     }
 
 
@@ -161,7 +163,7 @@ class UserController extends Controller
             $user->update(['birthdate' => $birthdate]);
         });
         // Return a response indicating success
-        return response()->json(['message' => 'User birthdate updated successfully']);
+        return response()->json(['data' => 'User birthdate updated successfully']);
     }
     //Update user birthdate
     public function updateprivacy_setting(Request $request)

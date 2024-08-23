@@ -578,6 +578,7 @@ Route::get('/getauthuserfriendids', [FriendRequestController::class, 'getAuthUse
 
 /*  About */
 Route::post('/about/createorupdate', [AboutController::class, 'storeOrUpdate']);
+Route::get('/getabout', [AboutController::class, 'getAbout']);
 
 
 

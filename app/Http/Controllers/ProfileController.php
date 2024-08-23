@@ -189,6 +189,4 @@ public function getAllAuthUserFollowing(Request $request)
 
 
 
-
-
 }

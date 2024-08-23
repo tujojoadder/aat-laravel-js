@@ -59,4 +59,19 @@ class AboutController extends Controller
 
 
  
+
+
+public function getAbout(Request $request) {
+    //Get Auth user
+    $user=auth()->user(); 
+    $userId=$user->user_id;
+    $about=About::where('user_id',$userId)->first();
+    return response()->json(['data' =>$about]);
+    
+    }
+    
+
+
+
+
 }
