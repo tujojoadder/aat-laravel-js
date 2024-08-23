@@ -22,10 +22,10 @@ class AboutController extends Controller
 
     // Validate the incoming request data
     $validatedData = $request->validate([
-        'location' => 'required|string|max:255',
-        'relationshipStatus' => 'required|in:Single,Married,Divorced',
-        'work' => 'required|string|max:255',
-        'education' => 'required|string|max:255',
+        'location' => 'nullable|string|max:255',
+        'relationshipStatus' => 'required|in:single,married,divorced',
+        'work' => 'nullable|string|max:255',
+        'education' =>'nullable|string|max:255',
     ]);
 
     // Check if the profile already exists
@@ -62,13 +62,25 @@ class AboutController extends Controller
 
 
 public function getAbout(Request $request) {
-    //Get Auth user
-    $user=auth()->user(); 
-    $userId=$user->user_id;
-    $about=About::where('user_id',$userId)->first();
-    return response()->json(['data' =>$about]);
-    
+    // Get Auth user
+    $user = auth()->user(); 
+    $userId = $user->user_id;
+    $about = About::where('user_id', $userId)->first();
+
+
+    /* This is for which is not created by valid gmail */
+    if (!$about) {
+        // If no data is found, return a response with null values for each key
+        return response()->json(['data' => [
+            'location' => null,
+            'relationship_status' => 'single',
+            'work' => null,
+            'education' => null
+        ]]);
     }
+
+    return response()->json(['data' => $about]);
+}
     
 
 

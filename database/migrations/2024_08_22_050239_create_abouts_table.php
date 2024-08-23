@@ -16,10 +16,10 @@ return new class extends Migration
         Schema::create('abouts', function (Blueprint $table) {
             $table->string('about_id')->primary(); 
             $table->string('user_id');
-            $table->string('location');
+            $table->string('location')->nullable();
             $table->enum('relationship_status', ['single', 'married', 'divorced']);
-            $table->string('work');
-            $table->string('education');
+            $table->string('work')->nullable();
+            $table->string('education')->nullable();
             $table->foreign('user_id')->references('user_id')->on('users')
             ->onDelete('cascade')
             ->onUpdate('cascade');

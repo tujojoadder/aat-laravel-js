@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\About;
 use App\Models\Groups;
 use App\Models\Pages;
 use App\Models\PasswordReset;
 use App\Models\UniqeUser;
 use App\Models\User;
 use Carbon\Carbon;
-
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Http\Request;
@@ -127,10 +127,10 @@ class LoginController extends Controller
 
             // Generate the identifier
             $identifier = $this->generateIdentifier($fullName);
-
+           $userId=Str::uuid();
             // Create the user
             $newUser = User::create([
-                'user_id' => Str::uuid(),
+                'user_id' =>$userId ,
                 'user_fname' => $fname,
                 'user_lname' => $lname,
                 'email' => $email,
@@ -141,6 +141,16 @@ class LoginController extends Controller
                 'identifier' => $identifier,
                 'cover_photo' => 'storage/defaultCover/user.jpg'
             ]);
+
+
+            About::create([
+                'about_id' => Str::uuid(),
+                'user_id' => $userId,
+                'relationship_status' =>'single',
+                
+            ]);
+
+
 
             // Generate token for the user
             $token = $newUser->createToken('user')->plainTextToken;

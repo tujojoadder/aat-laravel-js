@@ -232,7 +232,7 @@ public function getDayHadiths()
 
     // Retrieve all users except the currently authenticated user with eager loading of dayHadith and related Hadith
     $otherUsers = User::where('user_id', '!=', $authUser->user_id)
-        ->with(['dayHadith.hadith'])
+    ->whereHas('dayHadith')->with(['dayHadith.hadith'])
         ->get()
         ->map(function($user) use ($authUser) {
             if ($user->dayHadith) {
