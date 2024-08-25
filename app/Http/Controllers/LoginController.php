@@ -90,13 +90,13 @@ class LoginController extends Controller
         $photoPath = '';
         switch (cleanInput($formData['gender'])) {
             case 'male':
-                $photoPath = 'storage/defaultProfile/male.png';
+                $photoPath = 'http://127.0.0.1:8000/storage/mprofile_picture/male.PNG';
                 break;
             case 'female':
-                $photoPath = 'storage/defaultProfile/female.png';
+                $photoPath = 'http://127.0.0.1:8000/storage/fprofile_picture/female.png';
                 break;
             default:
-                $photoPath = 'storage/defaultProfile/others.jpeg';
+                $photoPath = 'http://127.0.0.1:8000/storage/fprofile_picture/others.png';
         }
 
 
@@ -139,7 +139,7 @@ class LoginController extends Controller
                 'gender' => $gender,
                 'birthdate' => $birthdate,
                 'identifier' => $identifier,
-                'cover_photo' => 'storage/defaultCover/user.jpg'
+                'cover_photo' => 'http://127.0.0.1:8000/storage/cover_photo/user.jpg'
             ]);
 
 

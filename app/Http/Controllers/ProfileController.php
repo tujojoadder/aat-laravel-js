@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FprofilePictures;
+use App\Models\MprofilePicture;
 use App\Models\Posts;
 use App\Models\UniqeUser;
 use App\Models\User;
@@ -186,6 +188,66 @@ public function getAllAuthUserFollowing(Request $request)
     return response()->json($followings);
 }
 
+
+
+
+ /*    Set Cover MProfilePicture */
+ public function setMProfilePictuire(Request $request)
+ {
+    
+     // Get authenticated user
+     $user = auth()->user();
+ 
+     // Validate the incoming request to ensure 'image_id' is provided
+     $request->validate([
+         'image_id' => 'required|exists:mprofile_pictures,profile_picture_id' // Ensure the provided image ID exists in the cover_photos table
+     ]);
+
+     // Use a database transaction for safety
+     $Profilephoto = null; // Initialize the cover photo variable
+     DB::transaction(function () use ($request, $user, &$Profilephoto) {
+         // Find the cover photo by the provided 'image_id'
+         $Profilephoto = MprofilePicture::find($request->image_id);
+ 
+         if ($Profilephoto) {
+             // Update the user's cover photo with the new image URL
+             $user->profile_picture = $Profilephoto->image_url;
+             $user->save();
+         }
+     });
+ 
+     // Return the updated cover photo as a JSON response
+     return response()->json(['data' => $Profilephoto], 200);
+ }
+ 
+ 
+/*    Set Cover FProfilePicture */
+public function setFProfilePictuire(Request $request)
+{
+    // Get authenticated user
+    $user = auth()->user();
+
+    // Validate the incoming request to ensure 'image_id' is provided
+    $request->validate([
+        'image_id' => 'required|exists:fprofile_pictures,profile_picture_id' // Ensure the provided image ID exists in the cover_photos table
+    ]);
+
+    // Use a database transaction for safety
+    $Profilephoto = null; // Initialize the cover photo variable
+    DB::transaction(function () use ($request, $user, &$Profilephoto) {
+        // Find the cover photo by the provided 'image_id'
+        $Profilephoto = FprofilePictures::find($request->image_id);
+
+        if ($Profilephoto) {
+            // Update the user's cover photo with the new image URL
+            $user->profile_picture = $Profilephoto->image_url;
+            $user->save();
+        }
+    });
+
+    // Return the updated cover photo as a JSON response
+    return response()->json(['data' => $Profilephoto], 200);
+}
 
 
 

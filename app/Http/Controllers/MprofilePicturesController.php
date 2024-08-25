@@ -6,6 +6,8 @@ use App\Models\BluetikPost;
 use App\Models\ImagePosts;
 use App\Models\MprofilePicture;
 use App\Models\Posts;
+use Illuminate\Support\Facades\File; // Import the File facade at the top
+
 use App\Models\UniqeUser;
 use App\Models\User;
 use Illuminate\Support\Carbon;
@@ -21,57 +23,85 @@ use Illuminate\Support\Facades\Storage;
 
 class MprofilePicturesController extends Controller
 {
+    
     public function store(Request $request)
     {
+        // Validate the incoming request for multiple images
         $this->validate($request, [
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-
-        $messages = []; // Initialize $messages variable
-
+    
+        $messages = [];
+        $uploadedImages = [];
+    
         // Check if any images are provided
         if ($request->hasFile('images')) {
-            DB::transaction(function () use ($request, &$messages) {
-                foreach ($request->file('images') as $image) {
-                    // Generate a unique filename for each image
-                    $customFileName = $image->hashName();
-
-                    // Store the image
-                    $path = $image->storeAs('public/mprofile_picture', $customFileName);
-
-                    // Generate a URL for the stored image
-                    $imageUrl = Storage::url($path);
-
-                    // Create a new record for each image in the database
-                    MprofilePicture::create([
+    
+            foreach ($request->file('images') as $image) {
+                try {
+                    // Generate a unique filename or use a specific name if the condition is met
+                    $originalFileName = $image->getClientOriginalName();
+                    $fileName = 'default_' . $image->hashName();
+    
+                    if (stripos($originalFileName, 'male') !== false) {
+                        $fileName = 'male_' . $image->hashName();
+                    }
+    
+                    // Move the image to the storage directory
+                    $path = $image->move(public_path('storage/mprofile_picture/'), $fileName);
+    
+                    // Generate a public URL for the stored image
+                    $imageUrl = asset('storage/mprofile_picture/' . $fileName);
+    
+                    // Save the image record to the database
+                    $data = MprofilePicture::create([
                         'profile_picture_id' => Str::uuid(),
                         'image_url' => $imageUrl,
                     ]);
-
-                    // Add success message for each image
-                    $messages[] = 'Image successfully stored';
+    
+                    // Add the image details to the array
+                    $uploadedImages[] = [
+                        'file_name' => $fileName,
+                        'url' => $imageUrl,
+                    ];
+    
+                    // Add a success message for each image
+                    $messages[] = 'Image successfully stored: ' . $imageUrl;
+    
+                } catch (\Exception $e) {
+                    // Add an error message if storing an image fails
+                    $messages[] = 'Failed to store image: ' . $e->getMessage();
                 }
-            });
+            }
         } else {
             // Add a message indicating that no images were provided
             $messages[] = 'No images provided';
         }
-
-        // Return the response after the transaction completes
-        return response()->json(['messages' => $messages]);
+    
+        // Return the response including the messages and details of uploaded images
+        return response()->json([
+            'messages' => $messages,
+            'uploaded_images' => $uploadedImages,
+        ]);
     }
 
+
+
+    
     public function view(Request $request)
     {
-
-        // Retrieve the profile picture data from the mprofile_picture table
-        $profilePictures = MprofilePicture::all(); // Assuming you want to retrieve all records
-
-        // Pass the profile picture data to the view
-        return view('mprofile_picture', ['profilePictures' => $profilePictures]);
+        // Determine the number of items per page (default to 5 if not specified)
+        $perPage = $request->input('per_page', 5);  // Default to 5 items per page if not provided
+        $page = $request->input('page', 1);  // Default to page 1 if not provided
+    
+        // Retrieve the paginated profile picture data from the mprofile_picture table
+        $profilePictures = MprofilePicture::paginate($perPage, ['*'], 'page', $page);
+    
+        // Return the paginated response
+        return response()->json($profilePictures);
     }
-
-    public function setmpicture(Request $request)
+    
+  /*   public function setmpicture(Request $request)
     {
         $request->validate([
             'image' =>  'required|exists:mprofile_pictures,image_url',
@@ -116,26 +146,31 @@ class MprofilePicturesController extends Controller
 
         // Return the message
         return $message;
+    } */
+
+    
+public function destroy(Request $request)
+{
+    // Delete all records from the mprofile_picture table
+    MprofilePicture::truncate();
+
+    // Define the directory path where images are stored
+    $directory = public_path('storage/mprofile_picture/');
+
+    // Get all files in the directory using File facade
+    $files = File::files($directory);
+
+    // Delete each file individually
+    foreach ($files as $file) {
+        File::delete($file); // Deletes the file
     }
 
-    public function destroy(Request $request)
-    {
+    // Return a success response after deletion
+    return response()->json(['data' => 'All Fprofile photos deleted']);
+}
 
-        // Delete all records from the mprofile_picture table
-        MprofilePicture::truncate();
 
-        // Get all files in the mprofile_picture directory
-        $files = Storage::files('public/mprofile_picture');
 
-        // Delete each file individually
-        foreach ($files as $file) {
-            Storage::delete($file);
-        }
 
-        // Retrieve the profile pictures data again after deletion
-        $profilePictures = MprofilePicture::all();
 
-        // Return the mprofile_picture view with a deleted message and profile pictures data
-        return view('mprofile_picture', ['profilePicturess' => $profilePictures, 'message' => 'All images have been deleted.']);
-    }
 }

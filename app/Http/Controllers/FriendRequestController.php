@@ -383,11 +383,11 @@ class FriendRequestController extends Controller
                 return response()->json($friends);
             } else {
                 // Handle the case where user_friends_ids column is empty
-                return response()->json(['message' => 'No friends found.'], 404);
+                return response()->json(['message' => 'you have no friends '], 200);
             }
         } else {
             // Handle the case where the friend list is not found for the authenticated user
-            return response()->json(['message' => 'Friend list not found.'], 404);
+            return response()->json(['message' =>  'you have no friends '], 200);
         }
     }
     

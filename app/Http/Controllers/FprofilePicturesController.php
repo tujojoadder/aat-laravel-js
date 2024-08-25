@@ -6,6 +6,8 @@ use App\Models\FprofilePictures;
 use App\Models\ImagePosts;
 use App\Models\UniqeUser;
 use App\Models\User;
+use Illuminate\Support\Facades\File; // Import the File facade at the top
+
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Http\Request;
@@ -19,53 +21,81 @@ use Illuminate\Support\Facades\Storage;
 class FprofilePicturesController extends Controller
 {
     public function store(Request $request)
-    {
-        $this->validate($request, [
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+{
+    // Validate the incoming request for multiple images
+    $this->validate($request, [
+        'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
 
-        $messages = []; // Initialize $messages variable
+    $messages = [];
+    $uploadedImages = [];
 
-        // Check if any images are provided
-        if ($request->hasFile('images')) {
-            DB::transaction(function () use ($request, &$messages) {
-                foreach ($request->file('images') as $image) {
-                    // Generate a unique filename for each image
-                    $customFileName = $image->hashName();
+    // Check if any images are provided
+    if ($request->hasFile('images')) {
 
-                    // Store the image
-                    $path = $image->storeAs('public/fprofile_picture', $customFileName);
-
-                    // Generate a URL for the stored image
-                    $imageUrl = Storage::url($path);
-
-                    // Create a new record for each image in the database
-                    FprofilePictures::create([
-                        'profile_picture_id' => Str::uuid(),
-                        'image_url' => $imageUrl,
-                    ]);
-
-                    // Add success message for each image
-                    $messages[] = 'Image successfully stored';
+        foreach ($request->file('images') as $image) {
+            try {
+                // Get the original file name and generate a unique file name
+                $originalFileName = $image->getClientOriginalName();
+                $fileExtension = $image->getClientOriginalExtension();
+                
+                // Check if the original file name contains specific keywords
+                if (stripos($originalFileName, 'female') !== false) {
+                    $fileName = pathinfo($originalFileName, PATHINFO_FILENAME) . '.' . $fileExtension;
+                } else {
+                    // Use a unique filename for other cases
+                    $fileName = Str::uuid() . '.' . $fileExtension;
                 }
-            });
-        } else {
-            // Add a message indicating that no images were provided
-            $messages[] = 'No images provided';
-        }
 
-        // Return the response after the transaction completes
-        return response()->json(['messages' => $messages]);
+                // Move the image to the storage directory
+                $path = $image->move(public_path('storage/fprofile_picture/'), $fileName);
+
+                // Generate a public URL for the stored image
+                $imageUrl = asset('storage/fprofile_picture/' . $fileName);
+
+                // Save the image record to the database
+                $data = FprofilePictures::create([
+                    'profile_picture_id' => Str::uuid(),
+                    'image_url' => $imageUrl,
+                ]);
+
+                // Add the image details to the array
+                $uploadedImages[] = [
+                    'file_name' => $fileName,
+                    'url' => $imageUrl,
+                ];
+
+                // Add a success message for each image
+                $messages[] = 'Image successfully stored: ' . $imageUrl;
+
+            } catch (\Exception $e) {
+                // Add an error message if storing an image fails
+                $messages[] = 'Failed to store image: ' . $e->getMessage();
+            }
+        }
+    } else {
+        // Add a message indicating that no images were provided
+        $messages[] = 'No images provided';
     }
+
+    // Return the response including the messages and details of uploaded images
+    return response()->json([
+        'messages' => $messages,
+        'uploaded_images' => $uploadedImages,
+    ]);
+}
 
     public function view(Request $request)
     {
-
-        // Retrieve the profile picture data from the fprofile_picture table
-        $profilePictures = FprofilePictures::all(); // Assuming you want to retrieve all records
-
-        // Pass the profile picture data to the view
-        return view('fprofile_picture', ['profilePictures' => $profilePictures]);
+        // Determine the number of items per page (default to 5 if not specified)
+        $perPage = $request->input('per_page', 5);  // Default to 5 items per page if not provided
+        $page = $request->input('page', 1);  // Default to page 1 if not provided
+    
+        // Retrieve the paginated profile picture data from the mprofile_picture table
+        $profilePictures = FprofilePictures::paginate($perPage, ['*'], 'page', $page);
+    
+        // Return the paginated response
+        return response()->json($profilePictures);
     }
 
     public function setfpicture(Request $request)
@@ -116,21 +146,23 @@ class FprofilePicturesController extends Controller
 
     public function destroy(Request $request)
     {
-        // Delete all records from the fprofile_picture table
-        FprofilePictures::truncate();
+       // Delete all records from the mprofile_picture table
+    FprofilePictures::truncate();
 
-        // Get all files in the fprofile_picture directory
-        $files = Storage::files('public/fprofile_picture');
+    // Define the directory path where images are stored
+    $directory = public_path('storage/fprofile_picture/');
 
-        // Delete each file individually
-        foreach ($files as $file) {
-            Storage::delete($file);
-        }
+    // Get all files in the directory using File facade
+    $files = File::files($directory);
 
-        // Retrieve the profile pictures data again after deletion
-        $profilePictures = FprofilePictures::all();
+    // Delete each file individually
+    foreach ($files as $file) {
+        File::delete($file); // Deletes the file
+    }
 
-        // Return the fprofile_picture view with a deleted message and profile pictures data
-        return view('fprofile_picture', ['profilePicturess' => $profilePictures, 'message' => 'All images have been deleted.']);
+    // Return a success response after deletion
+    return response()->json(['data' => 'All FProfile picture  deleted']);
+ 
+ 
     }
 }

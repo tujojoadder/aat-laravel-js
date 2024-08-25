@@ -149,22 +149,17 @@ Route::get('/viewmpicturestore', [MprofilePicturesController::class, 'view'])->n
 //delete mprofile picture 
 Route::delete('/deletemprofilepicture', [MprofilePicturesController::class, 'destroy'])->name('mprofilePicture.delete');
 //<-- no auth now
-//set Fprofile picture to user
-Route::post('/setmpicture', [MprofilePicturesController::class, 'setmpicture'])->name('setmpicture');
 
 /* <---  Cover Photo   ---> */
-//store cover photo
+//store cover photo --.from laravel view
 Route::post('/coverphotostore', [CoverPhotoController::class, 'store'])->name('cpstore');
 //protected-   view all cover photo
-//view cover photo
-Route::get('/viewcoverphotostore', [CoverPhotoController::class, 'view'])->name('viewcp');
+
 //protected-set fprofile piicture as profile picture
 //<-- no auth now
-//delete cover photo
+//delete cover photo --->from laravel view
 Route::delete('/deletecoverphoto', [CoverPhotoController::class, 'destroy'])->name('cp.delete');
 //<-- no auth now
-//set cover photo to user
-Route::post('/setcoverphoto', [CoverPhotoController::class, 'setcoverphoto'])->name('setcp');
 
 
 
@@ -574,11 +569,29 @@ Route::get('/getauthuserfollower', [ProfileController::class, 'getAllAuthUserFol
 Route::get('/getauthuserfollowing', [ProfileController::class, 'getAllAuthUserFollowing']);
 // view auth user friend list
 Route::get('/getauthuserfriendids', [FriendRequestController::class, 'getAuthUserFriendDetails']);
+//set Mprofile picture to user
+Route::post('/setmprofile', [ProfileController::class, 'setMProfilePictuire'])->name('setmpicture');
+//set Fprofile picture to user
+Route::post('/setfprofile', [ProfileController::class, 'setFProfilePictuire']);
+
+
+
+
+
+
+
 
 
 /*  About */
 Route::post('/about/createorupdate', [AboutController::class, 'storeOrUpdate']);
 Route::get('/getabout', [AboutController::class, 'getAbout']);
+
+/*<---- Cover photo ----> */
+//view cover photo
+Route::get('/viewcoverphotostore', [CoverPhotoController::class, 'view'])->name('viewcp');
+//set cover photo to user
+Route::post('/setcoverphoto', [CoverPhotoController::class, 'setcoverphoto'])->name('setcp');
+
 
 
 
