@@ -198,7 +198,7 @@ Route::get('/userdetails/{id}', [FriendRequestController::class, 'getUserInfo'])
 
        
        //send friend request
-       Route::post('/sendfriendrequest/{receiver_id}', [FriendRequestController::class, 'send_friendrequest'])->name('sendfriendrequest');
+       Route::post('/sendfriendrequest', [FriendRequestController::class, 'send_friendrequest']);
        // view auth user friend requests
        Route::get('/users/friendrequestlist', [FriendRequestController::class, 'friend_requestlist'])->name('friendrequestlist');
 

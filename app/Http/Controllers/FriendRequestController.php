@@ -19,19 +19,18 @@ class FriendRequestController extends Controller
 {
 
 
-    public function send_friendrequest(Request $request, $receiver_id)
+    public function send_friendrequest(Request $request)
     {
         $user=auth()->user();
         $userId=$user->user_id;
-        $request->merge(['receiver_id' => $receiver_id]);
-
+       
         // Validate input parameters
-        $this->validate($request, [
+        $request->validate([
             'receiver_id' => 'required|string|max:50'
         ]);
    
         $userId = cleanInput($userId);
-        $receiver_id = cleanInput($receiver_id);
+        $receiver_id = cleanInput($request->receiver_id);
 
         // Use the DB::transaction method for simplified transactions
         DB::transaction(function () use ($receiver_id, &$message,$user,$userId) {
@@ -394,21 +393,60 @@ class FriendRequestController extends Controller
 
 
 //get friend sugestion 7 record for home
-
 public function getFriendSuggestionHome()
 {
     $authUser = auth()->user(); // Authenticated user
 
-    // Fetch 5 users, excluding the authenticated user, and select specific columns
-   $otherUsers = User::where('user_id', '!=', $authUser->user_id)
-   ->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier')
-   ->inRandomOrder() // Randomize the results
-   ->limit(10) // Limit to 5 results
-   ->get();
+    // Get the authenticated user's ID
+    $authUserId = $authUser->user_id;
+
+    // Retrieve the friend list for the authenticated user
+    $authFriendList = FriendList::where('user_id', $authUserId)->first();
+
+    // Initialize friend IDs array
+    $friendIdsArray = [];
+
+    if ($authFriendList) {
+        // Access the user_friends_ids column
+        $userFriendsIds = $authFriendList->user_friends_ids;
+
+        // Check if user_friends_ids column is not empty
+        if (!empty($userFriendsIds)) {
+            // Split the comma-separated string into an array of friend IDs
+            $friendIdsArray = explode(',', $userFriendsIds);
+        }
+    }
+
+    // Retrieve IDs of users who have a pending friend request with the authenticated user
+    $pendingRequestSenderIds = FriendRequest::where('sender_id', $authUserId)
+        ->where('status', 'pending')
+        ->pluck('receiver_id');
+
+    $pendingRequestReceiverIds = FriendRequest::where('receiver_id', $authUserId)
+        ->where('status', 'pending')
+        ->pluck('sender_id');
+
+    // Merge both sender and receiver IDs
+    $pendingRequestIds = $pendingRequestSenderIds->merge($pendingRequestReceiverIds)->unique()->toArray();
+
+    // Merge friend IDs with pending request IDs to exclude from suggestions
+    $excludeIds = array_merge($friendIdsArray, $pendingRequestIds, [$authUserId]);
+
+    // Fetch 10 users, excluding the authenticated user, their friends, and pending friend requests
+    $otherUsers = User::whereNotIn('user_id', $excludeIds)
+        ->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier')
+        ->inRandomOrder() // Randomize the results
+        ->limit(10) // Limit to 10 results
+        ->get();
+
     return response()->json(['data' => $otherUsers]);
 }
 
+
  
+
+
+
 //get User info for show others profile 
 public function getUserInfo($id)
 {

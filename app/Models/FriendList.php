@@ -20,8 +20,6 @@ class FriendList extends Model
        'friend_lists_id',
        'user_id',
        'user_friends_ids'
-
-
        
     ];
      /**

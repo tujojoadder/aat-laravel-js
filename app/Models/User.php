@@ -121,7 +121,16 @@ class User extends Authenticatable
       {
           return $this->hasMany(UserFollowing::class, 'user_id', 'user_id');
       }
-      
+
+
+
+   /*  Get User Friends */
+      // In User.php
+public function friends()
+{
+    // Assuming 'FriendList' model stores friends relationship
+    return $this->hasMany(FriendList::class, 'user_id', 'user_id');
+}
  
     /**
      * The attributes that should be cast.
