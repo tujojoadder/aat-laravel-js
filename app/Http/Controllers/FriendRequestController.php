@@ -18,79 +18,136 @@ use Illuminate\Support\Str;
 class FriendRequestController extends Controller
 {
 
+      /*   Send Friend Request */
+      public function send_friendrequest(Request $request)
+      {
+          $user = auth()->user();
+          $userId = $user->user_id;
+         $message='';
+          // Validate input parameters
+          $request->validate([
+              'receiver_id' => 'required|string|max:50'
+          ]);
+         
+          $userId = cleanInput($userId);
+          $receiver_id = cleanInput($request->receiver_id);
+      
+          // Fetch the friend's list
+          $friendList = FriendList::where('user_id', $userId)->first();
+          $friendIdsArray = [];
+      
+          if ($friendList) {
+              // Access the user_friends_ids column
+              $userFriendsIds = $friendList->user_friends_ids;
+      
+              if (!empty($userFriendsIds)) {
+                  // Split the comma-separated string into an array of friend IDs
+                  $friendIdsArray = explode(',', $userFriendsIds);
+              }
+          }
+      
+          // Check if the receiver_id is already in the friend list
+          if (in_array($receiver_id, $friendIdsArray)) {
+              $message = 'Already your friend.';
+              return response()->json(['message' => $message]);
+          }
+      
+          // Use the DB::transaction method for simplified transactions
+          DB::transaction(function () use ($receiver_id, &$message, $user, $userId) {
+        //   <<<----Retrieve the friend request where the sender is the receiver ID and the receiver is the authenticated user
+             
+        $existingRequest = FriendRequest::where('sender_id', $receiver_id)
+                  ->where('receiver_id', $userId)
+                  ->first();
+      
+              // Check if an existing request was found
+              if ($existingRequest) {
+                  if ($existingRequest->status === 'pending') {
+                      // If there's a pending request, suggest accepting it instead
+                      $message = 'There is already a pending friend request from this user';
+                      return;
+                  } elseif ($existingRequest->status === 'accepted') {
+                      // If there's an accepted request, inform the user
+                      $message = 'Already your friend.';
+                      return;
+                  } else {
+                      // If there's a rejected request, delete it
+                      $existingRequest->delete();
+                  }
+              }
+      
+              // Check if sender_id and receiver_id are the same
+              if ($user->user_id == $receiver_id) {
+                  $message = 'You cannot send a friend request to yourself.';
+                  return;
+              }
+      
+/*     <<<<----  Check if a friend request already exists  ----> */
+              $existingRequest = FriendRequest::where('sender_id', $user->user_id)
+                  ->where('receiver_id', $receiver_id)
+                  ->first();
+      
+              if ($existingRequest) {
+                  // Friend request already exists
+                  if ($existingRequest->status == 'rejected') {
+                      $existingRequest->update(['status' => 'pending']);
+                      $message = 'Friend request sent successfully.';
+                  } elseif ($existingRequest->status == 'accepted') {
+                      $message = 'Already your friend.';
+                  } else {
+                      $message = 'Friend request already sent to this user.';
+                  }
+              } else { // Create a new friend request
+                  FriendRequest::create([
+                      'friend_request_id' => Str::uuid(),
+                      'sender_id' => $user->user_id,
+                      'receiver_id' => $receiver_id
+                  ]);
+      
+                  $message = 'Friend request sent successfully.';
+              }
+          });
+      
+          return response()->json(['message' => $message]);
+      }
+      
 
-    public function send_friendrequest(Request $request)
-    {
-        $user=auth()->user();
-        $userId=$user->user_id;
-       
-        // Validate input parameters
-        $request->validate([
-            'receiver_id' => 'required|string|max:50'
-        ]);
-   
-        $userId = cleanInput($userId);
-        $receiver_id = cleanInput($request->receiver_id);
 
-        // Use the DB::transaction method for simplified transactions
-        DB::transaction(function () use ($receiver_id, &$message,$user,$userId) {
-           
+/* Cancel Friend Request */
 
-            // Retrieve the friend request where the sender is the receiver ID and the receiver is the authenticated user
-            $existingRequest = FriendRequest::where('sender_id', $receiver_id)
-                ->where('receiver_id', $userId)
-                ->first();
+public function cancel_friend_request(Request $request) {
+    // Get Authenticated user
+    $user = auth()->user(); 
 
-            // Check if an existing request was found
-            if ($existingRequest) {
-                if ($existingRequest->status === 'pending') {
-                    // If there's a pending request, suggest accepting it instead
-                    $message = 'There is already a pending friend request from this user';
-                    return;
-                } elseif ($existingRequest->status === 'accepted') {
-                    // If there's an accepted request, inform the user
-                    $message = 'Already your friend.';
-                    return;
-                } else {
-                    // If there's a rejected request, delete it
-                    $existingRequest->delete();
-                }
-            }
+    // Validate the incoming request data
+    $request->validate([
+        'receiver_id' => 'required|max:50',
+    ]);
 
-            // Check if sender_id and receiver_id are the same
-            if ($user->user_id == $receiver_id) {
-                $message = 'You cannot send a friend request to yourself.';
-                return;
-            }
+    // Initialize the message variable
+    $message = '';
+    $receiver_id=cleanInput($request->receiver_id);
+    // Use a transaction to ensure data integrity
+    DB::transaction(function () use ($receiver_id, $user, $message) {
+        // Check if a friend request exists with the current user as the sender and the provided receiver_id
+        $friendRequest = FriendRequest::where('sender_id', $user->user_id)
+            ->where('receiver_id', $receiver_id)
+            ->first();
 
-            // Check if a friend request already exists
-            $existingRequest = FriendRequest::where('sender_id', $user->user_id)
-                ->where('receiver_id', $receiver_id)
-                ->first();
+        if ($friendRequest) {
+            // If a matching friend request exists, delete it
+            $friendRequest->delete();
+            $message = 'Friend request canceled successfully.';
+        } else {
+            // Handle the case where no matching friend request was found
+            $message = 'There is no friend request.';
+        }
+    });
 
-            if ($existingRequest) {
-                // Friend request already exists
-                if ($existingRequest->status == 'rejected') {
-                    $existingRequest->update(['status' => 'pending']);
-                    $message = 'Friend request sent successfully.';
-                } elseif ($existingRequest->status == 'accepted') {
-                    $message = 'Already your friend.';
-                } else {
-                    $message = 'Friend request already sent to this user.';
-                }
-            } else { // Create a new friend request
-                FriendRequest::create([
-                    'friend_request_id' => Str::uuid(),
-                    'sender_id' => $user->user_id,
-                    'receiver_id' => $receiver_id
-                ]);
+    // Optionally, return a response or message to indicate the operation was successful
+    return response()->json(['data' => $message]);
+}
 
-                $message = 'Friend request sent successfully.';
-            }
-        });
-
-        return response()->json(['message' => $message]);
-    }
 
 
 
