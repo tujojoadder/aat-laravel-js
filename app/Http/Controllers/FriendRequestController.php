@@ -450,6 +450,7 @@ public function cancel_friend_request(Request $request) {
 
 
 //get friend sugestion 7 record for home
+
 public function getFriendSuggestionHome()
 {
     $authUser = auth()->user(); // Authenticated user
@@ -535,6 +536,79 @@ public function getUserInfo($id)
 }
 
 
+
+
+
+/* <<<<---- Friend Request Page ----->>>> */
+
+/* friend request --->>>home  */
+public function friend_request(Request $request) {
+    // Get Auth user
+    $user = auth()->user(); // Retrieve the currently authenticated user
+    $userId = $user->user_id; // Get the user ID of the authenticated user
+
+    // Get paginated friend requests with selected user details
+    $friend_requests = FriendRequest::select(
+            'friend_requests.*', // Select all columns from the friend_requests table
+            'users.user_id', // Select the user_id column from the users table
+            'users.profile_picture', // Select the profile_picture column from the users table
+            'users.user_fname', // Select the user_fname column from the users table
+            'users.user_lname', // Select the user_lname column from the users table
+            'users.identifier' // Select the identifier column from the users table
+        )
+        ->join('users', 'friend_requests.sender_id', '=', 'users.user_id') // Join the users table on the sender_id column
+        ->where('friend_requests.receiver_id', $userId) // Filter the friend requests to only those where the receiver_id matches the authenticated user's ID
+        ->paginate(6); // Ensure page parameter is handled correctly
+
+    return response()->json($friend_requests); // Return the paginated results as JSON
+}
+
+public function getsuggestionfriend()
+{
+    $authUser = auth()->user(); // Authenticated user
+
+    // Get the authenticated user's ID
+    $authUserId = $authUser->user_id;
+
+    // Retrieve the friend list for the authenticated user
+    $authFriendList = FriendList::where('user_id', $authUserId)->first();
+
+    // Initialize friend IDs array
+    $friendIdsArray = [];
+
+    if ($authFriendList) {
+        // Access the user_friends_ids column
+        $userFriendsIds = $authFriendList->user_friends_ids;
+
+        // Check if user_friends_ids column is not empty
+        if (!empty($userFriendsIds)) {
+            // Split the comma-separated string into an array of friend IDs
+            $friendIdsArray = explode(',', $userFriendsIds);
+        }
+    }
+
+    // Retrieve IDs of users who have a pending friend request with the authenticated user
+    $pendingRequestSenderIds = FriendRequest::where('sender_id', $authUserId)
+        ->where('status', 'pending')
+        ->pluck('receiver_id');
+
+    $pendingRequestReceiverIds = FriendRequest::where('receiver_id', $authUserId)
+        ->where('status', 'pending')
+        ->pluck('sender_id');
+
+    // Merge both sender and receiver IDs
+    $pendingRequestIds = $pendingRequestSenderIds->merge($pendingRequestReceiverIds)->unique()->toArray();
+
+    // Merge friend IDs with pending request IDs to exclude from suggestions
+    $excludeIds = array_merge($friendIdsArray, $pendingRequestIds, [$authUserId]);
+
+    // Fetch 10 users, excluding the authenticated user, their friends, and pending friend requests
+    $otherUsers = User::whereNotIn('user_id', $excludeIds)
+        ->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier')
+        ->paginate(9); // Ensure page parameter is handled correctly
+
+    return response()->json($otherUsers);
+}
 
 
 

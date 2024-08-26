@@ -192,8 +192,9 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        /* <--- Friend  ---> */
      //get friend sugestion 7 record for home
        Route::get('/friendsuggestionhome', [FriendRequestController::class, 'getFriendSuggestionHome']);
-//get User info for show others profile 
-Route::get('/userdetails/{id}', [FriendRequestController::class, 'getUserInfo']);
+
+       //get User info for show others profile 
+        Route::get('/userdetails/{id}', [FriendRequestController::class, 'getUserInfo']);
 
 
        
@@ -214,6 +215,17 @@ Route::get('/userdetails/{id}', [FriendRequestController::class, 'getUserInfo'])
        // Retrive all friends of auth user
        Route::get('/users/getfriendids', [FriendRequestController::class, 'getFriendIds'])->name('getFriendIds');
 
+   /*    Friend --->>home */
+   Route::get('/auth-friend-requests', [FriendRequestController::class, 'friend_request']);
+   Route::get('/getsuggestionfriends', [FriendRequestController::class, 'getsuggestionfriend']);
+      
+      
+      
+      
+      
+      
+      
+      
        /* <---  Post ---> */
 
        // Create User Post
@@ -576,6 +588,8 @@ Route::get('/getauthuserfriendids', [FriendRequestController::class, 'getAuthUse
 Route::post('/setmprofile', [ProfileController::class, 'setMProfilePictuire'])->name('setmpicture');
 //set Fprofile picture to user
 Route::post('/setfprofile', [ProfileController::class, 'setFProfilePictuire']);
+
+
 
 
 
