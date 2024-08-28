@@ -180,7 +180,7 @@ class FriendRequestController extends Controller
 
 
     //ManageFriendRequests(Accepted,Rejected)
-    //we will not delete record from friend request table we just update
+    //we will not delete record from friend request table we just update(except auth user rejected)
     public function manageFriendRequest(Request $request)
     {
 
