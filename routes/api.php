@@ -218,9 +218,10 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
    /*    Friend --->>home */
    Route::get('/auth-friend-requests', [FriendRequestController::class, 'friend_request']);
    Route::get('/getsuggestionfriends', [FriendRequestController::class, 'getsuggestionfriend']);
-      
-      
-      
+   /*   Friend --->>sentRequest  */
+/* get all sented request auuth user did pendding*/ 
+  Route::get('/sentfriendrequest', [FriendRequestController::class, 'getSentFriendRequest']);
+   
       
       
       
