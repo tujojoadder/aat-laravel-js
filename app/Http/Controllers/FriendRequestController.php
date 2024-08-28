@@ -18,135 +18,136 @@ use Illuminate\Support\Str;
 class FriendRequestController extends Controller
 {
 
-      /*   Send Friend Request */
-      public function send_friendrequest(Request $request)
-      {
-          $user = auth()->user();
-          $userId = $user->user_id;
-         $message='';
-          // Validate input parameters
-          $request->validate([
-              'receiver_id' => 'required|string|max:50'
-          ]);
-         
-          $userId = cleanInput($userId);
-          $receiver_id = cleanInput($request->receiver_id);
-      
-          // Fetch the friend's list
-          $friendList = FriendList::where('user_id', $userId)->first();
-          $friendIdsArray = [];
-      
-          if ($friendList) {
-              // Access the user_friends_ids column
-              $userFriendsIds = $friendList->user_friends_ids;
-      
-              if (!empty($userFriendsIds)) {
-                  // Split the comma-separated string into an array of friend IDs
-                  $friendIdsArray = explode(',', $userFriendsIds);
-              }
-          }
-      
-          // Check if the receiver_id is already in the friend list
-          if (in_array($receiver_id, $friendIdsArray)) {
-              $message = 'Already your friend.';
-              return response()->json(['message' => $message]);
-          }
-      
-          // Use the DB::transaction method for simplified transactions
-          DB::transaction(function () use ($receiver_id, &$message, $user, $userId) {
-        //   <<<----Retrieve the friend request where the sender is the receiver ID and the receiver is the authenticated user
-             
-        $existingRequest = FriendRequest::where('sender_id', $receiver_id)
-                  ->where('receiver_id', $userId)
-                  ->first();
-      
-              // Check if an existing request was found
-              if ($existingRequest) {
-                  if ($existingRequest->status === 'pending') {
-                      // If there's a pending request, suggest accepting it instead
-                      $message = 'There is already a pending friend request from this user';
-                      return;
-                  } elseif ($existingRequest->status === 'accepted') {
-                      // If there's an accepted request, inform the user
-                      $message = 'Already your friend.';
-                      return;
-                  } else {
-                      // If there's a rejected request, delete it
-                      $existingRequest->delete();
-                  }
-              }
-      
-              // Check if sender_id and receiver_id are the same
-              if ($user->user_id == $receiver_id) {
-                  $message = 'You cannot send a friend request to yourself.';
-                  return;
-              }
-      
-/*     <<<<----  Check if a friend request already exists  ----> */
-              $existingRequest = FriendRequest::where('sender_id', $user->user_id)
-                  ->where('receiver_id', $receiver_id)
-                  ->first();
-      
-              if ($existingRequest) {
-                  // Friend request already exists
-                  if ($existingRequest->status == 'rejected') {
-                      $existingRequest->update(['status' => 'pending']);
-                      $message = 'Friend request sent successfully.';
-                  } elseif ($existingRequest->status == 'accepted') {
-                      $message = 'Already your friend.';
-                  } else {
-                      $message = 'Friend request already sent to this user.';
-                  }
-              } else { // Create a new friend request
-                  FriendRequest::create([
-                      'friend_request_id' => Str::uuid(),
-                      'sender_id' => $user->user_id,
-                      'receiver_id' => $receiver_id
-                  ]);
-      
-                  $message = 'Friend request sent successfully.';
-              }
-          });
-      
-          return response()->json(['message' => $message]);
-      }
-      
+    /*   Send Friend Request */
+    public function send_friendrequest(Request $request)
+    {
+        $user = auth()->user();
+        $userId = $user->user_id;
+        $message = '';
+        // Validate input parameters
+        $request->validate([
+            'receiver_id' => 'required|string|max:50'
+        ]);
 
+        $userId = cleanInput($userId);
+        $receiver_id = cleanInput($request->receiver_id);
 
-/* Cancel Friend Request */
+        // Fetch the friend's list
+        $friendList = FriendList::where('user_id', $userId)->first();
+        $friendIdsArray = [];
 
-public function cancel_friend_request(Request $request) {
-    // Get Authenticated user
-    $user = auth()->user(); 
+        if ($friendList) {
+            // Access the user_friends_ids column
+            $userFriendsIds = $friendList->user_friends_ids;
 
-    // Validate the incoming request data
-    $request->validate([
-        'receiver_id' => 'required|max:50',
-    ]);
-
-    // Initialize the message variable
-    $message = '';
-    $receiver_id=cleanInput($request->receiver_id);
-    // Use a transaction to ensure data integrity
-    DB::transaction(function () use ($receiver_id, $user, $message) {
-        // Check if a friend request exists with the current user as the sender and the provided receiver_id
-        $friendRequest = FriendRequest::where('sender_id', $user->user_id)
-            ->where('receiver_id', $receiver_id)
-            ->first();
-
-        if ($friendRequest) {
-            // If a matching friend request exists, delete it
-            $friendRequest->delete();
-            $message = 'Friend request canceled successfully.';
-        } else {
-            // Handle the case where no matching friend request was found
-            $message = 'There is no friend request.';
+            if (!empty($userFriendsIds)) {
+                // Split the comma-separated string into an array of friend IDs
+                $friendIdsArray = explode(',', $userFriendsIds);
+            }
         }
-    });
 
-    // Optionally, return a response or message to indicate the operation was successful
-    return response()->json(['data' => $message]);
-}
+        // Check if the receiver_id is already in the friend list
+        if (in_array($receiver_id, $friendIdsArray)) {
+            $message = 'Already your friend.';
+            return response()->json(['message' => $message]);
+        }
+
+        // Use the DB::transaction method for simplified transactions
+        DB::transaction(function () use ($receiver_id, &$message, $user, $userId) {
+            //   <<<----Retrieve the friend request where the sender is the receiver ID and the receiver is the authenticated user
+
+            $existingRequest = FriendRequest::where('sender_id', $receiver_id)
+                ->where('receiver_id', $userId)
+                ->first();
+
+            // Check if an existing request was found
+            if ($existingRequest) {
+                if ($existingRequest->status === 'pending') {
+                    // If there's a pending request, suggest accepting it instead
+                    $message = 'There is already a pending friend request from this user';
+                    return;
+                } elseif ($existingRequest->status === 'accepted') {
+                    // If there's an accepted request, inform the user
+                    $message = 'Already your friend.';
+                    return;
+                } else {
+                    // If there's a rejected request, delete it
+                    $existingRequest->delete();
+                }
+            }
+
+            // Check if sender_id and receiver_id are the same
+            if ($user->user_id == $receiver_id) {
+                $message = 'You cannot send a friend request to yourself.';
+                return;
+            }
+
+            /*     <<<<----  Check if a friend request already exists  ----> */
+            $existingRequest = FriendRequest::where('sender_id', $user->user_id)
+                ->where('receiver_id', $receiver_id)
+                ->first();
+
+            if ($existingRequest) {
+                // Friend request already exists
+                if ($existingRequest->status == 'rejected') {
+                    $existingRequest->update(['status' => 'pending']);
+                    $message = 'Friend request sent successfully.';
+                } elseif ($existingRequest->status == 'accepted') {
+                    $message = 'Already your friend.';
+                } else {
+                    $message = 'Friend request already sent to this user.';
+                }
+            } else { // Create a new friend request
+                FriendRequest::create([
+                    'friend_request_id' => Str::uuid(),
+                    'sender_id' => $user->user_id,
+                    'receiver_id' => $receiver_id
+                ]);
+
+                $message = 'Friend request sent successfully.';
+            }
+        });
+
+        return response()->json(['message' => $message]);
+    }
+
+
+
+    /* Cancel Friend Request */
+
+    public function cancel_friend_request(Request $request)
+    {
+        // Get Authenticated user
+        $user = auth()->user();
+
+        // Validate the incoming request data
+        $request->validate([
+            'receiver_id' => 'required|max:50',
+        ]);
+
+        // Initialize the message variable
+        $message = '';
+        $receiver_id = cleanInput($request->receiver_id);
+        // Use a transaction to ensure data integrity
+        DB::transaction(function () use ($receiver_id, $user, $message) {
+            // Check if a friend request exists with the current user as the sender and the provided receiver_id
+            $friendRequest = FriendRequest::where('sender_id', $user->user_id)
+                ->where('receiver_id', $receiver_id)
+                ->first();
+
+            if ($friendRequest) {
+                // If a matching friend request exists, delete it
+                $friendRequest->delete();
+                $message = 'Friend request canceled successfully.';
+            } else {
+                // Handle the case where no matching friend request was found
+                $message = 'There is no friend request.';
+            }
+        });
+
+        // Optionally, return a response or message to indicate the operation was successful
+        return response()->json(['data' => $message]);
+    }
 
 
 
@@ -179,14 +180,18 @@ public function cancel_friend_request(Request $request) {
 
 
     //ManageFriendRequests(Accepted,Rejected)
-    public function manageFriendRequest($requested_id, Request $request)
+    //we will not delete record from friend request table we just update
+    public function manageFriendRequest(Request $request)
     {
+
+
         // Validate the input parameters
         $request->validate([
             'decision' => 'required|in:accepted,rejected',
         ]);
         $decision = cleanInput($request->decision);
-
+       /*  Requested UserID */
+       $requested_id=cleanInput($request->sender_id);
         // Use the DB::transaction method for simplified transactions
         DB::transaction(function () use ($requested_id, &$message, $decision) {
             // Get the authenticated user
@@ -247,7 +252,7 @@ public function cancel_friend_request(Request $request) {
             }
         });
 
-        return response()->json(['message' => $message]);
+        return response()->json(['data' => $message]);
     }
 
 
@@ -268,7 +273,7 @@ public function cancel_friend_request(Request $request) {
 
         // Clean the input if necessary
         $useridtoremove = cleanInput($useridtoremove); // Uncomment if needed
-       
+
         // Initialize the message variable
         $message = '';
 
@@ -316,7 +321,7 @@ public function cancel_friend_request(Request $request) {
 
 
 
-    
+
 
 
     //Retrive specific users friendlist
@@ -324,39 +329,39 @@ public function cancel_friend_request(Request $request) {
     {
         // Clean the input and get the user ID from the request query
         $specificUserId = cleanInput($request->query('id'));
-    
+
         // Define the number of friends per page
         $perPage = 10;
-    
+
         // Get the authenticated user's ID
         $authUserId = auth()->id();
-    
+
         // Retrieve the friend list for the authenticated user
         $authFriendList = FriendList::where('user_id', $authUserId)->first();
-    
+
         // Retrieve the friend list for the specified user ID
         $friendList = FriendList::where('user_id', $specificUserId)->first();
-    
+
         if ($friendList) {
             // Access the user_friends_ids column
             $userFriendsIds = $friendList->user_friends_ids;
-    
+
             // Check if user_friends_ids column is not empty
             if (!empty($userFriendsIds)) {
                 // Split the comma-separated string into an array of friend IDs
                 $friendIdsArray = explode(',', $userFriendsIds);
-    
+
                 // Retrieve the authenticated user's friend IDs if available
                 $authFriendIdsArray = [];
                 if ($authFriendList && !empty($authFriendList->user_friends_ids)) {
                     $authFriendIdsArray = explode(',', $authFriendList->user_friends_ids);
                 }
-    
+
                 // Retrieve friend details from the users table with pagination
                 $friends = User::whereIn('user_id', $friendIdsArray)
                     ->select('user_id', 'user_fname', 'user_lname', 'profile_picture', 'identifier')
                     ->paginate($perPage);
-    
+
                 // Iterate over the paginated friends to add the is_friend field
                 $friends->getCollection()->transform(function ($user) use ($authFriendIdsArray) {
                     return [
@@ -368,7 +373,7 @@ public function cancel_friend_request(Request $request) {
                         'is_friend' => in_array($user->user_id, $authFriendIdsArray) ? true : false // Set is_friend to true if the friend is in the auth user's friend list, false otherwise
                     ];
                 });
-    
+
                 // Return the friend details as JSON response, including the is_friend field
                 return response()->json($friends);
             } else {
@@ -380,34 +385,34 @@ public function cancel_friend_request(Request $request) {
             return response()->json(['message' => 'Friend list not found for the user.'], 404);
         }
     }
-    
 
-/* Get friend for Auth user */
+
+    /* Get friend for Auth user */
     public function getAuthUserFriendDetails(Request $request)
     {
         // Define the number of friends per page
         $perPage = 10;
-       $user=auth()->user();
+        $user = auth()->user();
         // Get the authenticated user's ID
         $authUserId = $user->user_id;
-    
+
         // Retrieve the friend list for the authenticated user
         $authFriendList = FriendList::where('user_id', $authUserId)->first();
-    
+
         if ($authFriendList) {
             // Access the user_friends_ids column
             $userFriendsIds = $authFriendList->user_friends_ids;
-    
+
             // Check if user_friends_ids column is not empty
             if (!empty($userFriendsIds)) {
                 // Split the comma-separated string into an array of friend IDs
                 $friendIdsArray = explode(',', $userFriendsIds);
-    
+
                 // Retrieve friend details from the users table with pagination
                 $friends = User::whereIn('user_id', $friendIdsArray)
                     ->select('user_id', 'user_fname', 'user_lname', 'profile_picture', 'identifier')
                     ->paginate($perPage);
-    
+
                 // Return the friend details as JSON response
                 return response()->json($friends);
             } else {
@@ -419,69 +424,69 @@ public function cancel_friend_request(Request $request) {
             return response()->json(['message' =>  'you have no friends '], 200);
         }
     }
-    
 
 
-//get friend sugestion 7 record for home
 
-public function getFriendSuggestionHome()
-{
-    $authUser = auth()->user(); // Authenticated user
+    //get friend sugestion 7 record for home
 
-    // Get the authenticated user's ID
-    $authUserId = $authUser->user_id;
+    public function getFriendSuggestionHome()
+    {
+        $authUser = auth()->user(); // Authenticated user
 
-    // Retrieve the friend list for the authenticated user
-    $authFriendList = FriendList::where('user_id', $authUserId)->first();
+        // Get the authenticated user's ID
+        $authUserId = $authUser->user_id;
 
-    // Initialize friend IDs array
-    $friendIdsArray = [];
+        // Retrieve the friend list for the authenticated user
+        $authFriendList = FriendList::where('user_id', $authUserId)->first();
 
-    if ($authFriendList) {
-        // Access the user_friends_ids column
-        $userFriendsIds = $authFriendList->user_friends_ids;
+        // Initialize friend IDs array
+        $friendIdsArray = [];
 
-        // Check if user_friends_ids column is not empty
-        if (!empty($userFriendsIds)) {
-            // Split the comma-separated string into an array of friend IDs
-            $friendIdsArray = explode(',', $userFriendsIds);
+        if ($authFriendList) {
+            // Access the user_friends_ids column
+            $userFriendsIds = $authFriendList->user_friends_ids;
+
+            // Check if user_friends_ids column is not empty
+            if (!empty($userFriendsIds)) {
+                // Split the comma-separated string into an array of friend IDs
+                $friendIdsArray = explode(',', $userFriendsIds);
+            }
         }
+
+        // Retrieve IDs of users who have a pending friend request with the authenticated user
+        $pendingRequestSenderIds = FriendRequest::where('sender_id', $authUserId)
+            ->where('status', 'pending')
+            ->pluck('receiver_id');
+
+        $pendingRequestReceiverIds = FriendRequest::where('receiver_id', $authUserId)
+            ->where('status', 'pending')
+            ->pluck('sender_id');
+
+        // Merge both sender and receiver IDs
+        $pendingRequestIds = $pendingRequestSenderIds->merge($pendingRequestReceiverIds)->unique()->toArray();
+
+        // Merge friend IDs with pending request IDs to exclude from suggestions
+        $excludeIds = array_merge($friendIdsArray, $pendingRequestIds, [$authUserId]);
+
+        // Fetch 10 users, excluding the authenticated user, their friends, and pending friend requests
+        $otherUsers = User::whereNotIn('user_id', $excludeIds)
+            ->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier')
+            ->inRandomOrder() // Randomize the results
+            ->limit(10) // Limit to 10 results
+            ->get();
+
+        return response()->json(['data' => $otherUsers]);
     }
 
-    // Retrieve IDs of users who have a pending friend request with the authenticated user
-    $pendingRequestSenderIds = FriendRequest::where('sender_id', $authUserId)
-        ->where('status', 'pending')
-        ->pluck('receiver_id');
-
-    $pendingRequestReceiverIds = FriendRequest::where('receiver_id', $authUserId)
-        ->where('status', 'pending')
-        ->pluck('sender_id');
-
-    // Merge both sender and receiver IDs
-    $pendingRequestIds = $pendingRequestSenderIds->merge($pendingRequestReceiverIds)->unique()->toArray();
-
-    // Merge friend IDs with pending request IDs to exclude from suggestions
-    $excludeIds = array_merge($friendIdsArray, $pendingRequestIds, [$authUserId]);
-
-    // Fetch 10 users, excluding the authenticated user, their friends, and pending friend requests
-    $otherUsers = User::whereNotIn('user_id', $excludeIds)
-        ->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier')
-        ->inRandomOrder() // Randomize the results
-        ->limit(10) // Limit to 10 results
-        ->get();
-
-    return response()->json(['data' => $otherUsers]);
-}
-
-
- 
 
 
 
-//get User info for show others profile 
-public function getUserInfo($id)
-{
- /*    // Sanitize and validate the ID
+
+
+    //get User info for show others profile 
+    public function getUserInfo($id)
+    {
+        /*    // Sanitize and validate the ID
     if (empty($id) || !Uuid::isValid($id)) {
         Log::warning("Invalid User ID format: {$id}");
         return response()->json([
@@ -489,116 +494,117 @@ public function getUserInfo($id)
         ], 400); // Bad Request
     }
  */
-    // Retrieve the user by ID, selecting specific fields
-    $user = User::where('user_id', $id)
-        ->select('cover_photo', 'identifier', 'profile_picture', 'user_fname', 'user_lname')
-        ->first();
+        // Retrieve the user by ID, selecting specific fields
+        $user = User::where('user_id', $id)
+            ->select('cover_photo', 'identifier', 'profile_picture', 'user_fname', 'user_lname')
+            ->first();
 
-    // Check if user exists
-    if (!$user) {
-        Log::warning("User not found for ID: {$id}");
+        // Check if user exists
+        if (!$user) {
+            Log::warning("User not found for ID: {$id}");
+            return response()->json([
+                'error' => 'User not found'
+            ], 404); // Not Found
+        }
+
+        // Return the user data as JSON
         return response()->json([
-            'error' => 'User not found'
-        ], 404); // Not Found
+            'data' => $user
+        ], 200); // OK
     }
 
-    // Return the user data as JSON
-    return response()->json([
-        'data' => $user
-    ], 200); // OK
-}
 
 
 
 
+    /* <<<<---- Friend Request Page ----->>>> */
 
-/* <<<<---- Friend Request Page ----->>>> */
-
-/* friend request --->>>home  */
-public function friend_request(Request $request) {
+    /* friend request --->>>home  */
+    public function friend_request(Request $request)
+{
     // Get Auth user
     $user = auth()->user(); // Retrieve the currently authenticated user
     $userId = $user->user_id; // Get the user ID of the authenticated user
 
-    // Get paginated friend requests with selected user details
+    // Get paginated friend requests with selected user details where status is 'pending'
     $friend_requests = FriendRequest::select(
-            'friend_requests.*', // Select all columns from the friend_requests table
-            'users.user_id', // Select the user_id column from the users table
-            'users.profile_picture', // Select the profile_picture column from the users table
-            'users.user_fname', // Select the user_fname column from the users table
-            'users.user_lname', // Select the user_lname column from the users table
-            'users.identifier' // Select the identifier column from the users table
-        )
+        'friend_requests.*', // Select all columns from the friend_requests table
+        'users.user_id', // Select the user_id column from the users table
+        'users.profile_picture', // Select the profile_picture column from the users table
+        'users.user_fname', // Select the user_fname column from the users table
+        'users.user_lname', // Select the user_lname column from the users table
+        'users.identifier' // Select the identifier column from the users table
+    )
         ->join('users', 'friend_requests.sender_id', '=', 'users.user_id') // Join the users table on the sender_id column
         ->where('friend_requests.receiver_id', $userId) // Filter the friend requests to only those where the receiver_id matches the authenticated user's ID
+        ->where('friend_requests.status', 'pending') // Filter the friend requests to only those with a 'pending' status
         ->paginate(6);
 
     return response()->json($friend_requests); // Return the paginated results as JSON
 }
 
-public function getsuggestionfriend()
-{
-    $authUser = auth()->user(); // Authenticated user
 
-    // Get the authenticated user's ID
-    $authUserId = $authUser->user_id;
+    public function getsuggestionfriend()
+    {
+        $authUser = auth()->user(); // Authenticated user
 
-    // Retrieve the friend list for the authenticated user
-    $authFriendList = FriendList::where('user_id', $authUserId)->first();
+        // Get the authenticated user's ID
+        $authUserId = $authUser->user_id;
 
-    // Initialize friend IDs array
-    $friendIdsArray = [];
+        // Retrieve the friend list for the authenticated user
+        $authFriendList = FriendList::where('user_id', $authUserId)->first();
 
-    if ($authFriendList) {
-        // Access the user_friends_ids column
-        $userFriendsIds = $authFriendList->user_friends_ids;
+        // Initialize friend IDs array
+        $friendIdsArray = [];
 
-        // Check if user_friends_ids column is not empty
-        if (!empty($userFriendsIds)) {
-            // Split the comma-separated string into an array of friend IDs
-            $friendIdsArray = explode(',', $userFriendsIds);
+        if ($authFriendList) {
+            // Access the user_friends_ids column
+            $userFriendsIds = $authFriendList->user_friends_ids;
+
+            // Check if user_friends_ids column is not empty
+            if (!empty($userFriendsIds)) {
+                // Split the comma-separated string into an array of friend IDs
+                $friendIdsArray = explode(',', $userFriendsIds);
+            }
         }
+
+        // Retrieve IDs of users who have a pending friend request with the authenticated user
+        $pendingRequestSenderIds = FriendRequest::where('sender_id', $authUserId)
+            ->where('status', 'pending')
+            ->pluck('receiver_id');
+
+        $pendingRequestReceiverIds = FriendRequest::where('receiver_id', $authUserId)
+            ->where('status', 'pending')
+            ->pluck('sender_id');
+
+        // Merge both sender and receiver IDs
+        $pendingRequestIds = $pendingRequestSenderIds->merge($pendingRequestReceiverIds)->unique()->toArray();
+
+        // Merge friend IDs with pending request IDs to exclude from suggestions
+        $excludeIds = array_merge($friendIdsArray, $pendingRequestIds, [$authUserId]);
+
+        // Fetch 10 users, excluding the authenticated user, their friends, and pending friend requests
+        $otherUsers = User::whereNotIn('user_id', $excludeIds)
+            ->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier')
+            ->paginate(9); // Ensure page parameter is handled correctly
+
+        return response()->json($otherUsers);
     }
 
-    // Retrieve IDs of users who have a pending friend request with the authenticated user
-    $pendingRequestSenderIds = FriendRequest::where('sender_id', $authUserId)
-        ->where('status', 'pending')
-        ->pluck('receiver_id');
 
-    $pendingRequestReceiverIds = FriendRequest::where('receiver_id', $authUserId)
-        ->where('status', 'pending')
-        ->pluck('sender_id');
+    /* Get sent requests */
 
-    // Merge both sender and receiver IDs
-    $pendingRequestIds = $pendingRequestSenderIds->merge($pendingRequestReceiverIds)->unique()->toArray();
+    public function getSentFriendRequest()
+    {
+        // Get the authenticated user ID
+        $authUserId = auth()->user()->user_id;
 
-    // Merge friend IDs with pending request IDs to exclude from suggestions
-    $excludeIds = array_merge($friendIdsArray, $pendingRequestIds, [$authUserId]);
+        // Query to retrieve all users who have received a friend request from the authenticated user and the request status is pending
+        $sentRequests = User::whereHas('friendRequest', function ($query) use ($authUserId) {
+            $query->where('sender_id', $authUserId)
+                ->where('status', 'pending');
+        })->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier')->paginate(4);;
 
-    // Fetch 10 users, excluding the authenticated user, their friends, and pending friend requests
-    $otherUsers = User::whereNotIn('user_id', $excludeIds)
-        ->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier')
-        ->paginate(9); // Ensure page parameter is handled correctly
-
-    return response()->json($otherUsers);
-}
-
-
-/* Get sent requests */
-
-public function getSentFriendRequest()
-{
-    // Get the authenticated user ID
-    $authUserId = auth()->user()->user_id;
-
-    // Query to retrieve all users who have received a friend request from the authenticated user and the request status is pending
-    $sentRequests = User::whereHas('friendRequest', function ($query) use ($authUserId) {
-        $query->where('sender_id', $authUserId)
-              ->where('status', 'pending');
-    })->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier')->paginate(4);;
-
-    return response()->json($sentRequests);
-}
-
-
+        return response()->json($sentRequests);
+    }
 }

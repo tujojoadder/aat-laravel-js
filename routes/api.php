@@ -209,7 +209,7 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
 
 
        // Manage friend request(Accepted,rejected)
-       Route::post('/users/managefriendrequest/{requested_id}', [FriendRequestController::class, 'manageFriendRequest'])->name('manageFriendRequest');
+       Route::post('managefriendrequest', [FriendRequestController::class, 'manageFriendRequest'])->name('manageFriendRequest');
        // unfriend any friend
        Route::post('/users/unfrienduser/{useridtoremove}', [FriendRequestController::class, 'unfriendUser'])->name('unfriendUser');
        // Retrive all friends of auth user
