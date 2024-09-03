@@ -316,7 +316,6 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
 
 
 
-
        /* <--- Page Blueticks Request --->  */
 
        //Page Profile Photo  Request
@@ -398,6 +397,31 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        //upadete group details 
        Route::put('/groups/{groupId}/update/details', [GroupsController::class, 'updateGroupDetails'])
               ->name('upadte.details.group');
+        //Retrive joined groups(Not admin)
+        Route::get('/groups/joined-not-admin', [GroupsController::class, 'getJoinedGroupsButNotAdmin']);
+        //get specific groupdetails 
+     //Retrive joined groups(admin)
+     Route::get('/groups/joined-admin', [GroupsController::class, 'getGroupsWhereAdmin']);
+     //get specific groupdetails 
+
+       Route::get('/groupdetails/{id}', [GroupsController::class, 'groupDetails']);
+      /* get specific group posts */
+      Route::get('/getspecificgroupposts', [GroupsController::class, 'getSpecificGroupPosts']);
+       //get specific group photo
+       Route::get('/getspecificgroupphotos', [GroupsController::class, 'getSpecificGroupPhotos']);
+       //get specific group photo
+       Route::get('/getspecificgroupmember', [GroupsController::class, 'gettAllGroupMember']);
+
+
+
+
+
+
+
+
+
+
+
 
 
 

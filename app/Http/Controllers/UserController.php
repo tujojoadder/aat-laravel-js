@@ -99,13 +99,13 @@ class UserController extends Controller
             $photoPath = '';
             switch ($request->input('gender')) {
                 case 'male':
-                    $photoPath = 'storage/defaultProfile/male.png';
+                    $photoPath = 'storage/defaultProfile/male.jpg';
                     break;
                 case 'female':
-                    $photoPath = 'storage/defaultProfile/female.png';
+                    $photoPath = 'storage/defaultProfile/female.jpg';
                     break;
                 default:
-                    $photoPath = 'storage/defaultProfile/others.jpeg';
+                    $photoPath = 'storage/defaultProfile/others.jpg';
             }
 
             // Update the 'gender' field for the user

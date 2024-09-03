@@ -25,6 +25,10 @@ return new class extends Migration
             $table->enum('audience', ['public', 'private']);
             $table->integer('reported_count')->default(0);
             $table->timestamps();
+
+            $table->foreign('group_creator')->references('user_id')->on('users')
+            ->onDelete('cascade')
+            ->onUpdate('cascade');
         });
     }
 

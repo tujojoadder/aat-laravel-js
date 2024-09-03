@@ -20,21 +20,27 @@ class ProfileController extends Controller
 {
 /*     View others Profile */
 
-    /* get for specific user posts  */
-    public function getSpecificUserPosts(Request $request)
-    {
-        $user = auth()->user();
-        $specificUserId = cleanInput($request->query('id'));
-        // Debug the value of $specificUserId
-        $perPage = $request->query('per_page', 5);
-        $page = $request->query('page', 1);
+/* Get posts for a specific user */
+public function getSpecificUserPosts(Request $request)
+{
+    $user = auth()->user();
+    $specificUserId = cleanInput($request->query('id'));
+    
+    // Debug the value of $specificUserId if needed
+    $perPage = $request->query('per_page', 5);
+    $page = $request->query('page', 1);
 
-        $posts = Posts::where('author_id', $specificUserId)
-            ->with(['author', 'textPost', 'imagePost'])
-            ->paginate($perPage, ['*'], 'page', $page);
+    // Fetch posts where author_id matches the specific user ID and group_id, page_id, iaccount_id are NULL
+    $posts = Posts::where('author_id', $specificUserId)
+        ->whereNull('group_id')
+        ->whereNull('page_id')
+        ->whereNull('iaccount_id')
+        ->with(['author', 'textPost', 'imagePost'])
+        ->paginate($perPage, ['*'], 'page', $page);
 
-        return response()->json($posts);
-    }
+    return response()->json($posts);
+}
+
     /* get for others profile all photo */
     public function getSpecificUserPhotos(Request $request)
     {
@@ -47,7 +53,10 @@ class ProfileController extends Controller
 
         // Query for the posts with associated image posts for the specific user, paginate the results
         $posts = Posts::where('author_id', $specificUserId)
-            ->with('imagePost') // Eager load the image posts relationship
+        ->whereNull('group_id')
+        ->whereNull('page_id')
+        ->whereNull('iaccount_id')    
+        ->with('imagePost') // Eager load the image posts relationship
             ->whereHas('imagePost') // Ensure we only get posts with associated image posts
             ->paginate($perPage, ['*'], 'page', $page);
 

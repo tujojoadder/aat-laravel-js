@@ -39,12 +39,19 @@ class MprofilePicturesController extends Controller
     
             foreach ($request->file('images') as $image) {
                 try {
-                    // Generate a unique filename or use a specific name if the condition is met
+                    // Get the original file name
                     $originalFileName = $image->getClientOriginalName();
-                    $fileName = 'default_' . $image->hashName();
+                    $fileName = 'default_' . $image->hashName(); // Default filename
     
+                    // Check if the original file name contains certain keywords
                     if (stripos($originalFileName, 'male') !== false) {
-                        $fileName = 'male_' . $image->hashName();
+                        $fileName = $originalFileName; // Keep original name for 'male'
+                    } elseif (stripos($originalFileName, 'group') !== false) {
+                        $fileName = $originalFileName; // Keep original name for 'group'
+                    } elseif (stripos($originalFileName, 'page') !== false) {
+                        $fileName = $originalFileName; // Keep original name for 'page'
+                    } elseif (stripos($originalFileName, 'iaccount') !== false) {
+                        $fileName = $originalFileName; // Keep original name for 'iaccount'
                     }
     
                     // Move the image to the storage directory
@@ -84,6 +91,7 @@ class MprofilePicturesController extends Controller
             'uploaded_images' => $uploadedImages,
         ]);
     }
+    
 
 
 
@@ -166,7 +174,7 @@ public function destroy(Request $request)
     }
 
     // Return a success response after deletion
-    return response()->json(['data' => 'All Fprofile photos deleted']);
+    return response()->json(['data' => 'All Mprofile photos deleted']);
 }
 
 

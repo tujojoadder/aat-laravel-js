@@ -21,69 +21,71 @@ use Illuminate\Support\Facades\Storage;
 class FprofilePicturesController extends Controller
 {
     public function store(Request $request)
-{
-    // Validate the incoming request for multiple images
-    $this->validate($request, [
-        'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
-
-    $messages = [];
-    $uploadedImages = [];
-
-    // Check if any images are provided
-    if ($request->hasFile('images')) {
-
-        foreach ($request->file('images') as $image) {
-            try {
-                // Get the original file name and generate a unique file name
-                $originalFileName = $image->getClientOriginalName();
-                $fileExtension = $image->getClientOriginalExtension();
-                
-                // Check if the original file name contains specific keywords
-                if (stripos($originalFileName, 'female') !== false) {
-                    $fileName = pathinfo($originalFileName, PATHINFO_FILENAME) . '.' . $fileExtension;
-                } else {
-                    // Use a unique filename for other cases
-                    $fileName = Str::uuid() . '.' . $fileExtension;
+    {
+        // Validate the incoming request for multiple images
+        $this->validate($request, [
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+    
+        $messages = [];
+        $uploadedImages = [];
+    
+        // Check if any images are provided
+        if ($request->hasFile('images')) {
+    
+            foreach ($request->file('images') as $image) {
+                try {
+                    // Get the original file name and extension
+                    $originalFileName = $image->getClientOriginalName();
+                    $fileExtension = $image->getClientOriginalExtension();
+    
+                    // Generate a file name based on the condition
+                    if (stripos($originalFileName, 'female') !== false || stripos($originalFileName, 'others') !== false) {
+                        // Keep the original file name if it contains 'female' or 'others'
+                        $fileName = pathinfo($originalFileName, PATHINFO_FILENAME) . '.' . $fileExtension;
+                    } else {
+                        // Generate a unique file name for other cases
+                        $fileName = Str::uuid() . '.' . $fileExtension;
+                    }
+    
+                    // Move the image to the storage directory
+                    $path = $image->move(public_path('storage/fprofile_picture/'), $fileName);
+    
+                    // Generate a public URL for the stored image
+                    $imageUrl = asset('storage/fprofile_picture/' . $fileName);
+    
+                    // Save the image record to the database
+                    $data = FprofilePictures::create([
+                        'profile_picture_id' => Str::uuid(),
+                        'image_url' => $imageUrl,
+                    ]);
+    
+                    // Add the image details to the array
+                    $uploadedImages[] = [
+                        'file_name' => $fileName,
+                        'url' => $imageUrl,
+                    ];
+    
+                    // Add a success message for each image
+                    $messages[] = 'Image successfully stored: ' . $imageUrl;
+    
+                } catch (\Exception $e) {
+                    // Add an error message if storing an image fails
+                    $messages[] = 'Failed to store image: ' . $e->getMessage();
                 }
-
-                // Move the image to the storage directory
-                $path = $image->move(public_path('storage/fprofile_picture/'), $fileName);
-
-                // Generate a public URL for the stored image
-                $imageUrl = asset('storage/fprofile_picture/' . $fileName);
-
-                // Save the image record to the database
-                $data = FprofilePictures::create([
-                    'profile_picture_id' => Str::uuid(),
-                    'image_url' => $imageUrl,
-                ]);
-
-                // Add the image details to the array
-                $uploadedImages[] = [
-                    'file_name' => $fileName,
-                    'url' => $imageUrl,
-                ];
-
-                // Add a success message for each image
-                $messages[] = 'Image successfully stored: ' . $imageUrl;
-
-            } catch (\Exception $e) {
-                // Add an error message if storing an image fails
-                $messages[] = 'Failed to store image: ' . $e->getMessage();
             }
+        } else {
+            // Add a message indicating that no images were provided
+            $messages[] = 'No images provided';
         }
-    } else {
-        // Add a message indicating that no images were provided
-        $messages[] = 'No images provided';
+    
+        // Return the response including the messages and details of uploaded images
+        return response()->json([
+            'messages' => $messages,
+            'uploaded_images' => $uploadedImages,
+        ]);
     }
-
-    // Return the response including the messages and details of uploaded images
-    return response()->json([
-        'messages' => $messages,
-        'uploaded_images' => $uploadedImages,
-    ]);
-}
+    
 
     public function view(Request $request)
     {

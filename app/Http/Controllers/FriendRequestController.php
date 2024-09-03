@@ -326,65 +326,72 @@ class FriendRequestController extends Controller
 
     //Retrive specific users friendlist
     public function getSpecificUserFriendDetails(Request $request)
-    {
-        // Clean the input and get the user ID from the request query
-        $specificUserId = cleanInput($request->query('id'));
+{
+    // Clean the input and get the user ID from the request query
+    $specificUserId = cleanInput($request->query('id'));
 
-        // Define the number of friends per page
-        $perPage = 10;
+    // Define the number of friends per page
+    $perPage = 10;
 
-        // Get the authenticated user's ID
-        $authUserId = auth()->id();
+    // Get the authenticated user's ID
+    $authUserId = auth()->id();
 
-        // Retrieve the friend list for the authenticated user
-        $authFriendList = FriendList::where('user_id', $authUserId)->first();
+    // Retrieve the friend list for the authenticated user
+    $authFriendList = FriendList::where('user_id', $authUserId)->first();
 
-        // Retrieve the friend list for the specified user ID
-        $friendList = FriendList::where('user_id', $specificUserId)->first();
+    // Retrieve the friend list for the specified user ID
+    $friendList = FriendList::where('user_id', $specificUserId)->first();
 
-        if ($friendList) {
-            // Access the user_friends_ids column
-            $userFriendsIds = $friendList->user_friends_ids;
+    if ($friendList) {
+        // Access the user_friends_ids column
+        $userFriendsIds = $friendList->user_friends_ids;
 
-            // Check if user_friends_ids column is not empty
-            if (!empty($userFriendsIds)) {
-                // Split the comma-separated string into an array of friend IDs
-                $friendIdsArray = explode(',', $userFriendsIds);
+        // Check if user_friends_ids column is not empty
+        if (!empty($userFriendsIds)) {
+            // Split the comma-separated string into an array of friend IDs
+            $friendIdsArray = explode(',', $userFriendsIds);
 
-                // Retrieve the authenticated user's friend IDs if available
-                $authFriendIdsArray = [];
-                if ($authFriendList && !empty($authFriendList->user_friends_ids)) {
-                    $authFriendIdsArray = explode(',', $authFriendList->user_friends_ids);
-                }
-
-                // Retrieve friend details from the users table with pagination
-                $friends = User::whereIn('user_id', $friendIdsArray)
-                    ->select('user_id', 'user_fname', 'user_lname', 'profile_picture', 'identifier')
-                    ->paginate($perPage);
-
-                // Iterate over the paginated friends to add the is_friend field
-                $friends->getCollection()->transform(function ($user) use ($authFriendIdsArray) {
-                    return [
-                        'user_id' => $user->user_id,
-                        'user_fname' => $user->user_fname,
-                        'user_lname' => $user->user_lname,
-                        'profile_picture' => $user->profile_picture,
-                        'identifier' => $user->identifier,
-                        'is_friend' => in_array($user->user_id, $authFriendIdsArray) ? true : false // Set is_friend to true if the friend is in the auth user's friend list, false otherwise
-                    ];
-                });
-
-                // Return the friend details as JSON response, including the is_friend field
-                return response()->json($friends);
-            } else {
-                // Handle the case where user_friends_ids column is empty
-                return response()->json(['message' => 'No friends found for the user.'], 404);
+            // Retrieve the authenticated user's friend IDs if available
+            $authFriendIdsArray = [];
+            if ($authFriendList && !empty($authFriendList->user_friends_ids)) {
+                $authFriendIdsArray = explode(',', $authFriendList->user_friends_ids);
             }
+
+            // Retrieve friend details from the users table with pagination
+            $friends = User::whereIn('user_id', $friendIdsArray)
+                ->select('user_id', 'user_fname', 'user_lname', 'profile_picture', 'identifier')
+                ->paginate($perPage);
+
+            // Iterate over the paginated friends to add the is_friend field
+            $friends->getCollection()->transform(function ($user) use ($authFriendIdsArray, $authUserId) {
+                // Check if the authenticated user has sent a friend request to this user
+                $friendRequestExists = FriendRequest::where('sender_id', $authUserId)
+                    ->where('receiver_id', $user->user_id)
+                    ->exists();
+
+                return [
+                    'user_id' => $user->user_id,
+                    'user_fname' => $user->user_fname,
+                    'user_lname' => $user->user_lname,
+                    'profile_picture' => $user->profile_picture,
+                    'identifier' => $user->identifier,
+                    'is_friend' => in_array($user->user_id, $authFriendIdsArray) ? true : false, // Set is_friend to true if the friend is in the auth user's friend list, false otherwise
+                    'friend_request_sent' => $friendRequestExists ? true : false, // Set friend_request_sent to true if a friend request has been sent, false otherwise
+                ];
+            });
+
+            // Return the friend details as JSON response, including the is_friend field
+            return response()->json($friends);
         } else {
-            // Handle the case where the friend list is not found for the user
-            return response()->json(['message' => 'Friend list not found for the user.'], 404);
+            // Handle the case where user_friends_ids column is empty
+            return response()->json(['message' => 'No friends found for the user.'], 404);
         }
+    } else {
+        // Handle the case where the friend list is not found for the user
+        return response()->json(['message' => 'Friend list not found for the user.'], 404);
     }
+}
+
 
 
     /* Get friend for Auth user */

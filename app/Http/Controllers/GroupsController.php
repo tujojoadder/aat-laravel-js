@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FriendList;
+use App\Models\FriendRequest;
 use App\Models\GroupJoinRequest;
 use App\Models\Groups;
 use App\Models\Pages;
@@ -87,7 +89,7 @@ class GroupsController extends Controller
             'group_admins' => $user->user_id,
             'audience' => $audience,
             'group_picture' => 'storage/defaultProfile/group.jpg',
-            'group_cover' => 'storage/defaultCover/group.jpg',
+            'group_cover' => 'http://127.0.0.1:8000/storage/cover_photo/group.jpg',
 
 
         ]);
@@ -401,5 +403,231 @@ class GroupsController extends Controller
         }
         $group->update(['group_details' => $details]);
         return response()->json(['message' => 'Group details updated successfully']);
+    }
+
+
+ /*    Groups that auth user are not admin */
+    public function getJoinedGroupsButNotAdmin()
+    {
+        // Get the currently authenticated user
+        $user = auth()->user();
+    
+        // Define the number of items per page
+        $perPage = 9; // Adjust this number as needed
+        $page = request()->input('page', 1); // Get current page from query parameter, default to 1
+    
+        // Retrieve all groups that the user has joined
+        $joinedGroups = $user->groups()->get(); // Retrieve all groups
+    
+        // Filter out the groups where the user is an admin
+        $groupsNotAdmin = $joinedGroups->filter(function ($group) use ($user) {
+            // Check if the user is not listed in the group_admins field
+            return !str_contains($group->group_admins, $user->user_id);
+        });
+    
+        // Calculate the total number of pages
+        $totalItems = $groupsNotAdmin->count();
+        $totalPages = ceil($totalItems / $perPage);
+    
+        // Slice the filtered results for pagination
+        $pagedGroups = $groupsNotAdmin->slice(($page - 1) * $perPage, $perPage)->values();
+    
+        // Map to select only the desired fields
+        $groupsArray = $pagedGroups->map(function ($group) {
+            return [
+                'group_name' => $group->group_name,
+                'group_id' => $group->group_id,
+                'identifier' => $group->identifier,
+                'group_cover' => $group->group_cover,
+                'group_picture' => $group->group_picture,
+                'audience' => $group->audience,
+            ];
+        });
+    
+        // Return the filtered list of groups as an array with pagination metadata
+        return response()->json([
+            'data' => $groupsArray,
+            'current_page' => (int)$page,
+            'per_page' => $perPage,
+            'total' => $totalItems,
+            'total_pages' => $totalPages
+        ]);
+    }
+
+
+ /*    Groups that auth user are admin */
+    public function getGroupsWhereAdmin()
+    {
+        // Get the currently authenticated user
+        $user = auth()->user();
+    
+        // Define the number of items per page
+        $perPage = 9; // Adjust this number as needed
+        $page = request()->input('page', 1); // Get current page from query parameter, default to 1
+    
+        // Retrieve all groups that the user has joined
+        $joinedGroups = $user->groups()->get(); // Retrieve all groups
+    
+        // Filter out the groups where the user is an admin
+        $groupsWhereAdmin = $joinedGroups->filter(function ($group) use ($user) {
+            // Check if the user is listed in the group_admins field
+            return str_contains($group->group_admins, $user->user_id);
+        });
+    
+        // Calculate the total number of pages
+        $totalItems = $groupsWhereAdmin->count();
+        $totalPages = ceil($totalItems / $perPage);
+    
+        // Slice the filtered results for pagination
+        $pagedGroups = $groupsWhereAdmin->slice(($page - 1) * $perPage, $perPage)->values();
+    
+        // Map to select only the desired fields
+        $groupsArray = $pagedGroups->map(function ($group) {
+            return [
+                'group_name' => $group->group_name,
+                'group_id' => $group->group_id,
+                'identifier' => $group->identifier,
+                'group_cover' => $group->group_cover,
+                'group_picture' => $group->group_picture,
+                'audience' => $group->audience,
+            ];
+        });
+    
+        // Return the filtered list of groups as an array with pagination metadata
+        return response()->json([
+            'data' => $groupsArray,
+            'current_page' => (int)$page,
+            'per_page' => $perPage,
+            'total' => $totalItems,
+            'total_pages' => $totalPages
+        ]);
+    }
+    
+
+
+
+    
+
+    //get specific groupdetails
+    public function groupDetails(Request $request)
+    {
+        // Get Authenticated user
+        $user = auth()->user();
+    
+        // Find the group by ID
+        $group = Groups::where('group_id', $request->id)->first();
+    
+        // Initialize isAdmin as false
+        $isAdmin = false;
+    
+        // Check if the group exists and the authenticated user is an admin of the group
+        if ($group) {
+            $isAdmin = str_contains($group->group_admins, $user->user_id);
+        }
+    
+        // Add isAdmin to the group data
+        $groupData = $group->toArray(); // Convert group model to array
+        $groupData['isAdmin'] = $isAdmin; // Add isAdmin flag
+    
+        return response()->json(['data' => $groupData]);
+    }
+    
+
+
+
+
+
+
+    
+    /* get for specific group posts  */
+    public function getSpecificGroupPosts(Request $request)
+    {
+        $user = auth()->user();
+        $specificGroupId = cleanInput($request->query('id'));
+        // Debug the value of $specificGroupId
+        $perPage = $request->query('per_page', 5);
+        $page = $request->query('page', 1);
+
+        $posts = Posts::where('group_id', $specificGroupId)
+            ->with(['author', 'textPost', 'imagePost'])
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json($posts);
+    }
+
+
+    /* get for specific group all photo */
+    public function getSpecificGroupPhotos(Request $request)
+    {
+        // Clean the input and get the user ID from the request query
+        $specificGroupId = cleanInput($request->query('id'));
+
+        // Set default pagination values, with the option to customize via query parameters
+        $perPage = $request->query('per_page', 6); // default to 10 per page
+        $page = $request->query('page', 1);
+
+        // Query for the posts with associated image posts for the specific user, paginate the results
+        $posts = Posts::where('group_id', $specificGroupId)
+            ->with('imagePost') // Eager load the image posts relationship
+            ->whereHas('imagePost') // Ensure we only get posts with associated image posts
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        // Return the paginated result as JSON
+        return response()->json($posts);
+    }
+
+    /* Get all users of a specific group */
+    public function gettAllGroupMember(Request $request)
+    {
+        // Clean and get the group ID from the request query
+        $groupId = cleanInput($request->query('id'));
+
+        // Find the group using the group_id
+        $group = Groups::where('group_id', $groupId)->first();
+
+        // Check if group exists
+        if (!$group) {
+            return response()->json(['error' => 'Group not found.'], 404);
+        }
+
+        // Define the number of members per page
+        $perPage = $request->query('per_page', 10);
+        $page = $request->query('page', 1);
+
+        // Get the authenticated user's ID
+        $authUserId = auth()->id();
+
+        // Retrieve the friend list for the authenticated user
+        $authFriendList = FriendList::where('user_id', $authUserId)->first();
+
+        // Retrieve the authenticated user's friend IDs if available
+        $authFriendIdsArray = [];
+        if ($authFriendList && !empty($authFriendList->user_friends_ids)) {
+            $authFriendIdsArray = explode(',', $authFriendList->user_friends_ids);
+        }
+
+        // Retrieve all users associated with this group using pagination
+        $users = $group->user()->paginate($perPage, ['*'], 'page', $page);
+
+        // Iterate over the paginated group members to add the is_friend and friend_request_sent fields
+        $users->getCollection()->transform(function ($user) use ($authFriendIdsArray, $authUserId) {
+            // Check if the authenticated user has sent a friend request to this user
+            $friendRequestExists = FriendRequest::where('sender_id', $authUserId)
+                ->where('receiver_id', $user->user_id)
+                ->exists();
+
+            return [
+                'user_id' => $user->user_id,
+                'user_fname' => $user->user_fname,
+                'user_lname' => $user->user_lname,
+                'profile_picture' => $user->profile_picture,
+                'identifier' => $user->identifier,
+                'is_friend' => in_array($user->user_id, $authFriendIdsArray) ? true : false, // Set is_friend to true if the member is in the auth user's friend list, false otherwise
+                'friend_request_sent' => $friendRequestExists ? true : false, // Set friend_request_sent to true if a friend request has been sent, false otherwise
+            ];
+        });
+
+        // Return the group members as JSON response, including the is_friend and friend_request_sent fields
+        return response()->json($users);
     }
 }

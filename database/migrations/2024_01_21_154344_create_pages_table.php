@@ -24,6 +24,11 @@ return new class extends Migration
             $table->string('page_picture');
             $table->string('page_cover');
             $table->timestamps();
+
+            $table->foreign('page_creator')->references('user_id')->on('users')
+            ->onDelete('cascade')
+            ->onUpdate('cascade');
+
         });
     }
 
