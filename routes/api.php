@@ -402,8 +402,11 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
         //get specific groupdetails 
      //Retrive joined groups(admin)
      Route::get('/groups/joined-admin', [GroupsController::class, 'getGroupsWhereAdmin']);
+    
+         // group suggestions
+         Route::get('/groups/suggestions', [GroupsController::class, 'getGroupSuggestion']);
+    
      //get specific groupdetails 
-
        Route::get('/groupdetails/{id}', [GroupsController::class, 'groupDetails']);
       /* get specific group posts */
       Route::get('/getspecificgroupposts', [GroupsController::class, 'getSpecificGroupPosts']);

@@ -88,7 +88,7 @@ class GroupsController extends Controller
             'group_creator' => $user->user_id,
             'group_admins' => $user->user_id,
             'audience' => $audience,
-            'group_picture' => 'storage/defaultProfile/group.jpg',
+            'group_picture' => 'http://127.0.0.1:8000/storage/mprofile_picture/group.jpg',
             'group_cover' => 'http://127.0.0.1:8000/storage/cover_photo/group.jpg',
 
 
@@ -507,7 +507,62 @@ class GroupsController extends Controller
         ]);
     }
     
+   /*  getGroupSuggestion */
+  
+   public function getGroupSuggestion()
+   {
+       // Get the currently authenticated user
+       $user = auth()->user();
+   
+       // Define the number of items per page
+       $perPage = 9; // Adjust this number as needed
+       $page = request()->input('page', 1); // Get current page from query parameter, default to 1
+   
+       // Retrieve all groups
+       $allGroups = Groups::all(); // Assuming Groups is your model
+   
+       // Retrieve groups the user has joined
+       $joinedGroups = $user->groups()->pluck('groups.group_id'); // Get IDs of groups user is part of
+   
+       // Filter out the groups where the user is an admin
+       $adminGroups = $user->groups()->whereRaw("FIND_IN_SET(?, groups.group_admins)", [$user->user_id])->pluck('groups.group_id'); // Get IDs of groups where user is an admin
+   
+       // Filter groups that the user has not joined and is not an admin
+       $groupsNotJoinedOrAdmin = $allGroups->filter(function ($group) use ($joinedGroups, $adminGroups) {
+           return !$joinedGroups->contains($group->group_id) && !$adminGroups->contains($group->group_id);
+       });
+   
+       // Calculate the total number of pages
+       $totalItems = $groupsNotJoinedOrAdmin->count();
+       $totalPages = ceil($totalItems / $perPage);
+   
+       // Slice the filtered results for pagination
+       $pagedGroups = $groupsNotJoinedOrAdmin->slice(($page - 1) * $perPage, $perPage)->values();
+   
+       // Map to select only the desired fields
+       $groupsArray = $pagedGroups->map(function ($group) {
+           return [
+               'group_name' => $group->group_name,
+               'group_id' => $group->group_id,
+               'identifier' => $group->identifier,
+               'group_cover' => $group->group_cover,
+               'group_picture' => $group->group_picture,
+               'audience' => $group->audience,
+           ];
+       });
+   
+       // Return the filtered list of groups as an array with pagination metadata
+       return response()->json([
+           'data' => $groupsArray,
+           'current_page' => (int)$page,
+           'per_page' => $perPage,
+           'total' => $totalItems,
+           'total_pages' => $totalPages
+       ]);
+   }
+   
 
+    
 
 
     
