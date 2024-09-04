@@ -689,4 +689,27 @@ class GroupsController extends Controller
         // Return the group members as JSON response, including the is_friend and friend_request_sent fields
         return response()->json($users);
     }
+
+
+    /* get posts where group_id is not null */
+    public function getRandomGroupPosts(Request $request)
+    {
+        $user = auth()->user();
+        $perPage = $request->query('per_page', 5);
+        $page = $request->query('page', 1);
+    
+        // Fetch posts where group_id is not null
+        $posts = Posts::whereNotNull('group_id')
+            ->with([
+                'author:user_id,user_lname,user_fname,profile_picture,identifier',
+                'textPost',
+                'imagePost',
+                'group:group_id,group_name,group_picture' // Only select group_id and group_picture from the group table
+            ])
+            ->paginate($perPage, ['*'], 'page', $page);
+    
+        return response()->json($posts);
+    }
+    
+
 }

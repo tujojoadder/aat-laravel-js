@@ -414,7 +414,8 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        Route::get('/getspecificgroupphotos', [GroupsController::class, 'getSpecificGroupPhotos']);
        //get specific group photo
        Route::get('/getspecificgroupmember', [GroupsController::class, 'gettAllGroupMember']);
-
+       //get random group Post
+       Route::get('/group/randomposts', [GroupsController::class, 'getRandomGroupPosts']);
 
 
 

@@ -54,6 +54,11 @@ class Posts extends Model
         return $this->morphMany(Likes::class, 'like_on');
     }
 
+// Define the relationship to the Groups model
+public function group()
+{
+    return $this->belongsTo(Groups::class, 'group_id', 'group_id');
+}
 
 
 
