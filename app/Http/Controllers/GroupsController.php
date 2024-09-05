@@ -339,6 +339,9 @@ class GroupsController extends Controller
         return response()->json(['group' => $group->group_id, 'posts' => $formattedPosts]);
     }
 
+
+    
+
     // Update Group name
     public function updateGroupName($groupId, Request $request)
     {
@@ -371,6 +374,13 @@ class GroupsController extends Controller
         $group->update(['group_name' => $name]);
         return response()->json(['message' => 'Group name updated successfully']);
     }
+
+
+
+
+
+
+
 
     //Update group details
     public function updateGroupDetails($groupId, Request $request)

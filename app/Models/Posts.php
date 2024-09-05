@@ -23,7 +23,8 @@ class Posts extends Model
          'timeline_ids',
          'audience',
          'post_type',
-         'iaccount_id'
+         'iaccount_id',
+         'approval'
      ];
      public function comments()
      {

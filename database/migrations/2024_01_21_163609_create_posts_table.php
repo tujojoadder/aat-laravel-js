@@ -24,6 +24,7 @@ return new class extends Migration
             $table->enum('audience', ['public', 'private','only_me']);
             $table->integer('reported_count')->default(0);
             $table->string('post_type')->default('general');
+            $table->string('approval')->nullable();//(pending,accepted)
             $table->timestamps();
 
             $table->foreign('author_id')->references('user_id')->on('users')
