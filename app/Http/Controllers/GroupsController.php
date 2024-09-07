@@ -476,7 +476,7 @@ class GroupsController extends Controller
         $user = auth()->user();
     
         // Define the number of items per page
-        $perPage = 3; // Adjust this number as needed
+        $perPage = 9; // Adjust this number as needed
         $page = request()->input('page', 1); // Get current page from query parameter, default to 1
     
         // Retrieve all groups that the user has joined
