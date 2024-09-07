@@ -416,7 +416,8 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        Route::get('/getspecificgroupmember', [GroupsController::class, 'gettAllGroupMember']);
        //get random group Post
        Route::get('/group/randomposts', [GroupsController::class, 'getRandomGroupPosts']);
-
+       //get combine group
+       Route::get('/combined-groups', [GroupsController::class, 'getCombinedGroups']);
 
 
 
