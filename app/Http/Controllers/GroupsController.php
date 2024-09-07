@@ -470,79 +470,33 @@ class GroupsController extends Controller
 
 
  /*    Groups that auth user are admin */
- public function getGroupsWhereAdmin()
- {
-     // Get the currently authenticated user
-     $user = auth()->user();
- 
-     // Retrieve all groups that the user has joined
-     $joinedGroups = $user->groups()->get(); // Retrieve all groups
- 
-     // Filter out the groups where the user is an admin
-     $groupsWhereAdmin = $joinedGroups->filter(function ($group) use ($user) {
-         // Check if the user is listed in the group_admins field
-         return str_contains($group->group_admins, $user->user_id);
-     });
- 
-     // Map to select only the desired fields
-     $groupsArray = $groupsWhereAdmin->map(function ($group) {
-         return [
-             'group_name' => $group->group_name,
-             'group_id' => $group->group_id,
-             'identifier' => $group->identifier,
-             'group_cover' => $group->group_cover,
-             'group_picture' => $group->group_picture,
-             'audience' => $group->audience,
-         ];
-     });
- 
-     // Return the filtered list of groups
-     return response()->json($groupsArray);
- }
- 
-    /* getCombinedGroups */
-    public function getCombinedGroups()
-{
-    // Get the currently authenticated user
-    $user = auth()->user();
-
-    // Define the number of items per page
-    $perPage = 9; // Adjust this number as needed
-    $page = request()->input('page', 1); // Get current page from query parameter, default to 1
-
-    // Retrieve all groups that the user has joined
-    $joinedGroups = $user->groups()->get(); // Retrieve all groups
-
-    // Separate admin and non-admin groups
-    $groupsWhereAdmin = $joinedGroups->filter(function ($group) use ($user) {
-        return str_contains($group->group_admins, $user->user_id);
-    });
-
-    $groupsNotAdmin = $joinedGroups->filter(function ($group) use ($user) {
-        return !str_contains($group->group_admins, $user->user_id);
-    });
-
-    // Pagination
-    $totalAdminItems = $groupsWhereAdmin->count();
-    $totalNotAdminItems = $groupsNotAdmin->count();
-
-    // Slice the filtered results for pagination
-    $pagedAdminGroups = $groupsWhereAdmin->slice(($page - 1) * $perPage, $perPage)->values();
-    $pagedNotAdminGroups = $groupsNotAdmin->slice(($page - 1) * $perPage, $perPage)->values();
-
-    // Combine and map to select only the desired fields
-    $combinedGroups = $pagedAdminGroups->map(function ($group) {
-        return [
-            'group_name' => $group->group_name,
-            'group_id' => $group->group_id,
-            'identifier' => $group->identifier,
-            'group_cover' => $group->group_cover,
-            'group_picture' => $group->group_picture,
-            'audience' => $group->audience,
-            'type' => 'admin'
-        ];
-    })->merge(
-        $pagedNotAdminGroups->map(function ($group) {
+    public function getGroupsWhereAdmin()
+    {
+        // Get the currently authenticated user
+        $user = auth()->user();
+    
+        // Define the number of items per page
+        $perPage = 9; // Adjust this number as needed
+        $page = request()->input('page', 1); // Get current page from query parameter, default to 1
+    
+        // Retrieve all groups that the user has joined
+        $joinedGroups = $user->groups()->get(); // Retrieve all groups
+    
+        // Filter out the groups where the user is an admin
+        $groupsWhereAdmin = $joinedGroups->filter(function ($group) use ($user) {
+            // Check if the user is listed in the group_admins field
+            return str_contains($group->group_admins, $user->user_id);
+        });
+    
+        // Calculate the total number of pages
+        $totalItems = $groupsWhereAdmin->count();
+        $totalPages = ceil($totalItems / $perPage);
+    
+        // Slice the filtered results for pagination
+        $pagedGroups = $groupsWhereAdmin->slice(($page - 1) * $perPage, $perPage)->values();
+    
+        // Map to select only the desired fields
+        $groupsArray = $pagedGroups->map(function ($group) {
             return [
                 'group_name' => $group->group_name,
                 'group_id' => $group->group_id,
@@ -550,25 +504,19 @@ class GroupsController extends Controller
                 'group_cover' => $group->group_cover,
                 'group_picture' => $group->group_picture,
                 'audience' => $group->audience,
-                'type' => 'joined'
             ];
-        })
-    );
-
-    // Calculate total pages
-    $totalItems = $totalAdminItems + $totalNotAdminItems;
-    $totalPages = ceil($totalItems / $perPage);
-
-    // Return the combined list of groups as an array with pagination metadata
-    return response()->json([
-        'data' => $combinedGroups,
-        'current_page' => (int)$page,
-        'per_page' => $perPage,
-        'total' => $totalItems,
-        'total_pages' => $totalPages
-    ]);
-}
-
+        });
+    
+        // Return the filtered list of groups as an array with pagination metadata
+        return response()->json([
+            'data' => $groupsArray,
+            'current_page' => (int)$page,
+            'per_page' => $perPage,
+            'total' => $totalItems,
+            'total_pages' => $totalPages
+        ]);
+    }
+    
    /*  getGroupSuggestion */
   
    public function getGroupSuggestion()
