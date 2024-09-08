@@ -377,7 +377,7 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        Route::post('group/addmember/{groupId}/{newMember}', [GroupsController::class, 'addMember'])
               ->name('addMember.group');
        // Set new admins group(the new admin have to member of the group)
-       Route::post('group/addadmin/{groupId}/{newAdmin}', [GroupsController::class, 'addAdmin'])
+       Route::post('groups/{groupId}/add-admin/{newAdmin}', [GroupsController::class, 'addAdmin'])
               ->name('addAdmin.group');
        // send request to join group
        Route::post('group/joinrequest/{groupId}', [GroupJoinRequestController::class, 'send_groupjoin_request'])
@@ -412,8 +412,12 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
       Route::get('/getspecificgroupposts', [GroupsController::class, 'getSpecificGroupPosts']);
        //get specific group photo
        Route::get('/getspecificgroupphotos', [GroupsController::class, 'getSpecificGroupPhotos']);
-       //get specific group photo
+       //get specific group member
        Route::get('/getspecificgroupmember', [GroupsController::class, 'gettAllGroupMember']);
+          //get specific group  for manage
+          Route::get('/getspecificgroupmembermanage', [GroupsController::class, 'gettAllGroupMemberManage']);
+      
+      
        //get random group Post
        Route::get('/group/randomposts', [GroupsController::class, 'getRandomGroupPosts']);
        //get combine group

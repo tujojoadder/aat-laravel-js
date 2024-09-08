@@ -182,13 +182,7 @@ class GroupsController extends Controller
     public function addAdmin(Request $request, $groupId, $newMember)
     {
         $user = auth()->user();
-        $request->merge(['groupId' => $groupId]);
-        $request->merge(['newMember' => $newMember]);
-        // Validate input parameters
-        $this->validate($request, [
-            'groupId' => 'required|string|max:50',
-            'newMember' => 'required|string|max:50',
-        ]);
+
         $groupId = cleanInput($groupId);
         $newMember = cleanInput($newMember);
         $isnewMember = User::find($newMember);
@@ -699,6 +693,58 @@ class GroupsController extends Controller
         // Return the group members as JSON response, including the is_friend and friend_request_sent fields
         return response()->json($users);
     }
+
+    public function gettAllGroupMemberManage(Request $request)
+    {
+        // Clean and get the group ID from the request query
+        $groupId = cleanInput($request->query('id'));
+    
+        // Find the group using the group_id
+        $group = Groups::where('group_id', $groupId)->first();
+    
+        // Check if group exists
+        if (!$group) {
+            return response()->json(['error' => 'Group not found.'], 404);
+        }
+    
+        // Group creator ID
+        $groupCreatorId = $group->group_creator;
+    
+        // Define the number of members per page
+        $perPage = $request->query('per_page', 10);
+        $page = $request->query('page', 1);
+    
+        // Get the list of admin IDs for the group
+        $adminIds = explode(',', $group->group_admins);
+    
+        // Retrieve all users associated with this group using pagination
+        $users = $group->user()->paginate($perPage, ['*'], 'page', $page);
+    
+        // Get the authenticated user's ID
+        $authUserId = auth()->user()->user_id;
+    
+        // Iterate over the paginated group members to add the isAdmin, isCreator, and isAuth fields
+        $users->getCollection()->transform(function ($user) use ($adminIds,$groupId, $groupCreatorId, $authUserId) {
+            return [
+                'group_id'=>$groupId,
+                'user_id' => $user->user_id,
+                'user_fname' => $user->user_fname,
+                'user_lname' => $user->user_lname,
+                'profile_picture' => $user->profile_picture,
+                'identifier' => $user->identifier,
+                'isAdmin' => in_array($user->user_id, $adminIds) ? true : false, // Set isAdmin to true if the member is an admin, false otherwise
+                'isCreator' => $user->user_id == $groupCreatorId ? true : false, // Set isCreator to true if the member is the group creator, false otherwise
+                'isAuth' => $user->user_id == $authUserId ? true : false, // Set isAuth to true if the member is the authenticated user, false otherwise
+            ];
+        });
+    
+        // Return the group members as a JSON response, including the isAdmin, isCreator, and isAuth fields
+        return response()->json($users);
+    }
+    
+
+
+
 
 
     /* get posts where group_id is not null */
