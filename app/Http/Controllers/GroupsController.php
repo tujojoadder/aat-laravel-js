@@ -177,70 +177,7 @@ class GroupsController extends Controller
         }
     }
 
-    //Set other member admin to group
-
-    public function addAdmin(Request $request, $groupId, $newMember)
-    {
-        $user = auth()->user();
-
-        $groupId = cleanInput($groupId);
-        $newMember = cleanInput($newMember);
-        $isnewMember = User::find($newMember);
-        if (!$isnewMember) {
-            return response([
-                'message' => 'New Member Id not founded'
-            ]);
-        }
-
-        // Your existing logic for checking if the user is an admin and if the new member is valid
-        $group = Groups::where('group_id', $groupId)->first();
-
-        if ($group) {
-            $admin = $group->group_admins;
-            if (!Str::contains($admin, $user->user_id)) {
-                return response([
-                    'message' => 'You are not admin'
-                ]);
-            } else {
-
-                if (Str::contains($admin, $newMember)) {
-                    return response([
-                        'message' => 'User is already an admin of this group.'
-                    ], 422); // HTTP 422 Unprocessable Entity
-                } else {
-                    $newmemberId = User::where('user_id', $newMember)->first();
-                    if ($newmemberId->groups->contains($groupId)) {
-                        $admin_list = explode(',', $admin); // Split the string into an array
-
-                        $number_of_admins = count($admin_list);
-
-                        if ($number_of_admins < 30) {
-                            // Update the admin column with the concatenated value
-                            $newAdminValue = $admin . ',' . $newMember;
-                            $group->update(['group_admins' => $newAdminValue]);
-
-                            return response([
-                                'message' => 'Admin updated successfully.'
-                            ]);
-                        } else {
-                            return response([
-                                'message' => 'There can be maximum 50 admins for group'
-                            ]);
-                        }
-                    } else {
-                        return response([
-                            'message' => 'The user is not member of this group'
-                        ]);
-                    }
-                }
-            }
-        } else {
-            return response([
-                'message' => 'Group not found'
-            ]);
-        }
-    }
-
+    
     //Retrive Group Members
     public function getGroupMembers($groupId)
     {
@@ -767,5 +704,163 @@ class GroupsController extends Controller
         return response()->json($posts);
     }
     
+
+
+
+
+
+
+
+
+
+
+//Both(public/private)Set other member admin to group
+
+    public function addAdmin(Request $request, $groupId, $newMember)
+    {
+        $user = auth()->user();
+
+        $groupId = cleanInput($groupId);
+        $newMember = cleanInput($newMember);
+        $isnewMember = User::find($newMember);
+        if (!$isnewMember) {
+            return response([
+                'message' => 'New Member Id not founded'
+            ]);
+        }
+
+        // Your existing logic for checking if the user is an admin and if the new member is valid
+        $group = Groups::where('group_id', $groupId)->first();
+
+        if ($group) {
+            $admin = $group->group_admins;
+            if (!Str::contains($admin, $user->user_id)) {
+                return response([
+                    'message' => 'You are not admin'
+                ]);
+            } else {
+
+                if (Str::contains($admin, $newMember)) {
+                    return response([
+                        'message' => 'User is already an admin of this group.'
+                    ], 422); // HTTP 422 Unprocessable Entity
+                } else {
+                    $newmemberId = User::where('user_id', $newMember)->first();
+                    if ($newmemberId->groups->contains($groupId)) {
+                        $admin_list = explode(',', $admin); // Split the string into an array
+
+                        $number_of_admins = count($admin_list);
+
+                        if ($number_of_admins < 30) {
+                            // Update the admin column with the concatenated value
+                            $newAdminValue = $admin . ',' . $newMember;
+                            $group->update(['group_admins' => $newAdminValue]);
+
+                            return response([
+                                'message' => 'Admin updated successfully.'
+                            ]);
+                        } else {
+                            return response([
+                                'message' => 'There can be maximum 50 admins for group'
+                            ]);
+                        }
+                    } else {
+                        return response([
+                            'message' => 'The user is not member of this group'
+                        ]);
+                    }
+                }
+            }
+        } else {
+            return response([
+                'message' => 'Group not found'
+            ]);
+        }
+    }
+
+
+
+    //Both(public/private) Remove from group
+    public function kickOutUser(Request $request, $groupId, $memberId)
+    {
+        $user = auth()->user(); // The authenticated user (the one performing the action)
+    
+        // Clean the input
+        $groupId = cleanInput($groupId);
+        $memberId = cleanInput($memberId);
+    
+        // Find the group
+        $group = Groups::where('group_id', $groupId)->first();
+    
+        if (!$group) {
+            return response()->json(['message' => 'Group not found'], 404);
+        }
+    
+        // Check if the authenticated user is an admin of the group
+        $adminList = explode(',', $group->group_admins);
+    
+        if (!in_array($user->user_id, $adminList)) {
+            return response()->json(['message' => 'You are not an admin of this group'], 403); // HTTP 403 Forbidden
+        }
+    
+        // Check if the user being kicked is the group creator
+        if ($group->group_creator === $memberId) {
+            return response()->json(['message' => 'You cannot kick out the group creator'], 403);
+        }
+    
+        // Check if the user to be kicked is a member of the group
+        $userInGroup = UsersHasGroups::where('group_id', $groupId)
+            ->where('user_id', $memberId)
+            ->first();
+    
+        if (!$userInGroup) {
+            return response()->json(['message' => 'User is not a member of this group'], 404);
+        }
+    
+        // Begin transaction
+        DB::beginTransaction();
+    
+        try {
+            // Remove the user from the group
+             // Remove the user from the group
+        UsersHasGroups::where('group_id', $groupId)
+        ->where('user_id', $memberId)
+        ->delete();
+    
+            // If the user is an admin, remove them from the admin list
+            if (in_array($memberId, $adminList)) {
+                $adminList = array_filter(explode(',', $group->group_admins)); // Filter out empty values
+                $adminList = array_diff($adminList, [$memberId]); // Remove the user from the admin list
+                $group->group_admins = implode(',', $adminList); // Update the admin list in the group
+                $group->save();
+            }
+    
+            // Commit the transaction
+            DB::commit();
+    
+            return response()->json(['message' => 'User has been kicked out successfully'], 200);
+        } catch (\Exception $e) {
+            // Rollback the transaction if something goes wrong
+            DB::rollBack();
+    
+            // Log detailed error information
+            Log::error('Error in kickOutUser: ', ['error' => $e->getMessage()]);
+    
+            return response()->json(['message' => 'Failed to kick out the user', 'error' => $e->getMessage()], 500);
+        }
+
+
+
+
+
+        
+    }
+    
+
+    
+
+
+
+
 
 }

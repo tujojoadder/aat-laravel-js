@@ -376,9 +376,16 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        // Add any user to group
        Route::post('group/addmember/{groupId}/{newMember}', [GroupsController::class, 'addMember'])
               ->name('addMember.group');
-       // Set new admins group(the new admin have to member of the group)
+       //(Both-->public/private) Set new admins group(the new admin have to member of the group)
        Route::post('groups/{groupId}/add-admin/{newAdmin}', [GroupsController::class, 'addAdmin'])
               ->name('addAdmin.group');
+
+    //(Both-->public/private) remove user from group
+    
+    Route::delete('/groups/{groupId}/kick-out-member/{memberId}', [GroupsController::class, 'kickOutUser']);
+
+
+
        // send request to join group
        Route::post('group/joinrequest/{groupId}', [GroupJoinRequestController::class, 'send_groupjoin_request'])
               ->name('joinrequest.group');
