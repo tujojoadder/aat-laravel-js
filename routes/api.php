@@ -406,9 +406,18 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
               ->name('upadte.details.group');
         //Retrive joined groups(Not admin)
         Route::get('/groups/joined-not-admin', [GroupsController::class, 'getJoinedGroupsButNotAdmin']);
+       //right -->Retrive joined groups(Not admin)
+       Route::get('/groups/joined-not-admin-right', [GroupsController::class, 'getJoinedGroupsButNotAdminRight']);
+       
+       // Route to join a public group
+      Route::post('groups/join/{groupId}', [GroupsController::class, 'joinPublicGroup'])->name('groups.join');
+
+        // Route to leave a group
+       Route::post('groups/leave/{groupId}', [GroupsController::class, 'leaveGroup'])->name('groups.leave');
+       
         //get specific groupdetails 
-     //Retrive joined groups(admin)
-     Route::get('/groups/joined-admin', [GroupsController::class, 'getGroupsWhereAdmin']);
+      //Retrive joined groups(admin)
+      Route::get('/groups/joined-admin', [GroupsController::class, 'getGroupsWhereAdmin']);
     
          // group suggestions
          Route::get('/groups/suggestions', [GroupsController::class, 'getGroupSuggestion']);
