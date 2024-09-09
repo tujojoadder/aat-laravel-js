@@ -17,8 +17,7 @@ return new class extends Migration
             $table->string('group_request_id')->primary();
             $table->string('sender_id');
             $table->string('group_id');
-            $table->enum('status', ['pending', 'accepted', 'rejected'])->default('pending');
-
+          
             $table->timestamps();
             $table->foreign('sender_id')->references('user_id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('group_id')->references('group_id')->on('groups')->onDelete('cascade')->onUpdate('cascade');

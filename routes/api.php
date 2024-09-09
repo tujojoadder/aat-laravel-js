@@ -430,10 +430,25 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        Route::get('/getspecificgroupphotos', [GroupsController::class, 'getSpecificGroupPhotos']);
        //get specific group member
        Route::get('/getspecificgroupmember', [GroupsController::class, 'gettAllGroupMember']);
-          //get specific group  for manage
-          Route::get('/getspecificgroupmembermanage', [GroupsController::class, 'gettAllGroupMemberManage']);
-      
-      
+       //get specific group  for manage
+       Route::get('/getspecificgroupmembermanage', [GroupsController::class, 'gettAllGroupMemberManage']);
+          
+       /* private group join request */
+       Route::post('/groups/join-request-private/{groupId}', [GroupsController::class, 'joinRequestPrivateGroup']);
+      /* private group join request */
+        Route::delete('/groups/cancel-join-request/{groupId}', [GroupsController::class, 'cancelJoinRequest']);
+        /*     get join request for specific group */
+        Route::get('group/join-requests', [GroupsController::class, 'getUsersWithJoinRequests']);
+
+      // Manage join group request(add,cancel)
+      Route::post('managejoingrouprequest', [GroupsController::class, 'manageJoinGroupRequest']);
+
+
+
+
+
+
+
        //get random group Post
        Route::get('/group/randomposts', [GroupsController::class, 'getRandomGroupPosts']);
        //get combine group

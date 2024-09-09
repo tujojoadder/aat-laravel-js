@@ -20,7 +20,7 @@ class GroupJoinRequest extends Model
         'group_request_id',
         'sender_id',
         'group_id',
-        'status',
+     
 
     ];
     /**

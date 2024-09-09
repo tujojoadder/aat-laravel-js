@@ -177,7 +177,7 @@ class GroupsController extends Controller
         }
     }
 
-    
+
     //Retrive Group Members
     public function getGroupMembers($groupId)
     {
@@ -271,7 +271,7 @@ class GroupsController extends Controller
     }
 
 
-    
+
 
     // Update Group name
     public function updateGroupName($groupId, Request $request)
@@ -351,32 +351,32 @@ class GroupsController extends Controller
 
 
 
- /*    Groups that auth user are not admin */
+    /*    Groups that auth user are not admin */
     public function getJoinedGroupsButNotAdmin()
     {
         // Get the currently authenticated user
         $user = auth()->user();
-    
+
         // Define the number of items per page
         $perPage = 9; // Adjust this number as needed
         $page = request()->input('page', 1); // Get current page from query parameter, default to 1
-    
+
         // Retrieve all groups that the user has joined
         $joinedGroups = $user->groups()->get(); // Retrieve all groups
-    
+
         // Filter out the groups where the user is an admin
         $groupsNotAdmin = $joinedGroups->filter(function ($group) use ($user) {
             // Check if the user is not listed in the group_admins field
             return !str_contains($group->group_admins, $user->user_id);
         });
-    
+
         // Calculate the total number of pages
         $totalItems = $groupsNotAdmin->count();
         $totalPages = ceil($totalItems / $perPage);
-    
+
         // Slice the filtered results for pagination
         $pagedGroups = $groupsNotAdmin->slice(($page - 1) * $perPage, $perPage)->values();
-    
+
         // Map to select only the desired fields
         $groupsArray = $pagedGroups->map(function ($group) {
             return [
@@ -388,7 +388,7 @@ class GroupsController extends Controller
                 'audience' => $group->audience,
             ];
         });
-    
+
         // Return the filtered list of groups as an array with pagination metadata
         return response()->json([
             'data' => $groupsArray,
@@ -403,27 +403,27 @@ class GroupsController extends Controller
     {
         // Get the currently authenticated user
         $user = auth()->user();
-    
+
         // Define the number of items per page
         $perPage = 9; // Adjust this number as needed
         $page = request()->input('page', 1); // Get current page from query parameter, default to 1
-    
+
         // Retrieve all groups that the user has joined
         $joinedGroups = $user->groups()->get(); // Retrieve all groups
-    
+
         // Filter out the groups where the user is an admin
         $groupsNotAdmin = $joinedGroups->filter(function ($group) use ($user) {
             // Check if the user is not listed in the group_admins field
             return !str_contains($group->group_admins, $user->user_id);
         });
-    
+
         // Calculate the total number of pages
         $totalItems = $groupsNotAdmin->count();
         $totalPages = ceil($totalItems / $perPage);
-    
+
         // Slice the filtered results for pagination
         $pagedGroups = $groupsNotAdmin->slice(($page - 1) * $perPage, $perPage)->values();
-    
+
         // Map to select only the desired fields
         $groupsArray = $pagedGroups->map(function ($group) {
             return [
@@ -435,7 +435,7 @@ class GroupsController extends Controller
                 'audience' => $group->audience,
             ];
         });
-    
+
         // Return the filtered list of groups as an array with pagination metadata
         return response()->json([
             'data' => $groupsArray,
@@ -447,32 +447,32 @@ class GroupsController extends Controller
     }
 
 
- /*    Groups that auth user are admin */
+    /*    Groups that auth user are admin */
     public function getGroupsWhereAdmin()
     {
         // Get the currently authenticated user
         $user = auth()->user();
-    
+
         // Define the number of items per page
         $perPage = 4; // Adjust this number as needed
         $page = request()->input('page', 1); // Get current page from query parameter, default to 1
-    
+
         // Retrieve all groups that the user has joined
         $joinedGroups = $user->groups()->get(); // Retrieve all groups
-    
+
         // Filter out the groups where the user is an admin
         $groupsWhereAdmin = $joinedGroups->filter(function ($group) use ($user) {
             // Check if the user is listed in the group_admins field
             return str_contains($group->group_admins, $user->user_id);
         });
-    
+
         // Calculate the total number of pages
         $totalItems = $groupsWhereAdmin->count();
         $totalPages = ceil($totalItems / $perPage);
-    
+
         // Slice the filtered results for pagination
         $pagedGroups = $groupsWhereAdmin->slice(($page - 1) * $perPage, $perPage)->values();
-    
+
         // Map to select only the desired fields
         $groupsArray = $pagedGroups->map(function ($group) {
             return [
@@ -484,7 +484,7 @@ class GroupsController extends Controller
                 'audience' => $group->audience,
             ];
         });
-    
+
         // Return the filtered list of groups as an array with pagination metadata
         return response()->json([
             'data' => $groupsArray,
@@ -494,99 +494,109 @@ class GroupsController extends Controller
             'total_pages' => $totalPages
         ]);
     }
-    
-   /*  getGroupSuggestion */
-  
-   public function getGroupSuggestion()
-   {
-       // Get the currently authenticated user
-       $user = auth()->user();
-   
-       // Define the number of items per page
-       $perPage = 9; // Adjust this number as needed
-       $page = request()->input('page', 1); // Get current page from query parameter, default to 1
-   
-       // Retrieve all groups
-       $allGroups = Groups::all(); // Assuming Groups is your model
-   
-       // Retrieve groups the user has joined
-       $joinedGroups = $user->groups()->pluck('groups.group_id'); // Get IDs of groups user is part of
-   
-       // Filter out the groups where the user is an admin
-       $adminGroups = $user->groups()->whereRaw("FIND_IN_SET(?, groups.group_admins)", [$user->user_id])->pluck('groups.group_id'); // Get IDs of groups where user is an admin
-   
-       // Filter groups that the user has not joined and is not an admin
-       $groupsNotJoinedOrAdmin = $allGroups->filter(function ($group) use ($joinedGroups, $adminGroups) {
-           return !$joinedGroups->contains($group->group_id) && !$adminGroups->contains($group->group_id);
-       });
-   
-       // Calculate the total number of pages
-       $totalItems = $groupsNotJoinedOrAdmin->count();
-       $totalPages = ceil($totalItems / $perPage);
-   
-       // Slice the filtered results for pagination
-       $pagedGroups = $groupsNotJoinedOrAdmin->slice(($page - 1) * $perPage, $perPage)->values();
-   
-       // Map to select only the desired fields
-       $groupsArray = $pagedGroups->map(function ($group) {
-           return [
-               'group_name' => $group->group_name,
-               'group_id' => $group->group_id,
-               'identifier' => $group->identifier,
-               'group_cover' => $group->group_cover,
-               'group_picture' => $group->group_picture,
-               'audience' => $group->audience,
-           ];
-       });
-   
-       // Return the filtered list of groups as an array with pagination metadata
-       return response()->json([
-           'data' => $groupsArray,
-           'current_page' => (int)$page,
-           'per_page' => $perPage,
-           'total' => $totalItems,
-           'total_pages' => $totalPages
-       ]);
-   }
-   
 
-    
+    /*  getGroupSuggestion */
+
+    public function getGroupSuggestion()
+    {
+        // Get the currently authenticated user
+        $user = auth()->user();
+
+        // Define the number of items per page
+        $perPage = 9; // Adjust this number as needed
+        $page = request()->input('page', 1); // Get current page from query parameter, default to 1
+
+        // Retrieve all groups
+        $allGroups = Groups::all(); // Assuming Groups is your model
+
+        // Retrieve groups the user has joined
+        $joinedGroups = $user->groups()->pluck('groups.group_id'); // Get IDs of groups user is part of
+
+        // Filter out the groups where the user is an admin
+        $adminGroups = $user->groups()->whereRaw("FIND_IN_SET(?, groups.group_admins)", [$user->user_id])->pluck('groups.group_id'); // Get IDs of groups where user is an admin
+
+        // Filter groups that the user has not joined and is not an admin
+        $groupsNotJoinedOrAdmin = $allGroups->filter(function ($group) use ($joinedGroups, $adminGroups) {
+            return !$joinedGroups->contains($group->group_id) && !$adminGroups->contains($group->group_id);
+        });
+
+        // Calculate the total number of pages
+        $totalItems = $groupsNotJoinedOrAdmin->count();
+        $totalPages = ceil($totalItems / $perPage);
+
+        // Slice the filtered results for pagination
+        $pagedGroups = $groupsNotJoinedOrAdmin->slice(($page - 1) * $perPage, $perPage)->values();
+
+        // Map to select only the desired fields
+        $groupsArray = $pagedGroups->map(function ($group) {
+            return [
+                'group_name' => $group->group_name,
+                'group_id' => $group->group_id,
+                'identifier' => $group->identifier,
+                'group_cover' => $group->group_cover,
+                'group_picture' => $group->group_picture,
+                'audience' => $group->audience,
+            ];
+        });
+
+        // Return the filtered list of groups as an array with pagination metadata
+        return response()->json([
+            'data' => $groupsArray,
+            'current_page' => (int)$page,
+            'per_page' => $perPage,
+            'total' => $totalItems,
+            'total_pages' => $totalPages
+        ]);
+    }
 
 
-    
+
+
+
+
 
     //get specific groupdetails
     public function groupDetails(Request $request)
-{
-    // Get Authenticated user
-    $user = auth()->user();
-    $userId = $user->user_id;
-    
-    // Find the group by ID
-    $group = Groups::where('group_id', $request->id)->first();
-    
-    // Initialize variables
-    $isAdmin = false;
-    $joinStatus = false;
-    
-    // Check if the group exists
-    if ($group) {
-        // Check if the authenticated user is an admin of the group
-        $isAdmin = str_contains($group->group_admins, $userId);
+    {
+        // Get Authenticated user
+        $user = auth()->user();
+        $userId = $user->user_id;
 
-        // Check if the authenticated user is a member of the group
-        $joinStatus = UsersHasGroups::where('user_id', $userId)
-                                    ->where('group_id', $request->id)
-                                    ->exists();
+        // Find the group by ID
+        $group = Groups::where('group_id', $request->id)->first();
+
+        // Initialize variables
+        $isAdmin = false;
+        $joinStatus = false;
+        $isRequest = false;
+
+        // Check if the group exists
+        if ($group) {
+            // Check if the authenticated user is an admin of the group
+            $isAdmin = str_contains($group->group_admins, $userId);
+
+            // Check if the authenticated user is a member of the group
+            $joinStatus = UsersHasGroups::where('user_id', $userId)
+                ->where('group_id', $request->id)
+                ->exists();
+
+            // Check if the authenticated user has a pending join request
+            $joinRequest = GroupJoinRequest::where('sender_id', $userId)
+                ->where('group_id', $request->id)
+                ->first();
+
+            // If a join request exists, set isRequest to true
+            $isRequest = $joinRequest ? true : false;
+        }
+
+        // Add isAdmin, joinStatus, and isRequest to the group data
+        $groupData = $group ? $group->toArray() : [];
+        $groupData['isAdmin'] = $isAdmin; // Add isAdmin flag
+        $groupData['joinStatus'] = $joinStatus; // Add joinStatus flag
+        $groupData['isRequest'] = $isRequest; // Add isRequest flag
+
+        return response()->json(['data' => $groupData]);
     }
-    
-    // Add isAdmin and joinStatus to the group data
-    $groupData = $group->toArray(); // Convert group model to array
-    $groupData['isAdmin'] = $isAdmin; // Add isAdmin flag
-    $groupData['joinStatus'] = $joinStatus; // Add joinStatus flag
-    
-    return response()->json(['data' => $groupData]);
-}
 
 
 
@@ -594,7 +604,8 @@ class GroupsController extends Controller
 
 
 
-    
+
+
     /* get for specific group posts  */
     public function getSpecificGroupPosts(Request $request)
     {
@@ -691,35 +702,35 @@ class GroupsController extends Controller
     {
         // Clean and get the group ID from the request query
         $groupId = cleanInput($request->query('id'));
-    
+
         // Find the group using the group_id
         $group = Groups::where('group_id', $groupId)->first();
-    
+
         // Check if group exists
         if (!$group) {
             return response()->json(['error' => 'Group not found.'], 404);
         }
-    
+
         // Group creator ID
         $groupCreatorId = $group->group_creator;
-    
+
         // Define the number of members per page
         $perPage = $request->query('per_page', 10);
         $page = $request->query('page', 1);
-    
+
         // Get the list of admin IDs for the group
         $adminIds = explode(',', $group->group_admins);
-    
+
         // Retrieve all users associated with this group using pagination
         $users = $group->user()->paginate($perPage, ['*'], 'page', $page);
-    
+
         // Get the authenticated user's ID
         $authUserId = auth()->user()->user_id;
-    
+
         // Iterate over the paginated group members to add the isAdmin, isCreator, and isAuth fields
-        $users->getCollection()->transform(function ($user) use ($adminIds,$groupId, $groupCreatorId, $authUserId) {
+        $users->getCollection()->transform(function ($user) use ($adminIds, $groupId, $groupCreatorId, $authUserId) {
             return [
-                'group_id'=>$groupId,
+                'group_id' => $groupId,
                 'user_id' => $user->user_id,
                 'user_fname' => $user->user_fname,
                 'user_lname' => $user->user_lname,
@@ -730,11 +741,11 @@ class GroupsController extends Controller
                 'isAuth' => $user->user_id == $authUserId ? true : false, // Set isAuth to true if the member is the authenticated user, false otherwise
             ];
         });
-    
+
         // Return the group members as a JSON response, including the isAdmin, isCreator, and isAuth fields
         return response()->json($users);
     }
-    
+
 
 
 
@@ -746,7 +757,7 @@ class GroupsController extends Controller
         $user = auth()->user();
         $perPage = $request->query('per_page', 5);
         $page = $request->query('page', 1);
-    
+
         // Fetch posts where group_id is not null
         $posts = Posts::whereNotNull('group_id')
             ->with([
@@ -756,10 +767,9 @@ class GroupsController extends Controller
                 'group:group_id,group_name,group_picture' // Only select group_id and group_picture from the group table
             ])
             ->paginate($perPage, ['*'], 'page', $page);
-    
+
         return response()->json($posts);
     }
-    
 
 
 
@@ -770,7 +780,8 @@ class GroupsController extends Controller
 
 
 
-//Both(public/private)Set other member admin to group
+
+    //Both(public/private)Set other member admin to group
 
     public function addAdmin(Request $request, $groupId, $newMember)
     {
@@ -840,49 +851,49 @@ class GroupsController extends Controller
     public function kickOutUser(Request $request, $groupId, $memberId)
     {
         $user = auth()->user(); // The authenticated user (the one performing the action)
-    
+
         // Clean the input
         $groupId = cleanInput($groupId);
         $memberId = cleanInput($memberId);
-    
+
         // Find the group
         $group = Groups::where('group_id', $groupId)->first();
-    
+
         if (!$group) {
             return response()->json(['message' => 'Group not found'], 404);
         }
-    
+
         // Check if the authenticated user is an admin of the group
         $adminList = explode(',', $group->group_admins);
-    
+
         if (!in_array($user->user_id, $adminList)) {
             return response()->json(['message' => 'You are not an admin of this group'], 403); // HTTP 403 Forbidden
         }
-    
+
         // Check if the user being kicked is the group creator
         if ($group->group_creator === $memberId) {
             return response()->json(['message' => 'You cannot kick out the group creator'], 403);
         }
-    
+
         // Check if the user to be kicked is a member of the group
         $userInGroup = UsersHasGroups::where('group_id', $groupId)
             ->where('user_id', $memberId)
             ->first();
-    
+
         if (!$userInGroup) {
             return response()->json(['message' => 'User is not a member of this group'], 404);
         }
-    
+
         // Begin transaction
         DB::beginTransaction();
-    
+
         try {
             // Remove the user from the group
-             // Remove the user from the group
-        UsersHasGroups::where('group_id', $groupId)
-        ->where('user_id', $memberId)
-        ->delete();
-    
+            // Remove the user from the group
+            UsersHasGroups::where('group_id', $groupId)
+                ->where('user_id', $memberId)
+                ->delete();
+
             // If the user is an admin, remove them from the admin list
             if (in_array($memberId, $adminList)) {
                 $adminList = array_filter(explode(',', $group->group_admins)); // Filter out empty values
@@ -890,42 +901,42 @@ class GroupsController extends Controller
                 $group->group_admins = implode(',', $adminList); // Update the admin list in the group
                 $group->save();
             }
-    
+
             // Commit the transaction
             DB::commit();
-    
+
             return response()->json(['message' => 'User has been kicked out successfully'], 200);
         } catch (\Exception $e) {
             // Rollback the transaction if something goes wrong
             DB::rollBack();
-    
+
             // Log detailed error information
             Log::error('Error in kickOutUser: ', ['error' => $e->getMessage()]);
-    
+
             return response()->json(['message' => 'Failed to kick out the user', 'error' => $e->getMessage()], 500);
         }
-        
     }
-    
-/* public group join */
-    
-    public function joinPublicGroup(Request $request, $groupId) {
-        // Get the authenticated user
-        $user = auth()->user(); 
-        $userId = $user->user_id;
-                // Clean the input
 
-        $groupId=cleanInput($groupId);
+    /* public group join */
+
+    public function joinPublicGroup(Request $request, $groupId)
+    {
+        // Get the authenticated user
+        $user = auth()->user();
+        $userId = $user->user_id;
+        // Clean the input
+
+        $groupId = cleanInput($groupId);
         // Data transaction
         DB::transaction(function () use ($userId, $groupId) {
             // Check if the group exists
             $group = Groups::where('group_id', $groupId)->first();
-            
+
             if (!$group) {
                 // Group does not exist, throw an exception to trigger transaction rollback
                 throw new \Exception('Group not found');
             }
-    
+
             // Check if the group's audience is public
             if ($group->audience === 'public') {
                 // Create a record in the UsersHasGroups model
@@ -938,51 +949,226 @@ class GroupsController extends Controller
                 throw new \Exception('Group is not public');
             }
         });
-    
+
         // Handle success response
         return response()->json(['message' => 'Operation successful'], 200);
     }
-    
 
-/* public group leave */
+
+    /* public group leave */
 
     public function leaveGroup(Request $request, $groupId)
+    {
+
+
+        // Get the authenticated user
+        $user = auth()->user();
+        $userId = $user->user_id;
+        // Clean the input
+        $groupId = cleanInput($groupId);
+        // Data transaction
+        DB::transaction(function () use ($userId, $groupId) {
+            // Check if the group exists
+            $group = Groups::where('group_id', $groupId)->first();
+
+            if (!$group) {
+                // Group does not exist, throw an exception to trigger transaction rollback
+                throw new \Exception('Group not found');
+            }
+
+            // Check if the user is a member of the group
+            $membership = UsersHasGroups::where('user_id', $userId)->where('group_id', $groupId)->first();
+
+            if (!$membership) {
+                // Membership record does not exist
+                throw new \Exception('User is not a member of the group');
+            }
+
+            // Remove the user from the group
+            UsersHasGroups::where('user_id', $userId)->where('group_id', $groupId)->delete();
+        });
+
+        // Handle success response
+        return response()->json(['message' => 'Successfully left the group'], 200);
+    }
+
+
+    /* private group join  request*/
+
+    public function joinRequestPrivateGroup(Request $request, $groupId)
+    {
+        // Get the authenticated user
+        $user = auth()->user();
+        $userId = $user->user_id;
+        // Clean the input
+        $groupId = cleanInput($groupId);
+        // Data transaction
+        DB::transaction(function () use ($userId, $groupId) {
+            // Check if the group exists
+            $group = Groups::where('group_id', $groupId)->first();
+
+            if (!$group) {
+                // Group does not exist, throw an exception to trigger transaction rollback
+                throw new \Exception('Group not found');
+            }
+
+            // Check if the group's audience is private
+            if ($group->audience === 'private') {
+                $joinRequest = GroupJoinRequest::where('sender_id', $userId)->where('group_id', $groupId)->first();
+                if ($joinRequest) {
+                    $joinRequest->delete();
+                }
+
+                GroupJoinRequest::create([
+                    'group_request_id' => Str::uuid(),
+                    'sender_id' => $userId,
+                    'group_id' => $groupId
+                ]);
+            } else {
+                // If the group is not public, throw an exception to trigger transaction rollback
+                throw new \Exception('Group is not private');
+            }
+        });
+
+        // Handle success response
+        return response()->json(['message' => 'Group join request successful'], 200);
+    }
+
+    //Cancel private group join request
+
+    public function cancelJoinRequest(Request $request, $groupId)
+    {
+        // Get the authenticated user
+        $user = auth()->user();
+        $userId = $user->user_id;
+
+        // Clean the input
+        $groupId = cleanInput($groupId);
+
+        // Data transaction
+        DB::transaction(function () use ($userId, $groupId) {
+            // Check if the group exists
+            $group = Groups::where('group_id', $groupId)->first();
+
+            if (!$group) {
+                // Group does not exist, throw an exception to trigger transaction rollback
+                throw new \Exception('Group not found');
+            }
+
+            // Check if the user has already sent a join request
+            $joinRequest = GroupJoinRequest::where('sender_id', $userId)->where('group_id', $groupId)->first();
+            if ($joinRequest) {
+                $joinRequest->delete(); // Cancel the join request
+            } else {
+                // If no join request exists, throw an exception to trigger transaction rollback
+                throw new \Exception('No join request found');
+            }
+        });
+
+        // Handle success response
+        return response()->json(['message' => 'Join request canceled successfully'], 200);
+    }
+
+
+    /*     get join request for specific group */
+    public function getUsersWithJoinRequests(Request $request)
+    {
+        $users = DB::transaction(function () use ($request) {
+            // Retrieve groupId and page from the query parameters
+            $groupId = $request->query('groupId');
+            $page = $request->query('page', 1); // Default to page 1 if not provided
+            $perPage = 5; // Default items per page
+
+            // Check if the group exists
+            $group = Groups::where('group_id', $groupId)->first();
+
+            if (!$group) {
+                // Group does not exist, throw an exception to trigger transaction rollback
+                throw new \Exception('Group not found');
+            }
+
+            // Retrieve user IDs from join requests for the specified group
+            $userIds = GroupJoinRequest::where('group_id', $groupId)
+                ->pluck('sender_id')
+                ->unique();
+
+            // Paginate users
+            return User::whereIn('user_id', $userIds)
+                ->paginate($perPage, ['*'], 'page', $page);
+        });
+
+        return response()->json($users);
+    }
+
+
+
+
+
+    public function manageJoinGroupRequest(Request $request)
 {
-  
-  
-    // Get the authenticated user
-    $user = auth()->user(); 
-    $userId = $user->user_id;
-    // Clean the input
-    $groupId=cleanInput($groupId);
-    // Data transaction
-    DB::transaction(function () use ($userId, $groupId) {
-        // Check if the group exists
+    // Validate the input parameters
+    $request->validate([
+        'decision' => 'required|in:add,cancel',
+        'groupId' => 'required|string|max:50',
+        'sender_id' => 'required|string|max:50',
+    ]);
+
+    $decision = cleanInput($request->decision);
+    $groupId = cleanInput($request->groupId);
+    $senderId = cleanInput($request->sender_id);
+
+    // Use the DB::transaction method for simplified transactions
+    DB::transaction(function () use ($groupId, &$message, $decision, $senderId) {
+        $user = auth()->user();
+
         $group = Groups::where('group_id', $groupId)->first();
-        
+
         if (!$group) {
             // Group does not exist, throw an exception to trigger transaction rollback
             throw new \Exception('Group not found');
         }
 
-        // Check if the user is a member of the group
-        $membership = UsersHasGroups::where('user_id', $userId)->where('group_id', $groupId)->first();
-
-        if (!$membership) {
-            // Membership record does not exist
-            throw new \Exception('User is not a member of the group');
+        // Check if the authenticated user is an admin of the group
+        $admin = $group->group_admins;
+        if (!Str::contains($admin, $user->user_id)) {
+            throw new \Exception('You are not an admin of this group');
         }
 
-        // Remove the user from the group
-        UsersHasGroups::where('user_id', $userId)->where('group_id', $groupId)->delete();
+        $request = GroupJoinRequest::where('group_id', $groupId)
+                                   ->where('sender_id', $senderId)
+                                   ->first();
+
+        if ($request) {
+            if ($decision === 'add') {
+                $request->delete();
+                // Add the user to the group
+               $alreadyMember= UsersHasGroups::where('user_id', $senderId)
+                ->where('group_id', $groupId)
+                ->first();
+                if ($alreadyMember) {
+                    $message = 'User added to the group successfully';
+
+                }else{
+                    UsersHasGroups::create([
+                        'user_id' => $senderId,
+                        'group_id' => $groupId,
+                    ]);
+                    $message = 'User added to the group successfully';
+
+                }               
+
+            } else if ($decision === 'cancel') {
+                $request->delete();
+                // Just delete the join request
+                $message = 'Join request canceled';
+            }
+          
+        } else {
+            throw new \Exception('Join request not found');
+        }
     });
 
-    // Handle success response
-    return response()->json(['message' => 'Successfully left the group'], 200);
+    return response()->json(['data' => $message], 200);
 }
-
-
-
-
 
 }
