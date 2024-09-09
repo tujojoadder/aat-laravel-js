@@ -616,6 +616,7 @@ class GroupsController extends Controller
         $page = $request->query('page', 1);
 
         $posts = Posts::where('group_id', $specificGroupId)
+        ->where('approval',true)
             ->with(['author', 'textPost', 'imagePost'])
             ->paginate($perPage, ['*'], 'page', $page);
 
@@ -635,6 +636,7 @@ class GroupsController extends Controller
 
         // Query for the posts with associated image posts for the specific user, paginate the results
         $posts = Posts::where('group_id', $specificGroupId)
+            ->where('approval',true)
             ->with('imagePost') // Eager load the image posts relationship
             ->whereHas('imagePost') // Ensure we only get posts with associated image posts
             ->paginate($perPage, ['*'], 'page', $page);
@@ -1170,5 +1172,84 @@ class GroupsController extends Controller
 
     return response()->json(['data' => $message], 200);
 }
+
+
+ /* get for specific approval requested group posts  */
+ public function getSpecificGroupPostsApprovalRequestes(Request $request)
+ {
+     $user = auth()->user();
+     $specificGroupId = cleanInput($request->query('id'));
+     // Debug the value of $specificGroupId
+     $perPage = $request->query('per_page', 5);
+     $page = $request->query('page', 1);
+
+     $posts = Posts::where('group_id', $specificGroupId)
+         ->where('approval',false)
+         ->with(['author', 'textPost', 'imagePost'])
+         ->paginate($perPage, ['*'], 'page', $page);
+
+     return response()->json($posts);
+ }
+
+
+ public function approvGroupPost(Request $request, $groupId, $postId) {
+    // Sanitize input
+    $groupId = cleanInput($groupId);
+    $postId = cleanInput($postId);
+
+    // Get authenticated user
+    $user = auth()->user(); 
+
+    // Use a transaction to ensure atomicity
+    DB::transaction(function () use ($user, $groupId, $postId) {
+        // Retrieve the group by its ID
+        $group = Groups::where('group_id', $groupId)->firstOrFail();
+
+        // Ensure the authenticated user is an admin of the group
+        if (!Str::contains($group->group_admins, $user->user_id)) {
+            throw new \Exception('You are not authorized to approve posts in this group.');
+        }
+
+        // Retrieve the post by its ID within the specified group
+        $post = Posts::where('group_id', $groupId)
+                      ->where('post_id', $postId)
+                      ->firstOrFail();
+
+        // Approve the post
+        $post->update(['approval' => true]);
+    }, 5); // Retry the transaction up to 5 times if it fails due to deadlock
+}
+
+
+
+public function RejectApprovGroupPost(Request $request, $groupId, $postId) {
+    // Sanitize input
+    $groupId = cleanInput($groupId);
+    $postId = cleanInput($postId);
+
+    // Get authenticated user
+    $user = auth()->user(); 
+
+    // Use a transaction to ensure atomicity
+    DB::transaction(function () use ($user, $groupId, $postId) {
+        // Retrieve the group by its ID
+        $group = Groups::where('group_id', $groupId)->firstOrFail();
+
+        // Ensure the authenticated user is an admin of the group
+        if (!Str::contains($group->group_admins, $user->user_id)) {
+            throw new \Exception('You are not authorized to approve posts in this group.');
+        }
+
+        // Retrieve the post by its ID within the specified group
+        $post = Posts::where('group_id', $groupId)
+                      ->where('post_id', $postId)
+                      ->firstOrFail();
+
+        // Approve the post
+        $post->delete();
+    }, 5); // Retry the transaction up to 5 times if it fails due to deadlock
+}
+
+
 
 }

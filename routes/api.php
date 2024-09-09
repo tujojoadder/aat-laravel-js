@@ -426,6 +426,9 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        Route::get('/groupdetails/{id}', [GroupsController::class, 'groupDetails']);
       /* get specific group posts */
       Route::get('/getspecificgroupposts', [GroupsController::class, 'getSpecificGroupPosts']);
+    /*    get specific group posts approval requests*/
+    Route::get('/getspecificgrouppostapprovalrequestes', [GroupsController::class, 'getSpecificGroupPostsApprovalRequestes']);
+
        //get specific group photo
        Route::get('/getspecificgroupphotos', [GroupsController::class, 'getSpecificGroupPhotos']);
        //get specific group member
@@ -442,10 +445,10 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
 
       // Manage join group request(add,cancel)
       Route::post('managejoingrouprequest', [GroupsController::class, 'manageJoinGroupRequest']);
-
-
-
-
+      // approvGroupPost
+      Route::post('/groups/{groupId}/posts/{postId}/approve', [GroupsController::class, 'approvGroupPost']);
+      // reject approvGroupPost
+      Route::delete('/groups/{groupId}/posts/{postId}/reject', [GroupsController::class, 'RejectApprovGroupPost']);
 
 
 
