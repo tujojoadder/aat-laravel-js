@@ -1234,7 +1234,7 @@ public function RejectApprovGroupPost(Request $request, $groupId, $postId) {
     DB::transaction(function () use ($user, $groupId, $postId) {
         // Retrieve the group by its ID
         $group = Groups::where('group_id', $groupId)->firstOrFail();
-
+  
         // Ensure the authenticated user is an admin of the group
         if (!Str::contains($group->group_admins, $user->user_id)) {
             throw new \Exception('You are not authorized to approve posts in this group.');
