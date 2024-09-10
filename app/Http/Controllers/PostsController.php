@@ -102,91 +102,98 @@ class PostsController extends Controller
     }
 
     //Create a group post
-    public function createGroupPost(Request $request, $groupId)
+    public function createGroupPost(Request $request)
     {
-        $request->merge(['groupId' => $groupId]);
-
         $user = auth()->user();
-
+    
         $this->validate($request, [
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'text' => 'nullable|max:10000',
             'groupId' => 'required',
             'image_or_text' => 'required_without_all:image,text',
         ]);
-
-        $groupId = cleanInput($groupId);
+    
+        $groupId = cleanInput($request->groupId);
         $group = Groups::find($groupId);
+    
         if (!$group) {
-            return response()->json(['message' => "Group not founded"]);
+            return response()->json(['message' => "Group not found"]);
         }
+    
         $text = cleanInput($request->text);
-
+    
         // Check if the user is a member of the group
         if (!$user->groups->contains($groupId)) {
             return response()->json(['message' => 'You are not a member of this group.'], 403);
-        } else {
-            $group = Groups::where('group_id', $groupId)->first();
-
-            if (!$group) {
-                return response()->json(['message' => 'Group not found.'], 404);
+        }
+    
+        $post_id = Str::uuid();
+        $postData = [
+            'post_id' => $post_id,
+            'author_id' => auth()->user()->user_id,
+            'group_id' => $groupId,
+            'post_type' => 'general',
+        ];
+    
+        // Handle group audience logic
+        if ($group->audience == 'private') {
+            // Check if the user is an admin of the group
+            if (!Str::contains($group->group_admins, $user->user_id)) {
+                // The user is a member but not an admin, require post approval
+                $postData['approval'] = false;
             }
-
-            $post_id = Str::uuid();
-            $postData = [
-                'post_id' => $post_id,
-                'author_id' => auth()->user()->user_id,
-                'group_id' => $groupId,
-                'audience' => $group->audience,
-                'post_type' => 'general'
-            ];
-
+        }
+    
+        return DB::transaction(function () use ($request, $post_id, $text, $postData) {
             // Create the main post
-            $post = Posts::create($postData);
-
+            Posts::create($postData);
+    
             // Handle both text and image
             if ($request->filled('text') && $request->hasFile('image')) {
                 // Handle text
                 TextPosts::create([
                     'text_post_id' => Str::uuid(),
                     'post_id' => $post_id,
-                    'post_text' => $request->text,
+                    'post_text' => $text,
                 ]);
-
+    
                 // Handle image
                 $customFileName = $request->file('image')->hashName();
-                $path = $request->file('image')->storeAs('public/upload/images', $customFileName);
-                $imageUrl = Storage::url($path);
+                // Move file to public directory directly
+                $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
+                $imageUrl = asset('storage/upload/images/' . $customFileName); // Generate a public URL
+    
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
                     'post_id' => $post_id,
                     'post_url' => $imageUrl,
                 ]);
-
-                $message = 'Text and Image successfully stored';
+    
+                return response()->json(['message' => 'Text and Image successfully stored']);
             } elseif ($request->filled('text') && !$request->hasFile('image')) {
-
                 TextPosts::create([
-                    'post_id' => $post_id,
-                    'post_text' => $request->text,
                     'text_post_id' => Str::uuid(),
+                    'post_id' => $post_id,
+                    'post_text' => $text,
                 ]);
-                $message = 'Text successfully stored';
+                return response()->json(['message' => 'Text successfully stored']);
             } elseif (!$request->filled('text') && $request->hasFile('image')) {
-
                 $customFileName = $request->file('image')->hashName();
-                $path = $request->file('image')->storeAs('public/upload/images', $customFileName);
-                $imageUrl = Storage::url($path);
+                // Move file to public directory directly
+                $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
+                $imageUrl = asset('storage/upload/images/' . $customFileName); // Generate a public URL
+    
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
                     'post_id' => $post_id,
                     'post_url' => $imageUrl,
                 ]);
-                $message = 'Image successfully stored';
+    
+                return response()->json(['message' => 'Image successfully stored']);
             }
-            return response()->json(['message' => $message]);
-        }
+        });
     }
+    
 
     // create page post
     //Create a group post

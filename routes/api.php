@@ -381,7 +381,6 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
               ->name('addAdmin.group');
 
     //(Both-->public/private) remove user from group
-    
     Route::delete('/groups/{groupId}/kick-out-member/{memberId}', [GroupsController::class, 'kickOutUser']);
 
 
@@ -449,6 +448,9 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
       Route::post('/groups/{groupId}/posts/{postId}/approve', [GroupsController::class, 'approvGroupPost']);
       // reject approvGroupPost
       Route::delete('/groups/{groupId}/posts/{postId}/reject', [GroupsController::class, 'RejectApprovGroupPost']);
+       // Create group Post
+       Route::post('group/post/create', [PostsController::class, 'createGroupPost']);
+
 
 
 
