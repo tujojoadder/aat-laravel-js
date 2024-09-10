@@ -473,7 +473,7 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        /* <--- Page ---> */
 
        // Create Page
-Route::post('/create-page', [PagesController::class, 'createPage']);
+       Route::post('/create-page', [PagesController::class, 'createPage']);
 
 
        // FollowOrUnFollow Page
@@ -482,6 +482,15 @@ Route::post('/create-page', [PagesController::class, 'createPage']);
        // add admins on Page
        Route::post('page/addadmin/{pageId}/{newAdminId}', [PagesController::class, 'addAdmin'])
               ->name('addadmin.page');
+       // get pages where auth user is admin
+      Route::get('/get-pages-where-admin', [PagesController::class, 'getPagesWhereAdmin']);
+       // get liked pages
+       Route::get('/get-pages-liked', [PagesController::class, 'getLikedPages']);
+       // get page suggestions
+       Route::get('/get-pages-suggestion', [PagesController::class, 'getPageSuggestion']);
+
+
+
        //Retrive Page members
        Route::get('/page/{pageId}/members', [PagesController::class, 'getPageMembers'])
               ->name('addmember.page');

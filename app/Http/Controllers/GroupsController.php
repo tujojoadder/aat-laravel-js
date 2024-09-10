@@ -64,7 +64,7 @@ public function createGroup(Request $request)
 
     // Validate the request data
     $validatedData = $request->validate([
-        'group_name' => 'required|string|max:35',
+        'group_name' => 'required|string|max:50',
         'group_details' => 'required|string|max:10000',
         'audience' => 'required|in:public,private,only_me'
     ], [

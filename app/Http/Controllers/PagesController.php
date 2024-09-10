@@ -92,8 +92,8 @@ public function createPage(Request $request)
                 'page_details' => $pageDetails,
                 'page_creator' => $userId,
                 'page_admins' => $userId,
-                'page_picture' => 'storage/defaultProfile/page.png',
-                'page_cover' => 'storage/defaultCover/page.jpg',
+                'page_picture' => 'http://127.0.0.1:8000/storage/mprofile_picture/page.jpg',
+                'page_cover' => 'http://127.0.0.1:8000/storage/cover_photo/page.jpg',
                 'category' => $pageCategory,
             ]);
 
@@ -375,4 +375,148 @@ public function createPage(Request $request)
         $page->update(['page_details' => $details]);
         return response()->json(['message' => 'Page details updated successfully']);
     }
+
+
+
+    /*    Pages that auth user are admin */
+    public function getPagesWhereAdmin()
+    {
+        // Get the currently authenticated user
+        $user = auth()->user();
+
+        // Define the number of items per page
+        $perPage = 4; // Adjust this number as needed
+        $page = request()->input('page', 1); // Get current page from query parameter, default to 1
+
+        // Retrieve all pages that the user has joined
+        $joinedPages = $user->pages()->get(); // Retrieve all groups
+
+        // Filter out the pages where the user is an admin
+        $pagesWhereAdmin = $joinedPages->filter(function ($page) use ($user) {
+            // Check if the user is listed in the page_admins field
+            return str_contains($page->page_admins, $user->user_id);
+        });
+
+        // Calculate the total number of pages
+        $totalItems = $pagesWhereAdmin->count();
+        $totalPages = ceil($totalItems / $perPage);
+
+        // Slice the filtered results for pagination
+        $pagedPages = $pagesWhereAdmin->slice(($page - 1) * $perPage, $perPage)->values();
+
+        // Map to select only the desired fields
+        $pagesArray = $pagedPages->map(function ($page) {
+            return [
+                'page_name' => $page->page_name,
+                'page_id' => $page->page_id,
+                'identifier' => $page->identifier,
+                'page_picture' => $page->page_picture,
+          
+            ];
+        });
+
+        // Return the filtered list of groups as an array with pagination metadata
+        return response()->json([
+            'data' => $pagesArray,
+            'current_page' => (int)$page,
+            'per_page' => $perPage,
+            'total' => $totalItems,
+            'total_pages' => $totalPages
+        ]);
+    }
+
+
+    public function getLikedPages()
+    {
+        // Get the currently authenticated user
+        $user = auth()->user();
+    
+        // Define the number of items per page
+        $perPage = 4; // Adjust this number as needed
+        $page = request()->input('page', 1); // Get current page from query parameter, default to 1
+    
+        // Retrieve all pages that the user has joined
+        $joinedPages = $user->pages()->get(); // Retrieve all pages
+    
+        // Filter out the pages where the user is not an admin
+        $pagesWhereNotAdmin = $joinedPages->filter(function ($page) use ($user) {
+            // Check if the user is not listed in the page_admins field
+            return !str_contains($page->page_admins, $user->user_id);
+        });
+    
+        // Calculate the total number of pages
+        $totalItems = $pagesWhereNotAdmin->count();
+        $totalPages = ceil($totalItems / $perPage);
+    
+        // Slice the filtered results for pagination
+        $pagedPages = $pagesWhereNotAdmin->slice(($page - 1) * $perPage, $perPage)->values();
+    
+        // Map to select only the desired fields
+        $pagesArray = $pagedPages->map(function ($page) {
+            return [
+                'page_name' => $page->page_name,
+                'page_id' => $page->page_id,
+                'identifier' => $page->identifier,
+                'page_picture' => $page->page_picture,
+            ];
+        });
+    
+        // Return the filtered list of pages as an array with pagination metadata
+        return response()->json([
+            'data' => $pagesArray,
+            'current_page' => (int)$page,
+            'per_page' => $perPage,
+            'total' => $totalItems,
+            'total_pages' => $totalPages
+        ]);
+    }
+    
+
+    public function getPageSuggestion()
+    {
+        // Get the currently authenticated user
+        $user = auth()->user();
+        
+        // Define the number of items per page
+        $perPage = 4; // Adjust this number as needed
+        $page = request()->input('page', 1); // Get current page from query parameter, default to 1
+        
+        // Retrieve all pages that the user has joined
+        $allPages = Pages::all(); // Retrieve all pages
+    
+        // Filter out the pages where the user is a member or an admin
+        $pagesWhereNotMemberOrAdmin = $allPages->filter(function ($page) use ($user) {
+            // Check if the user is not listed in the page_admins and is not a member
+            return !str_contains($page->page_admins, $user->user_id) && !$user->pages->contains('page_id', $page->page_id);
+        });
+    
+        // Calculate the total number of pages
+        $totalItems = $pagesWhereNotMemberOrAdmin->count();
+        $totalPages = ceil($totalItems / $perPage);
+    
+        // Slice the filtered results for pagination
+        $pagedPages = $pagesWhereNotMemberOrAdmin->slice(($page - 1) * $perPage, $perPage)->values();
+    
+        // Map to select only the desired fields
+        $pagesArray = $pagedPages->map(function ($page) {
+            return [
+                'page_name' => $page->page_name,
+                'page_id' => $page->page_id,
+                'identifier' => $page->identifier,
+                'page_picture' => $page->page_picture,
+            ];
+        });
+    
+        // Return the filtered list of pages as an array with pagination metadata
+        return response()->json([
+            'data' => $pagesArray,
+            'current_page' => (int)$page,
+            'per_page' => $perPage,
+            'total' => $totalItems,
+            'total_pages' => $totalPages
+        ]);
+    }
+    
+
+
 }
