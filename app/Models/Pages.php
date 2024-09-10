@@ -23,7 +23,8 @@ class Pages extends Model
         'page_creator',
         'page_admins',
         'page_picture',
-        'page_cover'
+        'page_cover',
+        'category'
 
     ];
     public function upload()

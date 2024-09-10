@@ -56,53 +56,67 @@ class GroupsController extends Controller
         return $baseIdentifier;
     }
     // give group audience in(public,private,only_me)
-    public function createGroup(Request $request)
-    {
-        $user = auth()->user();
-        $group_id = Str::uuid();
-        $this->validate($request, [
-            'group_name' => 'required|string|max:50',
-            'group_details' => 'required|string|max:10000',
-            'audience' => 'required|in:public,private,only_me'
-        ], [
-            'group_name.regex' => 'The group name may only contain letters, numbers'
-        ]);
+   
+public function createGroup(Request $request)
+{
+    $user = auth()->user();
+    $groupId = Str::uuid();
 
-        $group_name = cleanInput($request->group_name);
-        $group_details = cleanInput($request->group_details);
-        $audience = cleanInput($request->audience);
+    // Validate the request data
+    $validatedData = $request->validate([
+        'group_name' => 'required|string|max:35',
+        'group_details' => 'required|string|max:10000',
+        'audience' => 'required|in:public,private,only_me'
+    ], [
+        'group_name.regex' => 'The group name may only contain letters and numbers.',
+    ]);
 
-        // Remove all spaces from the group name
-        $group_nameidentifierBase = preg_replace('/[^\p{L}0-9]+/u', '', $group_name);
+    $groupName = cleanInput($validatedData['group_name']);
+    $groupDetails = cleanInput($validatedData['group_details']);
+    $audience = cleanInput($validatedData['audience']);
 
-        $identifierBase = strtolower($group_nameidentifierBase);
+    // Remove all spaces from the group name
+    $groupNameIdentifierBase = preg_replace('/[^\p{L}0-9]+/u', '', $groupName);
+    $identifierBase = strtolower($groupNameIdentifierBase);
 
-        // Generate the identifier
-        $identifier = $this->generateIdentifier($identifierBase);
+    // Generate the identifier
+    $identifier = $this->generateIdentifier($identifierBase);
 
-        Groups::create([
-            'group_id' => $group_id,
-            'identifier' => $identifier,
-            'group_name' => $group_name,
-            'group_details' => $group_details,
-            'group_creator' => $user->user_id,
-            'group_admins' => $user->user_id,
-            'audience' => $audience,
-            'group_picture' => 'http://127.0.0.1:8000/storage/mprofile_picture/group.jpg',
-            'group_cover' => 'http://127.0.0.1:8000/storage/cover_photo/group.jpg',
+    try {
+        DB::transaction(function () use (
+            $groupId, $identifier, $groupName, $groupDetails, $user, $audience
+        ) {
+            // Create the group
+            Groups::create([
+                'group_id' => $groupId,
+                'identifier' => $identifier,
+                'group_name' => $groupName,
+                'group_details' => $groupDetails,
+                'group_creator' => $user->user_id,
+                'group_admins' => $user->user_id,
+                'audience' => $audience,
+                'group_picture' => 'http://127.0.0.1:8000/storage/mprofile_picture/group.jpg',
+                'group_cover' => 'http://127.0.0.1:8000/storage/cover_photo/group.jpg',
+            ]);
 
-
-        ]);
-        UsersHasGroups::create([
-            'user_id' => $user->user_id,
-            'group_id' => $group_id
-        ]);
+            // Associate the user with the group
+            UsersHasGroups::create([
+                'user_id' => $user->user_id,
+                'group_id' => $groupId,
+            ]);
+        });
 
         return response()->json([
             'message' => 'Group is created successfully'
         ]);
-    }
+        
+    } catch (\Exception $e) {
 
+        return response()->json([
+            'message' => 'An error occurred while creating the group.',
+        ], 500);
+    }
+}
     // add any user to group
     public function addMember(Request $request, $groupId, $newMember)
     {
@@ -279,8 +293,8 @@ class GroupsController extends Controller
 
         $request->merge(['groupId' => $groupId]);
         $this->validate($request, [
-            'name' => 'required|string|max:50',
-            'groupId' => 'required|string|max:50',
+            'name' => 'required|string|max:35',
+            'groupId' => 'required|string|max:35',
         ]);
         $user = auth()->user();
         $userId = $user->user_id;

@@ -473,8 +473,9 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        /* <--- Page ---> */
 
        // Create Page
-       Route::post('page/create', [PagesController::class, 'createPage'])
-              ->name('createPage');
+Route::post('/create-page', [PagesController::class, 'createPage']);
+
+
        // FollowOrUnFollow Page
        Route::post('page/{pageId}/followorunfollow', [PagesController::class, 'FollowOrUnFollowPage'])
               ->name('followorunfollow.page');

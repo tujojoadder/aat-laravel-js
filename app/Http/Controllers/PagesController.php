@@ -54,50 +54,68 @@ class PagesController extends Controller
     
         return $baseIdentifier;
     }
-    // give page audience in(public,private,only_me)
-    public function createPage(Request $request)
-    {
-        $user = auth()->user();
-        $userId = $user->user_id;
-        $pageId = Str::uuid();
 
+    // app/Http/Controllers/PageController.php
 
-        $this->validate($request, [
-            'page_name' => 'required|string|max:50',
-            'page_details' => 'required|string|max:10000',
-        ]);
+public function createPage(Request $request)
+{
+    // Validate the request data
+    $validatedData = $request->validate([
+        'page_name' => 'required|string|max:35',
+        'page_details' => 'required|string|max:10000',
+        'category' => 'required|string|max:35',
+    ]);
 
+    // Extract and clean input data
+    $user = auth()->user();
+    $userId = $user->user_id;
+    $pageId = Str::uuid();
+    $pageName = cleanInput($validatedData['page_name']);
+    $pageNameIdentifier = preg_replace('/[^\p{L}0-9]+/u', '', $pageName);
+    $pageDetails = cleanInput($validatedData['page_details']);
+    $pageCategory = cleanInput($validatedData['category']);
 
-        $pageName = cleanInput($request->page_name);
-        $pageNameIdentifire = preg_replace('/[^\p{L}0-9]+/u', '', $pageName);;
-        $pageDetails = cleanInput($request->page_details);
+    $identifierBase = strtolower(str_replace(' ', '', $pageNameIdentifier));
 
-        $identifierBase = strtolower(str_replace(' ', '', $pageNameIdentifire));
+    // Generate the identifier
+    $identifier = $this->generateIdentifier($identifierBase);
 
-        // Generate the identifier
-        $identifier = $this->generateIdentifier($identifierBase);
+    try {
+        DB::transaction(function () use (
+            $pageId, $identifier, $pageName, $pageDetails, $userId, $pageCategory
+        ) {
+            // Create the page
+            Pages::create([
+                'page_id' => $pageId,
+                'identifier' => $identifier,
+                'page_name' => $pageName,
+                'page_details' => $pageDetails,
+                'page_creator' => $userId,
+                'page_admins' => $userId,
+                'page_picture' => 'storage/defaultProfile/page.png',
+                'page_cover' => 'storage/defaultCover/page.jpg',
+                'category' => $pageCategory,
+            ]);
 
-        Pages::create([
-            'page_id' => $pageId,
-            'identifier' => $identifier,
-            'page_name' => $pageName,
-            'page_details' => $pageDetails,
-            'page_creator' => $userId,
-            'page_admins' => $userId,
-            'page_picture' => 'storage/defaultProfile/page.png',
-            'page_cover' => 'storage/defaultCover/page.jpg',
-
-
-        ]);
-        UsersHasPages::create([
-            'user_id' => $userId,
-            'page_id' => $pageId
-        ]);
+            // Associate the user with the page
+            UsersHasPages::create([
+                'user_id' => $userId,
+                'page_id' => $pageId,
+            ]);
+        });
 
         return response()->json([
-            'message' => 'Page is created successfully'
-        ]);
+            'message' => 'Page created successfully.',
+        ], 201);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'An error occurred while creating the page.',
+        ], 500);
     }
+}
+
+    
     //Follow or Unfollow any page
     public function FollowOrUnFollowPage(Request $request, $pageId)
     {
