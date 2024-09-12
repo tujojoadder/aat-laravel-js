@@ -572,7 +572,27 @@ public function getSpecificPagePosts(Request $request)
 }
 
 
+ /* get for specific page all photo */
+ public function getSpecificPagePhotos(Request $request)
+ {
 
+     // Clean the input and get the user ID from the request query
+     $specificPageId = cleanInput($request->query('id'));
+
+     // Set default pagination values, with the option to customize via query parameters
+     $perPage = $request->query('per_page', 6); // default to 10 per page
+     $page = $request->query('page', 1);
+
+     // Query for the posts with associated image posts for the specific user, paginate the results
+     $posts = Posts::where('page_id', $specificPageId)
+         
+         ->with('imagePost') // Eager load the image posts relationship
+         ->whereHas('imagePost') // Ensure we only get posts with associated image posts
+         ->paginate($perPage, ['*'], 'page', $page);
+
+     // Return the paginated result as JSON
+     return response()->json($posts);
+ }
 
 
 

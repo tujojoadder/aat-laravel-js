@@ -510,6 +510,11 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
 
       /* get specific group posts */
       Route::get('/getspecificpageposts', [PagesController::class, 'getSpecificPagePosts']);
+       //get specific group photo
+       Route::get('/getspecificpagephotos', [PagesController::class, 'getSpecificPagePhotos']);
+
+
+
 
        /*  <<< --- IAccount --->>> */
 
