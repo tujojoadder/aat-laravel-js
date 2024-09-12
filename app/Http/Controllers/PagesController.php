@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FriendList;
+use App\Models\FriendRequest;
 use App\Models\Groups;
 use App\Models\Pages;
 use App\Models\Posts;
@@ -592,7 +594,79 @@ public function getSpecificPagePosts(Request $request)
 
      // Return the paginated result as JSON
      return response()->json($posts);
- }
+}
+
+
+ /* Get all users of a specific group */
+ public function getAllPageMember(Request $request)
+{
+    // Clean and get the page ID from the request query
+    $pageId = cleanInput($request->query('id'));
+
+    // Find the page using the page_id
+    $pages = Pages::where('page_id', $pageId)->first();
+
+    // Check if the page exists
+    if (!$pages) {
+        return response()->json(['error' => 'Page not found.'], 404);
+    }
+
+    // Define the number of members per page
+    $perPage = $request->query('per_page', 10);
+    // Page number
+    $page = $request->query('page', 1);
+
+    // Get the authenticated user's ID
+    $authUserId = auth()->id();
+
+    // Retrieve the friend list for the authenticated user
+    $authFriendList = FriendList::where('user_id', $authUserId)->first();
+
+    // Retrieve the authenticated user's friend IDs if available
+    $authFriendIdsArray = [];
+    if ($authFriendList && !empty($authFriendList->user_friends_ids)) {
+        $authFriendIdsArray = explode(',', $authFriendList->user_friends_ids);
+    }
+
+    // Retrieve all users associated with this page using pagination
+    $users = $pages->user()->paginate($perPage, ['*'], 'page', $page);
+
+    // Iterate over the paginated page members to add the is_friend and friend_request_sent fields
+    $users->getCollection()->transform(function ($user) use ($authFriendIdsArray, $authUserId) {
+        // Check if the current user is the authenticated user
+        if ($user->user_id == $authUserId) {
+            return [
+                'user_id' => $user->user_id,
+                'user_fname' => $user->user_fname,
+                'user_lname' => $user->user_lname,
+                'profile_picture' => $user->profile_picture,
+                'identifier' => $user->identifier,
+                'is_friend' => true, // Always true for the authenticated user
+                'friend_request_sent' => false, // No friend request is needed for oneself
+            ];
+        }
+
+        // Check if the authenticated user has sent a friend request to this user
+        $friendRequestExists = FriendRequest::where('sender_id', $authUserId)
+            ->where('receiver_id', $user->user_id)
+            ->exists();
+
+        return [
+            'user_id' => $user->user_id,
+            'user_fname' => $user->user_fname,
+            'user_lname' => $user->user_lname,
+            'profile_picture' => $user->profile_picture,
+            'identifier' => $user->identifier,
+            'is_friend' => in_array($user->user_id, $authFriendIdsArray) ? true : false, // Set is_friend based on the friend list
+            'friend_request_sent' => $friendRequestExists ? true : false, // Set friend_request_sent based on friend request status
+        ];
+    });
+
+    // Return the page members as a JSON response, including the is_friend and friend_request_sent fields
+    return response()->json($users);
+}
+
+
 
 
 

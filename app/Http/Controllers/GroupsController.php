@@ -660,60 +660,73 @@ public function createGroup(Request $request)
     }
 
     /* Get all users of a specific group */
-    public function gettAllGroupMember(Request $request)
+    public function getAllGroupMember(Request $request)
     {
         // Clean and get the group ID from the request query
         $groupId = cleanInput($request->query('id'));
-
+    
         // Find the group using the group_id
         $group = Groups::where('group_id', $groupId)->first();
-
-        // Check if group exists
+    
+        // Check if the group exists
         if (!$group) {
             return response()->json(['error' => 'Group not found.'], 404);
         }
-
+    
         // Define the number of members per page
         $perPage = $request->query('per_page', 10);
         $page = $request->query('page', 1);
-
+    
         // Get the authenticated user's ID
         $authUserId = auth()->id();
-
+    
         // Retrieve the friend list for the authenticated user
         $authFriendList = FriendList::where('user_id', $authUserId)->first();
-
+    
         // Retrieve the authenticated user's friend IDs if available
         $authFriendIdsArray = [];
         if ($authFriendList && !empty($authFriendList->user_friends_ids)) {
             $authFriendIdsArray = explode(',', $authFriendList->user_friends_ids);
         }
-
+    
         // Retrieve all users associated with this group using pagination
         $users = $group->user()->paginate($perPage, ['*'], 'page', $page);
-
+    
         // Iterate over the paginated group members to add the is_friend and friend_request_sent fields
         $users->getCollection()->transform(function ($user) use ($authFriendIdsArray, $authUserId) {
+            // Check if the current user is the authenticated user
+            if ($user->user_id == $authUserId) {
+                return [
+                    'user_id' => $user->user_id,
+                    'user_fname' => $user->user_fname,
+                    'user_lname' => $user->user_lname,
+                    'profile_picture' => $user->profile_picture,
+                    'identifier' => $user->identifier,
+                    'is_friend' => true, // Always true for the authenticated user
+                    'friend_request_sent' => false, // No friend request is needed for oneself
+                ];
+            }
+    
             // Check if the authenticated user has sent a friend request to this user
             $friendRequestExists = FriendRequest::where('sender_id', $authUserId)
                 ->where('receiver_id', $user->user_id)
                 ->exists();
-
+    
             return [
                 'user_id' => $user->user_id,
                 'user_fname' => $user->user_fname,
                 'user_lname' => $user->user_lname,
                 'profile_picture' => $user->profile_picture,
                 'identifier' => $user->identifier,
-                'is_friend' => in_array($user->user_id, $authFriendIdsArray) ? true : false, // Set is_friend to true if the member is in the auth user's friend list, false otherwise
-                'friend_request_sent' => $friendRequestExists ? true : false, // Set friend_request_sent to true if a friend request has been sent, false otherwise
+                'is_friend' => in_array($user->user_id, $authFriendIdsArray) ? true : false, // Set is_friend based on the friend list
+                'friend_request_sent' => $friendRequestExists ? true : false, // Set friend_request_sent based on friend request status
             ];
         });
-
-        // Return the group members as JSON response, including the is_friend and friend_request_sent fields
+    
+        // Return the group members as a JSON response, including the is_friend and friend_request_sent fields
         return response()->json($users);
     }
-
+    
     public function gettAllGroupMemberManage(Request $request)
     {
         // Clean and get the group ID from the request query

@@ -431,7 +431,7 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        //get specific group photo
        Route::get('/getspecificgroupphotos', [GroupsController::class, 'getSpecificGroupPhotos']);
        //get specific group member
-       Route::get('/getspecificgroupmember', [GroupsController::class, 'gettAllGroupMember']);
+       Route::get('/getspecificgroupmember', [GroupsController::class, 'getAllGroupMember']);
        //get specific group  for manage
        Route::get('/getspecificgroupmembermanage', [GroupsController::class, 'gettAllGroupMemberManage']);
           
@@ -508,10 +508,12 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        Route::put('/page/{pageId}/update/details', [PagesController::class, 'updatePageDetails'])
               ->name('upadte.details.page');
 
-      /* get specific group posts */
+      /* get specific page posts */
       Route::get('/getspecificpageposts', [PagesController::class, 'getSpecificPagePosts']);
-       //get specific group photo
+       //get specific page photo
        Route::get('/getspecificpagephotos', [PagesController::class, 'getSpecificPagePhotos']);
+       //get specific page members
+       Route::get('/getspecificpagemember', [PagesController::class, 'getAllPageMember']);
 
 
 
