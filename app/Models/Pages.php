@@ -24,7 +24,10 @@ class Pages extends Model
         'page_admins',
         'page_picture',
         'page_cover',
-        'category'
+        'category',
+        'location',
+        'phone',
+        'email',
 
     ];
     public function upload()
