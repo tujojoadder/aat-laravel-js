@@ -519,4 +519,61 @@ public function createPage(Request $request)
     
 
 
+
+//get specific page details
+public function pageDetails(Request $request)
+{
+    // Get Authenticated user
+    $user = auth()->user();
+    $userId = $user->user_id;
+
+    // Find the group by ID
+    $page = Pages::where('page_id', $request->id)->first();
+
+    // Initialize variables
+    $isAdmin = false;
+    $joinStatus = false;
+  
+
+    // Check if the group exists
+    if ($page) {
+        // Check if the authenticated user is an admin of the group
+        $isAdmin = str_contains($page->page_admins, $userId);
+
+        // Check if the authenticated user is a member of the group
+        $joinStatus = UsersHasPages::where('user_id', $userId)
+            ->where('page_id', $request->id)
+            ->exists();      
+    }
+    // Add isAdmin, joinStatus, and isRequest to the group data
+    $pageData = $page ? $page->toArray() : [];
+    $pageData['isAdmin'] = $isAdmin; // Add isAdmin flag
+    $pageData['joinStatus'] = $joinStatus; // Add joinStatus flag
+    return response()->json(['data' => $pageData]);
+}
+
+
+/* getSpecificPagePosts */
+
+/* get for specific group posts  */
+public function getSpecificPagePosts(Request $request)
+{
+    $user = auth()->user();
+    $specificPageId = cleanInput($request->query('id'));
+    // Debug the value of $specificPageId
+    $perPage = $request->query('per_page', 5);
+    $page = $request->query('page', 1);
+
+    $posts = Posts::where('page_id', $specificPageId)
+        ->with(['author', 'textPost', 'imagePost'])
+        ->paginate($perPage, ['*'], 'page', $page);
+
+    return response()->json($posts);
+}
+
+
+
+
+
+
 }

@@ -488,7 +488,8 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        Route::get('/get-pages-liked', [PagesController::class, 'getLikedPages']);
        // get page suggestions
        Route::get('/get-pages-suggestion', [PagesController::class, 'getPageSuggestion']);
-
+     //get specific groupdetails 
+     Route::get('/pagedetails/{id}', [PagesController::class, 'pageDetails']);
 
 
        //Retrive Page members
@@ -507,7 +508,8 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        Route::put('/page/{pageId}/update/details', [PagesController::class, 'updatePageDetails'])
               ->name('upadte.details.page');
 
-
+      /* get specific group posts */
+      Route::get('/getspecificpageposts', [PagesController::class, 'getSpecificPagePosts']);
 
        /*  <<< --- IAccount --->>> */
 
