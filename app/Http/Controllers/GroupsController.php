@@ -755,9 +755,11 @@ public function createGroup(Request $request)
 
         // Get the authenticated user's ID
         $authUserId = auth()->user()->user_id;
+        //is auth user is isCreator
+        $isAuthIsCreator = auth()->user()->user_id == $groupCreatorId ? true : false  ;
 
         // Iterate over the paginated group members to add the isAdmin, isCreator, and isAuth fields
-        $users->getCollection()->transform(function ($user) use ($adminIds, $groupId, $groupCreatorId, $authUserId) {
+        $users->getCollection()->transform(function ($user) use ($adminIds, $groupId, $groupCreatorId, $authUserId,$isAuthIsCreator) {
             return [
                 'group_id' => $groupId,
                 'user_id' => $user->user_id,
@@ -768,6 +770,7 @@ public function createGroup(Request $request)
                 'isAdmin' => in_array($user->user_id, $adminIds) ? true : false, // Set isAdmin to true if the member is an admin, false otherwise
                 'isCreator' => $user->user_id == $groupCreatorId ? true : false, // Set isCreator to true if the member is the group creator, false otherwise
                 'isAuth' => $user->user_id == $authUserId ? true : false, // Set isAuth to true if the member is the authenticated user, false otherwise
+                'isAuthIsCreator'=>$isAuthIsCreator
             ];
         });
 
@@ -880,49 +883,58 @@ public function createGroup(Request $request)
     public function kickOutUser(Request $request, $groupId, $memberId)
     {
         $user = auth()->user(); // The authenticated user (the one performing the action)
-
+    
         // Clean the input
         $groupId = cleanInput($groupId);
         $memberId = cleanInput($memberId);
-
+    
         // Find the group
         $group = Groups::where('group_id', $groupId)->first();
-
+    
         if (!$group) {
             return response()->json(['message' => 'Group not found'], 404);
         }
-
+    
         // Check if the authenticated user is an admin of the group
         $adminList = explode(',', $group->group_admins);
-
+    
         if (!in_array($user->user_id, $adminList)) {
             return response()->json(['message' => 'You are not an admin of this group'], 403); // HTTP 403 Forbidden
         }
-
+    
         // Check if the user being kicked is the group creator
         if ($group->group_creator === $memberId) {
             return response()->json(['message' => 'You cannot kick out the group creator'], 403);
         }
-
+    
+        // Ensure that only the group creator can kick out an admin
+        if (in_array($memberId, $adminList) && $user->user_id !== $group->group_creator) {
+            return response()->json(['message' => 'Only the group creator can kick out other admins'], 403);
+        }
+    
+        // Prevent the group creator from kicking themselves out
+        if ($user->user_id === $group->group_creator && $group->group_creator === $memberId) {
+            return response()->json(['message' => 'You cannot remove yourself as the group creator'], 403);
+        }
+    
         // Check if the user to be kicked is a member of the group
         $userInGroup = UsersHasGroups::where('group_id', $groupId)
             ->where('user_id', $memberId)
             ->first();
-
+    
         if (!$userInGroup) {
             return response()->json(['message' => 'User is not a member of this group'], 404);
         }
-
+    
         // Begin transaction
         DB::beginTransaction();
-
+    
         try {
-            // Remove the user from the group
             // Remove the user from the group
             UsersHasGroups::where('group_id', $groupId)
                 ->where('user_id', $memberId)
                 ->delete();
-
+    
             // If the user is an admin, remove them from the admin list
             if (in_array($memberId, $adminList)) {
                 $adminList = array_filter(explode(',', $group->group_admins)); // Filter out empty values
@@ -930,21 +942,22 @@ public function createGroup(Request $request)
                 $group->group_admins = implode(',', $adminList); // Update the admin list in the group
                 $group->save();
             }
-
+    
             // Commit the transaction
             DB::commit();
-
+    
             return response()->json(['message' => 'User has been kicked out successfully'], 200);
         } catch (\Exception $e) {
             // Rollback the transaction if something goes wrong
             DB::rollBack();
-
+    
             // Log detailed error information
             Log::error('Error in kickOutUser: ', ['error' => $e->getMessage()]);
-
+    
             return response()->json(['message' => 'Failed to kick out the user', 'error' => $e->getMessage()], 500);
         }
     }
+        
 
     /* public group join */
 
