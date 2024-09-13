@@ -437,7 +437,7 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
           
        /* private group join request */
        Route::post('/groups/join-request-private/{groupId}', [GroupsController::class, 'joinRequestPrivateGroup']);
-      /* private group join request */
+      /* private group le request */
         Route::delete('/groups/cancel-join-request/{groupId}', [GroupsController::class, 'cancelJoinRequest']);
         /*     get join request for specific group */
         Route::get('group/join-requests', [GroupsController::class, 'getUsersWithJoinRequests']);
@@ -515,7 +515,11 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        //get specific page members
        Route::get('/getspecificpagemember', [PagesController::class, 'getAllPageMember']);
 
+       // Route to join a public group
+       Route::post('page/join/{pageId}', [PagesController::class, 'joinPage']);
 
+       // Route to leave a group
+      Route::post('page/leave/{pageId}', [PagesController::class, 'leavePage']);
 
 
        /*  <<< --- IAccount --->>> */

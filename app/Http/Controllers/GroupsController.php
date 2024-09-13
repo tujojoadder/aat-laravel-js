@@ -577,7 +577,7 @@ public function createGroup(Request $request)
         $userId = $user->user_id;
 
         // Find the group by ID
-        $group = Groups::where('group_id', $request->id)->first();
+        $group = Groups::where('group_id', $request->id)->firstOrFail();
 
         // Initialize variables
         $isAdmin = false;
@@ -985,7 +985,6 @@ public function createGroup(Request $request)
 
 
     /* public group leave */
-
     public function leaveGroup(Request $request, $groupId)
     {
 

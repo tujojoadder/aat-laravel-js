@@ -532,8 +532,8 @@ class PagesController extends Controller
         // Get Authenticated user
         $user = auth()->user();
         $userId = $user->user_id;
-
-        // Find the group by ID
+    
+        // Find the page by ID, selecting the fields except 'page_admins'
         $page = Pages::select(
             'page_id',
             'page_name',
@@ -544,31 +544,37 @@ class PagesController extends Controller
             'category',
             'location',
             'phone',
-            'email',
+            'email'
         )
-            ->where('page_id', $request->id)->first();
-
+        ->where('page_id', $request->id)->firstOrFail();
+    
         // Initialize variables
         $isAdmin = false;
         $joinStatus = false;
-
-
-        // Check if the group exists
+    
+        // Check if the page exists
         if ($page) {
-            // Check if the authenticated user is an admin of the group
-            $isAdmin = str_contains($page->page_admins, $userId);
-
-            // Check if the authenticated user is a member of the group
+            // Fetch the page_admins to process, but not return
+            $pageAdmins = Pages::where('page_id', $request->id)->value('page_admins');
+    
+            // Check if the authenticated user is an admin of the page
+            $isAdmin = str_contains($pageAdmins, $userId);
+    
+            // Check if the authenticated user is a member of the page
             $joinStatus = UsersHasPages::where('user_id', $userId)
                 ->where('page_id', $request->id)
                 ->exists();
         }
-        // Add isAdmin, joinStatus, and isRequest to the group data
+    
+        // Convert the page data to an array and add custom flags
         $pageData = $page ? $page->toArray() : [];
         $pageData['isAdmin'] = $isAdmin; // Add isAdmin flag
         $pageData['joinStatus'] = $joinStatus; // Add joinStatus flag
+    
+        // Return the response without 'page_admins'
         return response()->json(['data' => $pageData]);
     }
+    
 
 
     /* getSpecificPagePosts */
@@ -681,4 +687,75 @@ class PagesController extends Controller
         // Return the page members as a JSON response, including the is_friend and friend_request_sent fields
         return response()->json($users);
     }
+    
+    
+    /* public page */
+     public function joinPage(Request $request, $pageId)
+     {
+         // Get the authenticated user
+         $user = auth()->user();
+         $userId = $user->user_id;
+         // Clean the input
+ 
+         $pageId = cleanInput($pageId);
+         // Data transaction
+         DB::transaction(function () use ($userId, $pageId) {
+             // Check if the group exists
+             $page = Pages::where('page_id', $pageId)->first();
+ 
+             if (!$page) {
+                 // Group does not exist, throw an exception to trigger transaction rollback
+                 throw new \Exception('Group not found');
+             }
+
+                 // Create a record in the UsersHasPage model
+                 UsersHasPages::create([
+                     'user_id' => $userId,
+                     'page_id' => $pageId
+                 ]);
+            
+         });
+ 
+         // Handle success response
+         return response()->json(['message' => 'Page joined successful'], 200);
+     }
+
+/* public page leave */
+public function leavePage(Request $request, $pageId)
+{
+
+
+    // Get the authenticated user
+    $user = auth()->user();
+    $userId = $user->user_id;
+    // Clean the input
+    $pageId = cleanInput($pageId);
+    // Data transaction
+    DB::transaction(function () use ($userId, $pageId) {
+        // Check if the group exists
+        $page = Pages::where('page_id', $pageId)->first();
+
+        if (!$page) {
+            // Group does not exist, throw an exception to trigger transaction rollback
+            throw new \Exception('Page not found');
+        }
+
+        // Check if the user is a member of the group
+        $membership = UsersHasPages::where('user_id', $userId)->where('page_id', $pageId)->first();
+
+        if (!$membership) {
+            // Membership record does not exist
+            throw new \Exception('User is not a member of the Page');
+        }
+
+        // Remove the user from the group
+        UsersHasPages::where('user_id', $userId)->where('page_id', $pageId)->delete();
+    });
+
+    // Handle success response
+    return response()->json(['message' => 'Successfully left the page'], 200);
+}
+
+
+
 }
