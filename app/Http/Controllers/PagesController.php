@@ -63,9 +63,9 @@ class PagesController extends Controller
     {
         // Validate the request data
         $validatedData = $request->validate([
-            'page_name' => 'required|string|max:35',
+            'page_name' => 'required|string|max:40',
             'page_details' => 'required|string|max:10000',
-            'category' => 'required|string|max:35',
+            'category' => 'required|string|max:40',
         ]);
 
         // Extract and clean input data
@@ -323,66 +323,7 @@ class PagesController extends Controller
         ]);
     }
 
-    // Update Page name
-    public function updatePageName($pageId, Request $request)
-    {
-
-        $request->merge(['pageId' => $pageId]);
-        $this->validate($request, [
-            'name' => 'required|string|max:50',
-            'pageId' => 'required',
-        ]);
-        $user = auth()->user();
-        $userId = $user->user_id;
-        $pageId = cleanInput($pageId);
-        $name = cleanInput($request->name);
-        $page = Pages::where('page_id', $pageId)->first();
-
-        if (!$page) {
-            return response()->json(['message' => 'Page not found'], 404);
-        }
-        $admin = $page->page_admins;
-        if (!Str::contains($admin, $userId)) {
-            return response([
-                'message' => 'You are not admin'
-            ]);
-        }
-
-        $page->update(['page_name' => $name]);
-        return response()->json(['message' => 'Page name updated successfully']);
-    }
-
-
-
-    //Update page details
-    public function updatePageDetails($pageId, Request $request)
-    {
-
-        $request->merge(['pageId' => $pageId]);
-        $this->validate($request, [
-            'details' => 'required|string|max:10000',
-            'pageId' => 'required|string|max:50',
-        ]);
-        $user = auth()->user();
-        $userId = $user->user_id;
-        $pageId = cleanInput($pageId);
-        $details = cleanInput($request->details);
-        $page = Pages::where('page_id', $pageId)->first();
-
-        if (!$page) {
-            return response()->json(['message' => 'Page not found'], 404);
-        }
-        $admin = $page->page_admins;
-        if (!Str::contains($admin, $userId)) {
-            return response([
-                'message' => 'You are not admin'
-            ]);
-        }
-        $page->update(['page_details' => $details]);
-        return response()->json(['message' => 'Page details updated successfully']);
-    }
-
-
+    
 
     /*    Pages that auth user are admin */
     public function getPagesWhereAdmin()
@@ -754,6 +695,186 @@ public function leavePage(Request $request, $pageId)
 
     // Handle success response
     return response()->json(['message' => 'Successfully left the page'], 200);
+}
+
+
+
+    // Update Group name
+    public function updatePageName($pageId, Request $request)
+    {
+
+       
+        $request->merge(['pageId' => $pageId]);
+        $this->validate($request, [
+            'name' => 'required|string|max:40',
+            'pageId' => 'required|string|max:40',
+        ]);
+        $user = auth()->user();
+        $userId = $user->user_id;
+        $pageId = cleanInput($pageId);
+        $name = cleanInput($request->name);
+
+        $pageMember = UsersHasPages::where('user_id', $userId)
+            ->where('page_id', $pageId)
+            ->first();
+        if (!$pageMember) {
+            return response([
+                'message' => 'You are not member of this page'
+            ], 422);
+        }
+
+
+        $page = Pages::where('page_id', $pageId)->first();
+
+        if (!$page) {
+            return response()->json(['message' => 'Page not found'], 404);
+        }
+        $page->update(['page_name' => $name]);
+        return response()->json(['message' => 'Page name updated successfully']);
+    }
+
+
+
+
+
+
+
+
+    //Update group details
+    public function updatePageDetails($pageId, Request $request)
+    {
+        $request->merge(['pageId' => $pageId]);
+        $this->validate($request, [
+            'details' => 'required|string|max:10000',
+            'pageId' => 'required|string|max:50',
+        ]);
+        $user = auth()->user();
+        $userId = $user->user_id;
+        $pageId = cleanInput($pageId);
+        $details = cleanInput($request->details);
+
+        $pageMember = UsersHasPages::where('user_id', $userId)
+            ->where('page_id', $pageId)
+            ->first();
+        if (!$pageMember) {
+            return response([
+                'message' => 'You are not member of this [page]'
+            ], 422);
+        }
+
+
+        $page = Pages::where('page_id', $pageId)->first();
+
+        if (!$page) {
+            return response()->json(['message' => 'Page not found'], 404);
+        }
+        $page->update(['page_details' => $details]);
+        return response()->json(['message' => 'Group details updated successfully']);
+    }
+
+
+
+
+    // Update Group location
+    public function updatePageLocation($pageId, Request $request)
+    {
+
+       
+        $request->merge(['pageId' => $pageId]);
+        $this->validate($request, [
+            'location' => 'required|string|max:100',
+            'pageId' => 'required|string|max:40',
+        ]);
+        $user = auth()->user();
+        $userId = $user->user_id;
+        $pageId = cleanInput($pageId);
+        $location = cleanInput($request->location);
+
+        $pageMember = UsersHasPages::where('user_id', $userId)
+            ->where('page_id', $pageId)
+            ->first();
+        if (!$pageMember) {
+            return response([
+                'message' => 'You are not member of this page'
+            ], 422);
+        }
+
+
+        $page = Pages::where('page_id', $pageId)->first();
+
+        if (!$page) {
+            return response()->json(['message' => 'Page not found'], 404);
+        }
+        $page->update(['location' => $location]);
+        return response()->json(['message' => 'Page location updated successfully']);
+    }
+
+
+ // Update Group location
+ public function updatePagePhone($pageId, Request $request)
+ {
+    
+     $request->merge(['pageId' => $pageId]);
+     $this->validate($request, [
+         'phone' => 'required|string|max:30',
+         'pageId' => 'required|string|max:40',
+     ]);
+     $user = auth()->user();
+     $userId = $user->user_id;
+     $pageId = cleanInput($pageId);
+     $phone = cleanInput($request->phone);
+
+     $pageMember = UsersHasPages::where('user_id', $userId)
+         ->where('page_id', $pageId)
+         ->first();
+     if (!$pageMember) {
+         return response([
+             'message' => 'You are not member of this page'
+         ], 422);
+     }
+
+
+     $page = Pages::where('page_id', $pageId)->first();
+
+     if (!$page) {
+         return response()->json(['message' => 'Page not found'], 404);
+     }
+     $page->update(['phone' => $phone]);
+     return response()->json(['message' => 'Page phone updated successfully']);
+ }
+
+
+// Update Group location
+public function updatePageEmail($pageId, Request $request)
+{
+   
+    $request->merge(['pageId' => $pageId]);
+    $this->validate($request, [
+        'email' => 'required|email|max:50',
+        'pageId' => 'required|string|max:40',
+    ]);
+    $user = auth()->user();
+    $userId = $user->user_id;
+    $pageId = cleanInput($pageId);
+    $email = cleanInput($request->email);
+
+    $pageMember = UsersHasPages::where('user_id', $userId)
+        ->where('page_id', $pageId)
+        ->first();
+    if (!$pageMember) {
+        return response([
+            'message' => 'You are not member of this page'
+        ], 422);
+    }
+
+
+    $page = Pages::where('page_id', $pageId)->first();
+
+    if (!$page) {
+        return response()->json(['message' => 'Page not found'], 404);
+    }
+    $page->update(['email' => $email]);
+    return response()->json(['message' => 'Page email updated successfully']);
 }
 
 

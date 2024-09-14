@@ -105,7 +105,7 @@ Route::post('/storyandques/create', [HadithController::class, 'createHadithQues'
 
 
 
-       
+
 
 
 /* <---  Demo registration   ---> */
@@ -171,7 +171,7 @@ Route::delete('/deletecoverphoto', [CoverPhotoController::class, 'destroy'])->na
 Route::middleware('auth:sanctum')->group(function () {
 
 
-Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDetails');
+       Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDetails');
 
 
        //<-- Bluetick Users (Everyone gender) -->
@@ -190,19 +190,19 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        Route::get('/profile/{user_id}', [UserController::class, 'view_profile'])->name('profile.show');
 
        /* <--- Friend  ---> */
-     //get friend sugestion 7 record for home
+       //get friend sugestion 7 record for home
        Route::get('/friendsuggestionhome', [FriendRequestController::class, 'getFriendSuggestionHome']);
 
        //get User info for show others profile 
-        Route::get('/userdetails/{id}', [FriendRequestController::class, 'getUserInfo']);
+       Route::get('/userdetails/{id}', [FriendRequestController::class, 'getUserInfo']);
 
 
-       
+
        //send friend request
        Route::post('/sendfriendrequest', [FriendRequestController::class, 'send_friendrequest']);
        //cancel friend request
        Route::post('/cancelfriendrequest', [FriendRequestController::class, 'cancel_friend_request']);
-      
+
        // view auth user friend requests
        Route::get('/users/friendrequestlist', [FriendRequestController::class, 'friend_requestlist'])->name('friendrequestlist');
 
@@ -215,18 +215,18 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        // Retrive all friends of auth user
        Route::get('/users/getfriendids', [FriendRequestController::class, 'getFriendIds'])->name('getFriendIds');
 
-   /*    Friend --->>home */
-   Route::get('/auth-friend-requests', [FriendRequestController::class, 'friend_request']);
-   Route::get('/getsuggestionfriends', [FriendRequestController::class, 'getsuggestionfriend']);
-   /*   Friend --->>sentRequest  */
-/* get all sented request auuth user did pendding*/ 
-  Route::get('/sentfriendrequest', [FriendRequestController::class, 'getSentFriendRequest']);
-   
-      
-      
-      
-      
-      
+       /*    Friend --->>home */
+       Route::get('/auth-friend-requests', [FriendRequestController::class, 'friend_request']);
+       Route::get('/getsuggestionfriends', [FriendRequestController::class, 'getsuggestionfriend']);
+       /*   Friend --->>sentRequest  */
+       /* get all sented request auuth user did pendding*/
+       Route::get('/sentfriendrequest', [FriendRequestController::class, 'getSentFriendRequest']);
+
+
+
+
+
+
        /* <---  Post ---> */
 
        // Create User Post
@@ -380,8 +380,8 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        Route::post('groups/{groupId}/add-admin/{newAdmin}', [GroupsController::class, 'addAdmin'])
               ->name('addAdmin.group');
 
-    //(Both-->public/private) remove user from group
-    Route::delete('/groups/{groupId}/kick-out-member/{memberId}', [GroupsController::class, 'kickOutUser']);
+       //(Both-->public/private) remove user from group
+       Route::delete('/groups/{groupId}/kick-out-member/{memberId}', [GroupsController::class, 'kickOutUser']);
 
 
 
@@ -403,30 +403,30 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        //upadete group details 
        Route::put('/groups/{groupId}/update/details', [GroupsController::class, 'updateGroupDetails'])
               ->name('upadte.details.group');
-        //Retrive joined groups(Not admin)
-        Route::get('/groups/joined-not-admin', [GroupsController::class, 'getJoinedGroupsButNotAdmin']);
+       //Retrive joined groups(Not admin)
+       Route::get('/groups/joined-not-admin', [GroupsController::class, 'getJoinedGroupsButNotAdmin']);
        //right -->Retrive joined groups(Not admin)
        Route::get('/groups/joined-not-admin-right', [GroupsController::class, 'getJoinedGroupsButNotAdminRight']);
-       
-       // Route to join a public group
-      Route::post('groups/join/{groupId}', [GroupsController::class, 'joinPublicGroup'])->name('groups.join');
 
-        // Route to leave a group
+       // Route to join a public group
+       Route::post('groups/join/{groupId}', [GroupsController::class, 'joinPublicGroup'])->name('groups.join');
+
+       // Route to leave a group
        Route::post('groups/leave/{groupId}', [GroupsController::class, 'leaveGroup'])->name('groups.leave');
-       
-        //get specific groupdetails 
-      //Retrive joined groups(admin)
-      Route::get('/groups/joined-admin', [GroupsController::class, 'getGroupsWhereAdmin']);
-    
-         // group suggestions
-         Route::get('/groups/suggestions', [GroupsController::class, 'getGroupSuggestion']);
-    
-     //get specific groupdetails 
+
+       //get specific groupdetails 
+       //Retrive joined groups(admin)
+       Route::get('/groups/joined-admin', [GroupsController::class, 'getGroupsWhereAdmin']);
+
+       // group suggestions
+       Route::get('/groups/suggestions', [GroupsController::class, 'getGroupSuggestion']);
+
+       //get specific groupdetails 
        Route::get('/groupdetails/{id}', [GroupsController::class, 'groupDetails']);
-      /* get specific group posts */
-      Route::get('/getspecificgroupposts', [GroupsController::class, 'getSpecificGroupPosts']);
-    /*    get specific group posts approval requests*/
-    Route::get('/getspecificgrouppostapprovalrequestes', [GroupsController::class, 'getSpecificGroupPostsApprovalRequestes']);
+       /* get specific group posts */
+       Route::get('/getspecificgroupposts', [GroupsController::class, 'getSpecificGroupPosts']);
+       /*    get specific group posts approval requests*/
+       Route::get('/getspecificgrouppostapprovalrequestes', [GroupsController::class, 'getSpecificGroupPostsApprovalRequestes']);
 
        //get specific group photo
        Route::get('/getspecificgroupphotos', [GroupsController::class, 'getSpecificGroupPhotos']);
@@ -434,20 +434,20 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        Route::get('/getspecificgroupmember', [GroupsController::class, 'getAllGroupMember']);
        //get specific group  for manage
        Route::get('/getspecificgroupmembermanage', [GroupsController::class, 'gettAllGroupMemberManage']);
-          
+
        /* private group join request */
        Route::post('/groups/join-request-private/{groupId}', [GroupsController::class, 'joinRequestPrivateGroup']);
-      /* private group le request */
-        Route::delete('/groups/cancel-join-request/{groupId}', [GroupsController::class, 'cancelJoinRequest']);
-        /*     get join request for specific group */
-        Route::get('group/join-requests', [GroupsController::class, 'getUsersWithJoinRequests']);
+       /* private group le request */
+       Route::delete('/groups/cancel-join-request/{groupId}', [GroupsController::class, 'cancelJoinRequest']);
+       /*     get join request for specific group */
+       Route::get('group/join-requests', [GroupsController::class, 'getUsersWithJoinRequests']);
 
-      // Manage join group request(add,cancel)
-      Route::post('managejoingrouprequest', [GroupsController::class, 'manageJoinGroupRequest']);
-      // approvGroupPost
-      Route::post('/groups/{groupId}/posts/{postId}/approve', [GroupsController::class, 'approvGroupPost']);
-      // reject approvGroupPost
-      Route::delete('/groups/{groupId}/posts/{postId}/reject', [GroupsController::class, 'RejectApprovGroupPost']);
+       // Manage join group request(add,cancel)
+       Route::post('managejoingrouprequest', [GroupsController::class, 'manageJoinGroupRequest']);
+       // approvGroupPost
+       Route::post('/groups/{groupId}/posts/{postId}/approve', [GroupsController::class, 'approvGroupPost']);
+       // reject approvGroupPost
+       Route::delete('/groups/{groupId}/posts/{postId}/reject', [GroupsController::class, 'RejectApprovGroupPost']);
        // Create group Post
        Route::post('group/post/create', [PostsController::class, 'createGroupPost']);
 
@@ -483,13 +483,13 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        Route::post('page/addadmin/{pageId}/{newAdminId}', [PagesController::class, 'addAdmin'])
               ->name('addadmin.page');
        // get pages where auth user is admin
-      Route::get('/get-pages-where-admin', [PagesController::class, 'getPagesWhereAdmin']);
+       Route::get('/get-pages-where-admin', [PagesController::class, 'getPagesWhereAdmin']);
        // get liked pages
        Route::get('/get-pages-liked', [PagesController::class, 'getLikedPages']);
        // get page suggestions
        Route::get('/get-pages-suggestion', [PagesController::class, 'getPageSuggestion']);
-     //get specific groupdetails 
-     Route::get('/pagedetails/{id}', [PagesController::class, 'pageDetails']);
+       //get specific groupdetails 
+       Route::get('/pagedetails/{id}', [PagesController::class, 'pageDetails']);
 
 
        //Retrive Page members
@@ -502,14 +502,12 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        Route::get('/page/{pageId}/post', [PagesController::class, 'getPagePosts'])
               ->name('retrivePost.page');
        //upadete page name 
-       Route::put('/page/{pageId}/update/name', [PagesController::class, 'updatePageName'])
-              ->name('upadte.name.page');
+       Route::put('/page/{pageId}/update/name', [PagesController::class, 'updatePageName']);
        //upadete page details 
-       Route::put('/page/{pageId}/update/details', [PagesController::class, 'updatePageDetails'])
-              ->name('upadte.details.page');
+       Route::put('/page/{pageId}/update/details', [PagesController::class, 'updatePageDetails']);
 
-      /* get specific page posts */
-      Route::get('/getspecificpageposts', [PagesController::class, 'getSpecificPagePosts']);
+       /* get specific page posts */
+       Route::get('/getspecificpageposts', [PagesController::class, 'getSpecificPagePosts']);
        //get specific page photo
        Route::get('/getspecificpagephotos', [PagesController::class, 'getSpecificPagePhotos']);
        //get specific page members
@@ -519,7 +517,21 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        Route::post('page/join/{pageId}', [PagesController::class, 'joinPage']);
 
        // Route to leave a group
-      Route::post('page/leave/{pageId}', [PagesController::class, 'leavePage']);
+       Route::post('page/leave/{pageId}', [PagesController::class, 'leavePage']);
+       //upadete pages name 
+       Route::put('/pages/{pageId}/update/name', [PagesController::class, 'updatePageName']);
+       //upadete pages details 
+       Route::put('/pages/{pageId}/update/details', [PagesController::class, 'updatePageDetails']);
+
+
+
+       //upadete pages location 
+       Route::put('/pages/{pageId}/update/location', [PagesController::class, 'updatePageLocation']);
+       //upadete pages phone 
+       Route::put('/pages/{pageId}/update/phone', [PagesController::class, 'updatePagePhone']);
+       //upadete pages email 
+       Route::put('/pages/{pageId}/update/email', [PagesController::class, 'updatePageEmail']);
+
 
 
        /*  <<< --- IAccount --->>> */
@@ -607,9 +619,9 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
               ->name('getUsersWhoLiked.likes');
 
 
-      /* <--- LogOut --> */
-      Route::post('/logout', [LoginController::class, 'logOut'])
-      ->name('logOut');
+       /* <--- LogOut --> */
+       Route::post('/logout', [LoginController::class, 'logOut'])
+              ->name('logOut');
        /*  <<< --- Report --->>> */
 
        //Report any Model
@@ -627,63 +639,60 @@ Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDe
        /*    <---- chat ----> */
        Route::post('/chat', [DemoRegisterController::class, 'chat']);
 
-/* <---- Hadith ----> */
-/* Hadith for show in hadith box */
-Route::get('/get-random-hadith', [HadithController::class, 'getRandomHadith'])
-->name('getRandomhadith');
+       /* <---- Hadith ----> */
+       /* Hadith for show in hadith box */
+       Route::get('/get-random-hadith', [HadithController::class, 'getRandomHadith'])
+              ->name('getRandomhadith');
 
 
-/*<---- Day Hadith ---> */
+       /*<---- Day Hadith ---> */
 
-/* setdayhadith */
-Route::post('/setdayhadith', [HadithController::class, 'setDayHadith'])
-->name('setDayHadith');
-/*  Get all user day hadith  */
-Route::get('/getdayhadiths', [HadithController::class, 'getDayHadiths'])
-->name('getDayHadiths');
-/* like day hadith */
-Route::post('/likedayhadith', [HadithController::class, 'likeDayHadith'])
-->name('likeDayHadith');
-/* Day hadith Details  */
-Route::post('/dayhadithdetails', [HadithController::class, 'dayHadithDetails']);
-
-
-
-/* Post */
-Route::get('/getposts', [PostsController::class, 'getPosts']);
+       /* setdayhadith */
+       Route::post('/setdayhadith', [HadithController::class, 'setDayHadith'])
+              ->name('setDayHadith');
+       /*  Get all user day hadith  */
+       Route::get('/getdayhadiths', [HadithController::class, 'getDayHadiths'])
+              ->name('getDayHadiths');
+       /* like day hadith */
+       Route::post('/likedayhadith', [HadithController::class, 'likeDayHadith'])
+              ->name('likeDayHadith');
+       /* Day hadith Details  */
+       Route::post('/dayhadithdetails', [HadithController::class, 'dayHadithDetails']);
 
 
 
-        /* Others Profile   */
-
-Route::get('/getspecificuserposts', [ProfileController::class, 'getSpecificUserPosts']);
-Route::get('/getspecificuserphotos', [ProfileController::class, 'getSpecificUserPhotos']);
-/* get all followers for specific user on profile*/
-Route::get('/getspecificuserfollower', [ProfileController::class, 'getAllUserFollower']);
-/* Following User */
-Route::get('/getspecificuserfollowing', [ProfileController::class, 'getAllUserFollowing']);
-// view specific user friend list
-Route::get('/getspecificuserfriendids', [FriendRequestController::class, 'getSpecificUserFriendDetails'])->name('getSpecificUserFriendIds');
+       /* Post */
+       Route::get('/getposts', [PostsController::class, 'getPosts']);
 
 
 
-            /* Auth user Profile   */
+       /* Others Profile   */
 
-Route::get('/getauthuserposts', [ProfileController::class, 'getAuthUserPosts']);
-Route::get('/getauthuserphotos', [ProfileController::class, 'getAuthUserPhotos']);
-/* get all followers for specific user on profile*/
-Route::get('/getauthuserfollower', [ProfileController::class, 'getAllAuthUserFollower']);
-/* Following User */
-Route::get('/getauthuserfollowing', [ProfileController::class, 'getAllAuthUserFollowing']);
-// view auth user friend list
-Route::get('/getauthuserfriendids', [FriendRequestController::class, 'getAuthUserFriendDetails']);
-//set Mprofile picture to user
-Route::post('/setmprofile', [ProfileController::class, 'setMProfilePictuire'])->name('setmpicture');
-//set Fprofile picture to user
-Route::post('/setfprofile', [ProfileController::class, 'setFProfilePictuire']);
+       Route::get('/getspecificuserposts', [ProfileController::class, 'getSpecificUserPosts']);
+       Route::get('/getspecificuserphotos', [ProfileController::class, 'getSpecificUserPhotos']);
+       /* get all followers for specific user on profile*/
+       Route::get('/getspecificuserfollower', [ProfileController::class, 'getAllUserFollower']);
+       /* Following User */
+       Route::get('/getspecificuserfollowing', [ProfileController::class, 'getAllUserFollowing']);
+       // view specific user friend list
+       Route::get('/getspecificuserfriendids', [FriendRequestController::class, 'getSpecificUserFriendDetails'])->name('getSpecificUserFriendIds');
 
 
 
+       /* Auth user Profile   */
+
+       Route::get('/getauthuserposts', [ProfileController::class, 'getAuthUserPosts']);
+       Route::get('/getauthuserphotos', [ProfileController::class, 'getAuthUserPhotos']);
+       /* get all followers for specific user on profile*/
+       Route::get('/getauthuserfollower', [ProfileController::class, 'getAllAuthUserFollower']);
+       /* Following User */
+       Route::get('/getauthuserfollowing', [ProfileController::class, 'getAllAuthUserFollowing']);
+       // view auth user friend list
+       Route::get('/getauthuserfriendids', [FriendRequestController::class, 'getAuthUserFriendDetails']);
+       //set Mprofile picture to user
+       Route::post('/setmprofile', [ProfileController::class, 'setMProfilePictuire'])->name('setmpicture');
+       //set Fprofile picture to user
+       Route::post('/setfprofile', [ProfileController::class, 'setFProfilePictuire']);
 
 
 
@@ -692,18 +701,16 @@ Route::post('/setfprofile', [ProfileController::class, 'setFProfilePictuire']);
 
 
 
-/*  About */
-Route::post('/about/createorupdate', [AboutController::class, 'storeOrUpdate']);
-Route::get('/getabout', [AboutController::class, 'getAbout']);
-
-/*<---- Cover photo ----> */
-//view cover photo
-Route::get('/viewcoverphotostore', [CoverPhotoController::class, 'view'])->name('viewcp');
-//set cover photo to user
-Route::post('/setcoverphoto', [CoverPhotoController::class, 'setcoverphoto'])->name('setcp');
 
 
 
+       /*  About */
+       Route::post('/about/createorupdate', [AboutController::class, 'storeOrUpdate']);
+       Route::get('/getabout', [AboutController::class, 'getAbout']);
 
-
+       /*<---- Cover photo ----> */
+       //view cover photo
+       Route::get('/viewcoverphotostore', [CoverPhotoController::class, 'view'])->name('viewcp');
+       //set cover photo to user
+       Route::post('/setcoverphoto', [CoverPhotoController::class, 'setcoverphoto'])->name('setcp');
 });

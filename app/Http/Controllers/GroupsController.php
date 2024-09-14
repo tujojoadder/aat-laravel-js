@@ -293,8 +293,8 @@ public function createGroup(Request $request)
 
         $request->merge(['groupId' => $groupId]);
         $this->validate($request, [
-            'name' => 'required|string|max:35',
-            'groupId' => 'required|string|max:35',
+            'name' => 'required|string|max:40',
+            'groupId' => 'required|string|max:40',
         ]);
         $user = auth()->user();
         $userId = $user->user_id;
