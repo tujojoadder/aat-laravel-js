@@ -162,7 +162,7 @@ class PagesController extends Controller
         }
     }
 
-    //Add admins on pages
+    /* //Add admins on pages
 
     public function addAdmin(Request $request, $pageId, $newAdmin)
     {
@@ -223,7 +223,7 @@ class PagesController extends Controller
                 'message' => 'Page not found'
             ]);
         }
-    }
+    } */
 
 
     //Retrive Page Members
@@ -560,7 +560,7 @@ class PagesController extends Controller
     }
 
 
-    /* Get all users of a specific group */
+    /* Get all users of a specific Page */
     public function getAllPageMember(Request $request)
     {
         // Clean and get the page ID from the request query
@@ -878,5 +878,201 @@ public function updatePageEmail($pageId, Request $request)
 }
 
 
+    /* gettAllGroupMemberManage */
+    public function gettAllPageMemberManage(Request $request)
+    {
+        // Clean and get the page ID from the request query
+        $pageId = cleanInput($request->query('id'));
+
+        // Find the page using the page_id
+        $pages = Pages::where('page_id', $pageId)->first();
+
+        // Check if page exists
+        if (!$pages) {
+            return response()->json(['error' => 'Page not found.'], 404);
+        }
+
+        // Group creator ID
+        $pagesCreatorId = $pages->page_creator;
+
+        // Define the number of members per page
+        $perPage = $request->query('per_page', 10);
+        $page = $request->query('page', 1);
+
+        // Get the list of admin IDs for the group
+        $adminIds = explode(',', $pages->page_admins);
+
+        // Retrieve all users associated with this group using pagination
+        $users = $pages->user()->paginate($perPage, ['*'], 'page', $page);
+
+        // Get the authenticated user's ID
+        $authUserId = auth()->user()->user_id;
+        //is auth user is isCreator
+        $isAuthIsCreator = auth()->user()->user_id == $pagesCreatorId ? true : false  ;
+
+        // Iterate over the paginated group members to add the isAdmin, isCreator, and isAuth fields
+        $users->getCollection()->transform(function ($user) use ($adminIds, $pageId, $pagesCreatorId, $authUserId,$isAuthIsCreator) {
+            return [
+                'page_id' => $pageId,
+                'user_id' => $user->user_id,
+                'user_fname' => $user->user_fname,
+                'user_lname' => $user->user_lname,
+                'profile_picture' => $user->profile_picture,
+                'identifier' => $user->identifier,
+                'isAdmin' => in_array($user->user_id, $adminIds) ? true : false, // Set isAdmin to true if the member is an admin, false otherwise
+                'isCreator' => $user->user_id == $pagesCreatorId ? true : false, // Set isCreator to true if the member is the group creator, false otherwise
+                'isAuth' => $user->user_id == $authUserId ? true : false, // Set isAuth to true if the member is the authenticated user, false otherwise
+                'isAuthIsCreator'=>$isAuthIsCreator
+            ];
+        });
+
+        // Return the group members as a JSON response, including the isAdmin, isCreator, and isAuth fields
+        return response()->json($users);
+    }
+
+
+
+    public function addAdmin(Request $request, $pageId, $newMember)
+    {
+        $user = auth()->user();
+
+        $pageId = cleanInput($pageId);
+        $newMember = cleanInput($newMember);
+        $isnewMember = User::find($newMember);
+        if (!$isnewMember) {
+            return response([
+                'message' => 'New Member Id not founded'
+            ]);
+        }
+
+        // Your existing logic for checking if the user is an admin and if the new member is valid
+        $page = Pages::where('page_id', $pageId)->first();
+
+        if ($page) {
+            $admin = $page->page_admins;
+            if (!Str::contains($admin, $user->user_id)) {
+                return response([
+                    'message' => 'You are not admin'
+                ]);
+            } else {
+
+                if (Str::contains($admin, $newMember)) {
+                    return response([
+                        'message' => 'User is already an admin of this group.'
+                    ], 422); // HTTP 422 Unprocessable Entity
+                } else {
+                    $newmemberId = User::where('user_id', $newMember)->first();
+                    if ($newmemberId->pages->contains($pageId)) {
+                        $admin_list = explode(',', $admin); // Split the string into an array
+
+                        $number_of_admins = count($admin_list);
+
+                        if ($number_of_admins <= 30) {
+                            // Update the admin column with the concatenated value
+                            $newAdminValue = $admin . ',' . $newMember;
+                            $page->update(['page_admins' => $newAdminValue]);
+
+                            return response([
+                                'message' => 'Admin updated successfully.'
+                            ]);
+                        } else {
+                            return response([
+                                'message' => 'There can be maximum 30 admins for page'
+                            ]);
+                        }
+                    } else {
+                        return response([
+                            'message' => 'The user is not member of this page'
+                        ]);
+                    }
+                }
+            }
+        } else {
+            return response([
+                'message' => 'Page not found'
+            ]);
+        }
+    }
+
+
+
+    //Both(public/private) Remove from group
+    public function kickOutUser(Request $request, $pageId, $memberId)
+    {
+        $user = auth()->user(); // The authenticated user (the one performing the action)
+    
+        // Clean the input
+        $pageId = cleanInput($pageId);
+        $memberId = cleanInput($memberId);
+    
+        // Find the page
+        $page = Pages::where('page_id', $pageId)->first();
+    
+        if (!$page) {
+            return response()->json(['message' => 'Page not found'], 404);
+        }
+    
+        // Check if the authenticated user is an admin of the group
+        $adminList = explode(',', $page->page_admins);
+    
+        if (!in_array($user->user_id, $adminList)) {
+            return response()->json(['message' => 'You are not an admin of this page'], 403); // HTTP 403 Forbidden
+        }
+    
+        // Check if the user being kicked is the group creator
+        if ($page->page_creator === $memberId) {
+            return response()->json(['message' => 'You cannot kick out the page creator'], 403);
+        }
+    
+        // Ensure that only the group creator can kick out an admin
+        if (in_array($memberId, $adminList) && $user->user_id !== $page->page_creator) {
+            return response()->json(['message' => 'Only the page creator can kick out other admins'], 403);
+        }
+    
+        // Prevent the group creator from kicking themselves out
+        if ($user->user_id === $page->page_creator && $page->page_creator === $memberId) {
+            return response()->json(['message' => 'You cannot remove yourself as the page creator'], 403);
+        }
+    
+        // Check if the user to be kicked is a member of the group
+        $userInPage = UsersHasPages::where('page_id', $pageId)
+            ->where('user_id', $memberId)
+            ->first();
+    
+        if (!$userInPage) {
+            return response()->json(['message' => 'User is not a member of this page'], 404);
+        }
+    
+        // Begin transaction
+        DB::beginTransaction();
+    
+        try {
+            // Remove the user from the group
+            UsersHasPages::where('page_id', $pageId)
+                ->where('user_id', $memberId)
+                ->delete();
+    
+            // If the user is an admin, remove them from the admin list
+            if (in_array($memberId, $adminList)) {
+                $adminList = array_filter(explode(',', $page->page_admins)); // Filter out empty values
+                $adminList = array_diff($adminList, [$memberId]); // Remove the user from the admin list
+                $page->page_admins = implode(',', $adminList); // Update the admin list in the group
+                $page->save();
+            }
+    
+            // Commit the transaction
+            DB::commit();
+    
+            return response()->json(['message' => 'User has been kicked out successfully'], 200);
+        } catch (\Exception $e) {
+            // Rollback the transaction if something goes wrong
+            DB::rollBack();
+    
+            // Log detailed error information
+            Log::error('Error in kickOutUser: ', ['error' => $e->getMessage()]);
+    
+            return response()->json(['message' => 'Failed to kick out the user', 'error' => $e->getMessage()], 500);
+        }
+    }
 
 }

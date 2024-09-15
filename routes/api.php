@@ -379,7 +379,6 @@ Route::middleware('auth:sanctum')->group(function () {
        //(Both-->public/private) Set new admins group(the new admin have to member of the group)
        Route::post('groups/{groupId}/add-admin/{newAdmin}', [GroupsController::class, 'addAdmin'])
               ->name('addAdmin.group');
-
        //(Both-->public/private) remove user from group
        Route::delete('/groups/{groupId}/kick-out-member/{memberId}', [GroupsController::class, 'kickOutUser']);
 
@@ -513,6 +512,10 @@ Route::middleware('auth:sanctum')->group(function () {
        //get specific page members
        Route::get('/getspecificpagemember', [PagesController::class, 'getAllPageMember']);
 
+       //get specific page members for manage
+       Route::get('/getspecificpagememberformanage', [PagesController::class, 'gettAllPageMemberManage']);
+
+
        // Route to join a public group
        Route::post('page/join/{pageId}', [PagesController::class, 'joinPage']);
 
@@ -531,6 +534,11 @@ Route::middleware('auth:sanctum')->group(function () {
        Route::put('/pages/{pageId}/update/phone', [PagesController::class, 'updatePagePhone']);
        //upadete pages email 
        Route::put('/pages/{pageId}/update/email', [PagesController::class, 'updatePageEmail']);
+       //(Both-->public/private) Set new admins group(the new admin have to member of the group)
+       Route::post('page/{pageId}/add-admin/{newAdmin}', [PagesController::class, 'addAdmin']);
+       //(Both-->public/private) remove user from group
+       Route::delete('/page/{pageId}/kick-out-member/{memberId}', [PagesController::class, 'kickOutUser']);
+
 
 
 
