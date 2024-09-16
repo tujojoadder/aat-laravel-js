@@ -23,6 +23,7 @@ use App\Http\Controllers\PagesController;
 use App\Http\Controllers\PostsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfilePictureController;
+use App\Http\Controllers\QuizGameController;
 use App\Http\Controllers\RepliesController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StoryController;
@@ -721,4 +722,19 @@ Route::middleware('auth:sanctum')->group(function () {
        Route::get('/viewcoverphotostore', [CoverPhotoController::class, 'view'])->name('viewcp');
        //set cover photo to user
        Route::post('/setcoverphoto', [CoverPhotoController::class, 'setcoverphoto'])->name('setcp');
+
+
+     /*  Quiz */
+     Route::post('/random-hadith', [QuizGameController::class, 'getRandomHadith']);
+     Route::post('get-random-question/{hadithId}', [QuizGameController::class, 'getRandomQuestionAnswerSet']);
+     Route::post('check-answer', [QuizGameController::class, 'checkAnswer']);
+
+
+
+
+
+
+
+
 });
+       
