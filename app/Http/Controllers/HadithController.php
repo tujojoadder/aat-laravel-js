@@ -100,6 +100,9 @@ class HadithController extends Controller
                 // Assuming you have a Question model
                 QuestionAnswerSet::create($questionData);
             }
+
+           $theHadith=Hadith::where('hadith_id',$hadithId)->first();
+            $theHadith->update(['has_ques' => 'yes']);
         });
 
         return redirect()->back()->with('message', 'Hadith question inserted successfully');

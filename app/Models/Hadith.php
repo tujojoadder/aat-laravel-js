@@ -19,7 +19,9 @@ class Hadith extends Model
      protected $fillable = [
        'hadith_id',
        'hadith',
-       'book'
+       'book',
+       'has_ques',
+       'language',
 
     ];
     public function questionAnswerSets()
