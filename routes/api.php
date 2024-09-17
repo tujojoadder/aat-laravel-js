@@ -728,6 +728,7 @@ Route::middleware('auth:sanctum')->group(function () {
      Route::post('/random-hadith', [QuizGameController::class, 'getRandomHadith']);
      Route::post('get-random-question/{hadithId}', [QuizGameController::class, 'getRandomQuestionAnswerSet']);
      Route::post('check-answer', [QuizGameController::class, 'checkAnswer']);
+     Route::get('get-current-story', [QuizGameController::class, 'getCurrentStory']);
 
 
 
