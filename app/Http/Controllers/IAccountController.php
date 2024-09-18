@@ -469,4 +469,30 @@ public function index()
 
 
 
+
+
+  /* get posts where group_id is not null */
+  public function getRandomIaccountPosts(Request $request)
+  {
+      $user = auth()->user();
+      $perPage = $request->query('per_page', 5);
+      $page = $request->query('page', 1);
+
+      // Fetch posts where group_id is not null
+      $posts = Posts::whereNotNull('iaccount_id')
+          ->with([
+              'iaccount:iaccount_id,identifier,iaccount_name,iaccount_picture',
+              'textPost',
+              'imagePost',
+              'group:group_id,group_name,group_picture' // Only select group_id and group_picture from the group table
+          ])
+          ->paginate($perPage, ['*'], 'page', $page);
+
+      return response()->json($posts);
+  }
+
+
+
+    
+
 }

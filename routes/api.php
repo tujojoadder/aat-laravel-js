@@ -545,12 +545,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
        /*  <<< --- IAccount --->>> */
 
-
        //Create IAccount
        Route::post('/iaccount/create', [IAccountController::class, 'createIAccount'])
               ->name('createIAccount.iaccount');
-
-       //Retrive Iaccount followers
+       //get random group Post
+       Route::get('iaccount/randomposts', [IAccountController::class, 'getRandomIaccountPosts']);
+    
+    
+    
+    
+    
+              //Retrive Iaccount followers
        Route::get('/iaccount/getfollowers/{iaccountId}', [IAccountController::class, 'getIaccountFollower'])
               ->name('getfollowers.iaccount');
        //Retrive how many iaccount user following
