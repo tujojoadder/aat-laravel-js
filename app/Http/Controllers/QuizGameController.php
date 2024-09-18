@@ -149,7 +149,11 @@ class QuizGameController extends Controller
             ];
             //Delete record from current story table
             $currentStory = CurrentStory::where('story_id', $hadithId)->first();
+           
+           if ($currentStory) {
             $currentStory->delete();
+           }
+         
             // Commit the transaction
             DB::commit();
 
@@ -202,7 +206,7 @@ class QuizGameController extends Controller
                         'hadith_id' => $questionAnswerSet->hadith_id,
                         'first_ans' => $answers['first_ans'],
                         'second_ans' => $answers['second_ans'],
-                        'reading' => true,
+                        'reading' => 'yes',
 
 
                     ];
@@ -220,12 +224,18 @@ class QuizGameController extends Controller
                 if ($hadith) {
                     $currentStory->hadith_text = $hadith->hadith;
                     $currentStory->hadith_id = $hadith->hadith_id;
-                    $currentStory->reading = false;
+                    $currentStory->reading = 'no';
                 }
 
                 // Return response with the currentStory containing hadith
-                return response()->json(['data' => $currentStory]);
+                return response()->json($currentStory);
             }
+        }else{
+            $response=[
+                'reading' => 'none',
+            ];
+            return response()->json($response);
+
         }
     }
 }
