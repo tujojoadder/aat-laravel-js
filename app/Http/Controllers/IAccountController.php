@@ -63,35 +63,47 @@ class IAccountController extends Controller
         $user = auth()->user();
         $userId = $user->user_id;
         $iaccountId = Str::uuid();
-
-
+    
+        // Check if the user already has 3 iAccounts
+        $iaccountCount = IAccount::where('iaccount_creator', $userId)->count();
+    
+        if ($iaccountCount >= 3) {
+            return response()->json([
+                'message' => 'You have reached the maximum limit of 3 iAccounts.'
+            ], 403); // 403 Forbidden status code
+        }
+    
+        // Validation rules with a custom message for exceeding the 30 character limit
         $this->validate($request, [
-            'iaccount_name' => 'required|string|max:50'
+            'iaccount_name' => 'required|string|max:30'
+        ], [
+            'iaccount_name.max' => 'The iAccount name may not be greater than 30 characters.'
         ]);
-
-
+    
         $iaccountName = cleanInput($request->iaccount_name);
-
-        $group_nameidentifierBase = preg_replace('/[^\p{L}0-9]+/u', '', $iaccountName);
-        $identifierBase = strtolower($group_nameidentifierBase);
+    
+        $i_Chanel_nameidentifierBase = preg_replace('/[^\p{L}0-9]+/u', '', $iaccountName);
+        $identifierBase = strtolower($i_Chanel_nameidentifierBase);
+        
         // Generate the identifier
         $identifier = $this->generateIdentifier($identifierBase);
-
+    
+        // Create the iAccount
         IAccount::create([
             'iaccount_id' => $iaccountId,
             'identifier' => $identifier,
             'iaccount_name' => $iaccountName,
             'iaccount_creator' => $userId,
-            'iaccount_picture' => 'storage/defaultProfile/iaccount.jpg',
-            'iaccount_cover' => 'storage/defaultCover/iaccount.jpg',
-
+            'iaccount_picture' => 'http://127.0.0.1:8000/storage/mprofile_picture/iaccount.jpg',
+            'iaccount_cover' => 'http://127.0.0.1:8000/storage/cover_photo/iaccount.jpg',
         ]);
-
-
+    
         return response()->json([
             'message' => 'IAccount is created successfully'
         ]);
     }
+    
+
 
 
 
