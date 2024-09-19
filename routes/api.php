@@ -551,6 +551,14 @@ Route::middleware('auth:sanctum')->group(function () {
        //get random group Post
        Route::get('iaccount/randomposts', [IAccountController::class, 'getRandomIaccountPosts']);
     
+       // get pages where auth user is admin
+       Route::get('/get-your-iaccounts', [IAccountController::class, 'getYourIaccounts']);
+       // get liked iaccounts
+       Route::get('/get-iaccounts-liked', [IAccountController::class, 'getLikedIaccount']);
+
+
+
+
     
     
     
