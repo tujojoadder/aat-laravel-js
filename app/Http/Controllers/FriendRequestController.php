@@ -375,7 +375,7 @@ class FriendRequestController extends Controller
                     'user_lname' => $user->user_lname,
                     'profile_picture' => $user->profile_picture,
                     'identifier' => $user->identifier,
-                    'is_friend' => in_array($user->user_id, $authFriendIdsArray) ? true : false, // Set is_friend to true if the friend is in the auth user's friend list, false otherwise
+                    'is_friend' => $user->user_id == $authUserId || in_array($user->user_id, $authFriendIdsArray) ? true : false, // Set is_friend to true if the friend is in the auth user's friend list, false otherwise
                     'friend_request_sent' => $friendRequestExists ? true : false, // Set friend_request_sent to true if a friend request has been sent, false otherwise
                 ];
             });
