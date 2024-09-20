@@ -478,7 +478,7 @@ class IAccountController extends Controller
     {
         $user = auth()->user();
         $perPage = $request->query('per_page', 5);
-        $page = $request->query('page', 1);
+        $iaccount = $request->query('page', 1);
 
         // Fetch posts where group_id is not null
         $posts = Posts::whereNotNull('iaccount_id')
@@ -488,7 +488,7 @@ class IAccountController extends Controller
                 'imagePost',
                 'group:group_id,group_name,group_picture' // Only select group_id and group_picture from the group table
             ])
-            ->paginate($perPage, ['*'], 'page', $page);
+            ->paginate($perPage, ['*'], 'page', $iaccount);
 
         return response()->json($posts);
     }
@@ -501,12 +501,12 @@ class IAccountController extends Controller
 
         // Define pagination
         $perPage = $request->input('per_page', 5);
-        $page = $request->input('page', 1);
+        $iaccount = $request->input('page', 1);
 
         // Fetch iAccounts created by the user with pagination
         $iAccounts = IAccount::where('iaccount_creator', $user->user_id)
             ->select('iaccount_id', 'iaccount_name', 'iaccount_picture', 'iaccount_cover', 'identifier')
-            ->paginate($perPage, ['*'], 'page', $page);
+            ->paginate($perPage, ['*'], 'page', $iaccount);
 
         // Return the paginated response
         return response()->json([
@@ -527,7 +527,7 @@ class IAccountController extends Controller
 
     // Define how many items per page (or get it from the request)
     $perPage = $request->input('per_page', 8); // Default to 2 items per page
-    $page = $request->input('page', 1); // Default to page 1
+    $iaccount = $request->input('page', 1); // Default to page 1
 
     // Retrieve the iAccount IDs the user is linked to from 'users_has_iaccount' table
     $userIAccountIds = UsersHasIAccounts::where('user_id', $user->user_id)
@@ -535,7 +535,7 @@ class IAccountController extends Controller
 
     // Paginate the corresponding iAccounts from the 'iaccounts' table
     $iAccounts = IAccount::whereIn('iaccount_id', $userIAccountIds)
-        ->paginate($perPage, ['*'], 'page', $page);
+        ->paginate($perPage, ['*'], 'page', $iaccount);
 
     // Return the paginated response
     return response()->json([
@@ -550,8 +550,68 @@ class IAccountController extends Controller
     
 
 
+public function iaccountDetails(Request $request)
+{
+    // Get Authenticated user
+    $user = auth()->user();
+    $userId = $user->user_id;
+
+    // Find the page by ID, selecting the fields except 'page_admins'
+    $iaccount = IAccount::select(
+        'iaccount_id',
+        'iaccount_name',
+        'identifier',
+        'iaccount_picture',
+        'iaccount_cover',
+        'iaccount_creator',
+      
+    )
+    ->where('iaccount_id', $request->id)->firstOrFail();
+
+    // Initialize variables
+    $isCreator = false;
+    $joinStatus = false;
+
+    // Check if the page exists
+    if ($iaccount) {
+
+        // Check if the authenticated user is an creator of the page
+        $isCreator = ($iaccount->iaccount_creator === $user->user_id); 
+
+        // Check if the authenticated user is a member of the page
+        $joinStatus = UsersHasIAccounts::where('user_id', $userId)
+            ->where('iaccount_id', $request->id)
+            ->exists();
+    }
+
+    // Convert the page data to an array and add custom flags
+    $iaccountData = $iaccount ? $iaccount->toArray() : [];
+    $iaccountData['isCreator'] = $isCreator; // Add isCreator flag
+    $iaccountData['joinStatus'] = $joinStatus; // Add joinStatus flag
+
+    // Return the response without 'page_admins'
+    return response()->json(['data' => $iaccountData]);
+}
 
 
+
+
+
+ /* get for specific group posts  */
+ public function getSpecificIaccountPosts(Request $request)
+ {
+     $user = auth()->user();
+     $specificIaccountId = cleanInput($request->query('id'));
+     // Debug the value of $specificIaccountId
+     $perPage = $request->query('per_page', 5);
+     $page = $request->query('page', 1);
+
+     $posts = Posts::where('iaccount_id', $specificIaccountId)
+         ->with(['iaccount', 'textPost', 'imagePost'])
+         ->paginate($perPage, ['*'], 'page', $page);
+
+     return response()->json($posts);
+ }
 
 
 }

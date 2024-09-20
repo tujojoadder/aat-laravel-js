@@ -555,6 +555,10 @@ Route::middleware('auth:sanctum')->group(function () {
        Route::get('/get-your-iaccounts', [IAccountController::class, 'getYourIaccounts']);
        // get liked iaccounts
        Route::get('/get-iaccounts-liked', [IAccountController::class, 'getLikedIaccount']);
+       //get specific IAccount 
+       Route::get('/iaccountdetails/{id}', [IAccountController::class, 'iaccountDetails']);
+       /* get specific group posts */
+       Route::get('/getspecificiaccountposts', [IAccountController::class, 'getSpecificIaccountPosts']);
 
 
 
