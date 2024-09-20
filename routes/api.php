@@ -563,6 +563,10 @@ Route::middleware('auth:sanctum')->group(function () {
        Route::get('/getspecificichannelphotos', [IAccountController::class, 'getSpecificIAccountPhotos']);
        // view specific user friend list
        Route::get('/getspecificiaccountfollowerids', [IAccountController::class, 'getIAccountFollowrDetails']);
+       // Route to join iaccount
+       Route::post('iaccount/join/{iChannelId}', [IAccountController::class, 'joinIAccount']);
+       // Route to leave iaccount
+       Route::post('iaccount/leave/{iChannelId}', [IAccountController::class, 'leaveIAccount']);
 
 
 

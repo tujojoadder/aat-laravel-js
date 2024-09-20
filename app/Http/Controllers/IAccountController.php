@@ -523,173 +523,238 @@ class IAccountController extends Controller
 
 
     public function getLikedIaccount(Request $request)
-{
-    // Get the authenticated user
-    $user = auth()->user();
+    {
+        // Get the authenticated user
+        $user = auth()->user();
 
-    // Define how many items per page (or get it from the request)
-    $perPage = $request->input('per_page', 8); // Default to 2 items per page
-    $iaccount = $request->input('page', 1); // Default to page 1
+        // Define how many items per page (or get it from the request)
+        $perPage = $request->input('per_page', 8); // Default to 2 items per page
+        $iaccount = $request->input('page', 1); // Default to page 1
 
-    // Retrieve the iAccount IDs the user is linked to from 'users_has_iaccount' table
-    $userIAccountIds = UsersHasIAccounts::where('user_id', $user->user_id)
-        ->pluck('iaccount_id'); // Get just the IDs
+        // Retrieve the iAccount IDs the user is linked to from 'users_has_iaccount' table
+        $userIAccountIds = UsersHasIAccounts::where('user_id', $user->user_id)
+            ->pluck('iaccount_id'); // Get just the IDs
 
-    // Paginate the corresponding iAccounts from the 'iaccounts' table
-    $iAccounts = IAccount::whereIn('iaccount_id', $userIAccountIds)
-        ->paginate($perPage, ['*'], 'page', $iaccount);
+        // Paginate the corresponding iAccounts from the 'iaccounts' table
+        $iAccounts = IAccount::whereIn('iaccount_id', $userIAccountIds)
+            ->paginate($perPage, ['*'], 'page', $iaccount);
 
-    // Return the paginated response
-    return response()->json([
-        'data' => $iAccounts->items(),          // Paginated items
-        'current_page' => $iAccounts->currentPage(),
-        'per_page' => $iAccounts->perPage(),
-        'total' => $iAccounts->total(),
-        'total_pages' => $iAccounts->lastPage(),
-    ]);
-}
-
-    
-
-
-public function iaccountDetails(Request $request)
-{
-    // Get Authenticated user
-    $user = auth()->user();
-    $userId = $user->user_id;
-
-    // Find the page by ID, selecting the fields except 'page_admins'
-    $iaccount = IAccount::select(
-        'iaccount_id',
-        'iaccount_name',
-        'identifier',
-        'iaccount_picture',
-        'iaccount_cover',
-        'iaccount_creator',
-      
-    )
-    ->where('iaccount_id', $request->id)->firstOrFail();
-
-    // Initialize variables
-    $isCreator = false;
-    $joinStatus = false;
-
-    // Check if the page exists
-    if ($iaccount) {
-
-        // Check if the authenticated user is an creator of the page
-        $isCreator = ($iaccount->iaccount_creator === $user->user_id); 
-
-        // Check if the authenticated user is a member of the page
-        $joinStatus = UsersHasIAccounts::where('user_id', $userId)
-            ->where('iaccount_id', $request->id)
-            ->exists();
+        // Return the paginated response
+        return response()->json([
+            'data' => $iAccounts->items(),          // Paginated items
+            'current_page' => $iAccounts->currentPage(),
+            'per_page' => $iAccounts->perPage(),
+            'total' => $iAccounts->total(),
+            'total_pages' => $iAccounts->lastPage(),
+        ]);
     }
 
-    // Convert the page data to an array and add custom flags
-    $iaccountData = $iaccount ? $iaccount->toArray() : [];
-    $iaccountData['isCreator'] = $isCreator; // Add isCreator flag
-    $iaccountData['joinStatus'] = $joinStatus; // Add joinStatus flag
-
-    // Return the response without 'page_admins'
-    return response()->json(['data' => $iaccountData]);
-}
 
 
 
+    public function iaccountDetails(Request $request)
+    {
+        // Get Authenticated user
+        $user = auth()->user();
+        $userId = $user->user_id;
+
+        // Find the page by ID, selecting the fields except 'page_admins'
+        $iaccount = IAccount::select(
+            'iaccount_id',
+            'iaccount_name',
+            'identifier',
+            'iaccount_picture',
+            'iaccount_cover',
+            'iaccount_creator',
+
+        )
+            ->where('iaccount_id', $request->id)->firstOrFail();
+
+        // Initialize variables
+        $isCreator = false;
+        $joinStatus = false;
+
+        // Check if the page exists
+        if ($iaccount) {
+
+            // Check if the authenticated user is an creator of the page
+            $isCreator = ($iaccount->iaccount_creator === $user->user_id);
+
+            // Check if the authenticated user is a member of the page
+            $joinStatus = UsersHasIAccounts::where('user_id', $userId)
+                ->where('iaccount_id', $request->id)
+                ->exists();
+        }
+
+        // Convert the page data to an array and add custom flags
+        $iaccountData = $iaccount ? $iaccount->toArray() : [];
+        $iaccountData['isCreator'] = $isCreator; // Add isCreator flag
+        $iaccountData['joinStatus'] = $joinStatus; // Add joinStatus flag
+
+        // Return the response without 'page_admins'
+        return response()->json(['data' => $iaccountData]);
+    }
 
 
- /* get for specific group posts  */
- public function getSpecificIaccountPosts(Request $request)
- {
-     $user = auth()->user();
-     $specificIaccountId = cleanInput($request->query('id'));
-     // Debug the value of $specificIaccountId
-     $perPage = $request->query('per_page', 5);
-     $page = $request->query('page', 1);
-
-     $posts = Posts::where('iaccount_id', $specificIaccountId)
-         ->with(['iaccount', 'textPost', 'imagePost'])
-         ->paginate($perPage, ['*'], 'page', $page);
-
-     return response()->json($posts);
- }
 
 
- /* get for specific group all photo */
- public function getSpecificIAccountPhotos(Request $request)
- {
-     // Clean the input and get the user ID from the request query
-     $specificIAccountId = cleanInput($request->query('id'));
 
-     // Set default pagination values, with the option to customize via query parameters
-     $perPage = $request->query('per_page', 6); // default to 10 per page
-     $page = $request->query('page', 1);
+    /* get for specific group posts  */
+    public function getSpecificIaccountPosts(Request $request)
+    {
+        $user = auth()->user();
+        $specificIaccountId = cleanInput($request->query('id'));
+        // Debug the value of $specificIaccountId
+        $perPage = $request->query('per_page', 5);
+        $page = $request->query('page', 1);
 
-     // Query for the posts with associated image posts for the specific user, paginate the results
-     $posts = Posts::where('iaccount_id', $specificIAccountId)
-         ->with('imagePost') // Eager load the image posts relationship
-         ->whereHas('imagePost') // Ensure we only get posts with associated image posts
-         ->paginate($perPage, ['*'], 'page', $page);
+        $posts = Posts::where('iaccount_id', $specificIaccountId)
+            ->with(['iaccount', 'textPost', 'imagePost'])
+            ->paginate($perPage, ['*'], 'page', $page);
 
-     // Return the paginated result as JSON
-     return response()->json($posts);
- }
+        return response()->json($posts);
+    }
 
- public function getIAccountFollowrDetails(Request $request)
- {
-     // Clean the input and get the iAccount ID from the request query
-     $iAccountId = cleanInput($request->query('id'));
- 
-     // Define the number of friends per page
-     $perPage = 10;
- 
-     // Get the authenticated user's ID
-     $authUserId = auth()->id();
- 
-     // Retrieve the friend list for the authenticated user
-     $authFriendList = FriendList::where('user_id', $authUserId)->first();
- 
-     // Retrieve all users who are associated with the specified iAccount ID
-     $iAccountUsers = UsersHasIAccounts::where('iaccount_id', $iAccountId)->pluck('user_id');
- 
-     if ($iAccountUsers->isNotEmpty()) {
-         // Retrieve the authenticated user's friend IDs if available
-         $authFriendIdsArray = [];
-         if ($authFriendList && !empty($authFriendList->user_friends_ids)) {
-             $authFriendIdsArray = explode(',', $authFriendList->user_friends_ids);
-         }
- 
-         // Retrieve details of users who have the iAccount and paginate them
-         $usersWithIAccount = User::whereIn('user_id', $iAccountUsers)
-             ->select('user_id', 'user_fname', 'user_lname', 'profile_picture', 'identifier')
-             ->paginate($perPage);
- 
-         // Iterate over the paginated users to add the is_friend and friend_request_sent fields
-         $usersWithIAccount->getCollection()->transform(function ($user) use ($authFriendIdsArray, $authUserId) {
-             // Check if the authenticated user has sent a friend request to this user
-             $friendRequestExists = FriendRequest::where('sender_id', $authUserId)
-                 ->where('receiver_id', $user->user_id)
-                 ->exists();
- 
-             return [
-                 'user_id' => $user->user_id,
-                 'user_fname' => $user->user_fname,
-                 'user_lname' => $user->user_lname,
-                 'profile_picture' => $user->profile_picture,
-                 'identifier' => $user->identifier,
-                 'is_friend' => $user->user_id == $authUserId || in_array($user->user_id, $authFriendIdsArray) ? true : false, // Set is_friend to true if the friend is in the auth user's friend list, false otherwise
-                 'friend_request_sent' => $friendRequestExists ? true : false, // Set friend_request_sent to true if a friend request has been sent, false otherwise
-             ];
-         });
- 
-         // Return the user details as a JSON response, including the is_friend and friend_request_sent fields
-         return response()->json($usersWithIAccount);
-     } else {
-         // Handle the case where no users are associated with the given iAccount
-         return response()->json(['message' => 'No users found for the specified iAccount.'], 404);
-     }
- }
- 
+
+    /* get for specific group all photo */
+    public function getSpecificIAccountPhotos(Request $request)
+    {
+        // Clean the input and get the user ID from the request query
+        $specificIAccountId = cleanInput($request->query('id'));
+
+        // Set default pagination values, with the option to customize via query parameters
+        $perPage = $request->query('per_page', 6); // default to 10 per page
+        $page = $request->query('page', 1);
+
+        // Query for the posts with associated image posts for the specific user, paginate the results
+        $posts = Posts::where('iaccount_id', $specificIAccountId)
+            ->with('imagePost') // Eager load the image posts relationship
+            ->whereHas('imagePost') // Ensure we only get posts with associated image posts
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        // Return the paginated result as JSON
+        return response()->json($posts);
+    }
+
+    public function getIAccountFollowrDetails(Request $request)
+    {
+        // Clean the input and get the iAccount ID from the request query
+        $iAccountId = cleanInput($request->query('id'));
+
+        // Define the number of friends per page
+        $perPage = 10;
+
+        // Get the authenticated user's ID
+        $authUserId = auth()->id();
+
+        // Retrieve the friend list for the authenticated user
+        $authFriendList = FriendList::where('user_id', $authUserId)->first();
+
+        // Retrieve all users who are associated with the specified iAccount ID
+        $iAccountUsers = UsersHasIAccounts::where('iaccount_id', $iAccountId)->pluck('user_id');
+
+        if ($iAccountUsers->isNotEmpty()) {
+            // Retrieve the authenticated user's friend IDs if available
+            $authFriendIdsArray = [];
+            if ($authFriendList && !empty($authFriendList->user_friends_ids)) {
+                $authFriendIdsArray = explode(',', $authFriendList->user_friends_ids);
+            }
+
+            // Retrieve details of users who have the iAccount and paginate them
+            $usersWithIAccount = User::whereIn('user_id', $iAccountUsers)
+                ->select('user_id', 'user_fname', 'user_lname', 'profile_picture', 'identifier')
+                ->paginate($perPage);
+
+            // Iterate over the paginated users to add the is_friend and friend_request_sent fields
+            $usersWithIAccount->getCollection()->transform(function ($user) use ($authFriendIdsArray, $authUserId) {
+                // Check if the authenticated user has sent a friend request to this user
+                $friendRequestExists = FriendRequest::where('sender_id', $authUserId)
+                    ->where('receiver_id', $user->user_id)
+                    ->exists();
+
+                return [
+                    'user_id' => $user->user_id,
+                    'user_fname' => $user->user_fname,
+                    'user_lname' => $user->user_lname,
+                    'profile_picture' => $user->profile_picture,
+                    'identifier' => $user->identifier,
+                    'is_friend' => $user->user_id == $authUserId || in_array($user->user_id, $authFriendIdsArray) ? true : false, // Set is_friend to true if the friend is in the auth user's friend list, false otherwise
+                    'friend_request_sent' => $friendRequestExists ? true : false, // Set friend_request_sent to true if a friend request has been sent, false otherwise
+                ];
+            });
+
+            // Return the user details as a JSON response, including the is_friend and friend_request_sent fields
+            return response()->json($usersWithIAccount);
+        } else {
+            // Handle the case where no users are associated with the given iAccount
+            return response()->json(['message' => 'No users found for the specified iAccount.'], 404);
+        }
+    }
+
+
+
+    public function joinIAccount(Request $request, $iChannelId)
+    {
+        // Get the authenticated user
+        $user = auth()->user();
+        $userId = $user->user_id;
+        // Clean the input
+
+        $iChannelId = cleanInput($iChannelId);
+        // Data transaction
+        DB::transaction(function () use ($userId, $iChannelId) {
+            // Check if the group exists
+            $iaccount = IAccount::where('iaccount_id', $iChannelId)->first();
+
+            if (!$iaccount) {
+                // Group does not exist, throw an exception to trigger transaction rollback
+                throw new \Exception('IChannel not found');
+            }
+
+            // Create a record in the UsersHasGroups model
+            UsersHasIAccounts::create([
+                'user_id' => $userId,
+                'iaccount_id' => $iChannelId
+            ]);
+        });
+
+        // Handle success response
+        return response()->json(['message' => 'join successful'], 200);
+    }
+
+
+    public function leaveIAccount(Request $request, $iChannelId)
+    {
+        // Get the authenticated user
+        $user = auth()->user();
+        $userId = $user->user_id;
+        // Clean the input
+        $iChannelId = cleanInput($iChannelId);
+        // Data transaction
+        DB::transaction(function () use ($userId, $iChannelId) {
+            // Check if the group exists
+            $iaccount = IAccount::where('iaccount_id', $iChannelId)->first();
+
+            if (!$iaccount) {
+                // Group does not exist, throw an exception to trigger transaction rollback
+                throw new \Exception('IChannel not found');
+            }
+
+            // Check if the user is a member of the group
+            $membership = UsersHasIAccounts::where('user_id', $userId)->where('iaccount_id', $iChannelId)->first();
+
+            if (!$membership) {
+                // Membership record does not exist
+                throw new \Exception('User is not a member of the iChannel');
+            }
+
+            // Remove the user from the group
+            UsersHasIAccounts::where('user_id', $userId)->where('iaccount_id', $iChannelId)->delete();
+        });
+
+        // Handle success response
+        return response()->json(['message' => 'Successfully left the iChannel'], 200);
+    }
+
 
 }
