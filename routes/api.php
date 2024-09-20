@@ -559,7 +559,8 @@ Route::middleware('auth:sanctum')->group(function () {
        Route::get('/iaccountdetails/{id}', [IAccountController::class, 'iaccountDetails']);
        /* get specific group posts */
        Route::get('/getspecificiaccountposts', [IAccountController::class, 'getSpecificIaccountPosts']);
-
+       //get specific group photo
+       Route::get('/getspecificichannelphotos', [IAccountController::class, 'getSpecificIAccountPhotos']);
 
 
 
