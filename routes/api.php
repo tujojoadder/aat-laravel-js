@@ -567,7 +567,8 @@ Route::middleware('auth:sanctum')->group(function () {
        Route::post('iaccount/join/{iChannelId}', [IAccountController::class, 'joinIAccount']);
        // Route to leave iaccount
        Route::post('iaccount/leave/{iChannelId}', [IAccountController::class, 'leaveIAccount']);
-
+       //upadete iaccount name 
+       Route::put('/iaccount/{iChannelId}/update/name', [IAccountController::class, 'updateIAccountName']);
 
 
 

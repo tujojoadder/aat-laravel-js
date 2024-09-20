@@ -757,4 +757,31 @@ class IAccountController extends Controller
     }
 
 
+
+    public function updateIAccountName($iaccountId, Request $request)
+    {
+
+        $request->merge(['iChannelId' => $iaccountId]);
+        $this->validate($request, [
+            'name' => 'required|string|max:40',
+            'iChannelId' => 'required|string|max:40',
+        ]);
+        $user = auth()->user();
+        $userId = $user->user_id;
+        $iaccountId = cleanInput($iaccountId);
+        $name = cleanInput($request->name);
+
+        $iaccount = IAccount::where('iaccount_creator', $userId)->first();
+        if (!$iaccount) {
+            return response([
+                'message' => 'You are not creator of this iaccount'
+            ], 422);
+        }
+
+        $iaccount->update(['iaccount_name' => $name]);
+        return response()->json(['message' => 'IAccount name updated successfully']);
+    }
+
+
+
 }
