@@ -561,6 +561,9 @@ Route::middleware('auth:sanctum')->group(function () {
        Route::get('/getspecificiaccountposts', [IAccountController::class, 'getSpecificIaccountPosts']);
        //get specific group photo
        Route::get('/getspecificichannelphotos', [IAccountController::class, 'getSpecificIAccountPhotos']);
+       // view specific user friend list
+       Route::get('/getspecificiaccountfollowerids', [IAccountController::class, 'getIAccountFollowrDetails']);
+
 
 
 

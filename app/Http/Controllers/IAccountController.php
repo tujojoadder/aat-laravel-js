@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FriendList;
+use App\Models\FriendRequest;
 use App\Models\Groups;
 use App\Models\IAccount;
 use App\Models\ImagePosts;
@@ -634,6 +636,60 @@ public function iaccountDetails(Request $request)
      return response()->json($posts);
  }
 
-
+ public function getIAccountFollowrDetails(Request $request)
+ {
+     // Clean the input and get the iAccount ID from the request query
+     $iAccountId = cleanInput($request->query('id'));
+ 
+     // Define the number of friends per page
+     $perPage = 10;
+ 
+     // Get the authenticated user's ID
+     $authUserId = auth()->id();
+ 
+     // Retrieve the friend list for the authenticated user
+     $authFriendList = FriendList::where('user_id', $authUserId)->first();
+ 
+     // Retrieve all users who are associated with the specified iAccount ID
+     $iAccountUsers = UsersHasIAccounts::where('iaccount_id', $iAccountId)->pluck('user_id');
+ 
+     if ($iAccountUsers->isNotEmpty()) {
+         // Retrieve the authenticated user's friend IDs if available
+         $authFriendIdsArray = [];
+         if ($authFriendList && !empty($authFriendList->user_friends_ids)) {
+             $authFriendIdsArray = explode(',', $authFriendList->user_friends_ids);
+         }
+ 
+         // Retrieve details of users who have the iAccount and paginate them
+         $usersWithIAccount = User::whereIn('user_id', $iAccountUsers)
+             ->select('user_id', 'user_fname', 'user_lname', 'profile_picture', 'identifier')
+             ->paginate($perPage);
+ 
+         // Iterate over the paginated users to add the is_friend and friend_request_sent fields
+         $usersWithIAccount->getCollection()->transform(function ($user) use ($authFriendIdsArray, $authUserId) {
+             // Check if the authenticated user has sent a friend request to this user
+             $friendRequestExists = FriendRequest::where('sender_id', $authUserId)
+                 ->where('receiver_id', $user->user_id)
+                 ->exists();
+ 
+             return [
+                 'user_id' => $user->user_id,
+                 'user_fname' => $user->user_fname,
+                 'user_lname' => $user->user_lname,
+                 'profile_picture' => $user->profile_picture,
+                 'identifier' => $user->identifier,
+                 'is_friend' => $user->user_id == $authUserId || in_array($user->user_id, $authFriendIdsArray) ? true : false, // Set is_friend to true if the friend is in the auth user's friend list, false otherwise
+                 'friend_request_sent' => $friendRequestExists ? true : false, // Set friend_request_sent to true if a friend request has been sent, false otherwise
+             ];
+         });
+ 
+         // Return the user details as a JSON response, including the is_friend and friend_request_sent fields
+         return response()->json($usersWithIAccount);
+     } else {
+         // Handle the case where no users are associated with the given iAccount
+         return response()->json(['message' => 'No users found for the specified iAccount.'], 404);
+     }
+ }
+ 
 
 }
