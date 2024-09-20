@@ -60,6 +60,10 @@ class Posts extends Model
     {
         return $this->belongsTo(Groups::class, 'group_id', 'group_id');
     }
+    public function page()
+    {
+        return $this->belongsTo(Pages::class, 'page_id', 'page_id');
+    }
 
 
 

@@ -530,7 +530,7 @@ class PagesController extends Controller
         $page = $request->query('page', 1);
 
         $posts = Posts::where('page_id', $specificPageId)
-            ->with(['author', 'textPost', 'imagePost'])
+            ->with(['page:identifier,page_name,page_picture,page_id', 'textPost', 'imagePost'])
             ->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json($posts);

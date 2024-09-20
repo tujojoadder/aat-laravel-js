@@ -107,7 +107,7 @@ class PostsController extends Controller
         $user = auth()->user();
     
         $this->validate($request, [
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'text' => 'nullable|max:10000',
             'groupId' => 'required',
             'image_or_text' => 'required_without_all:image,text',
