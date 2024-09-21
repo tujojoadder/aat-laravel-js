@@ -526,6 +526,11 @@ Route::middleware('auth:sanctum')->group(function () {
        Route::put('/pages/{pageId}/update/name', [PagesController::class, 'updatePageName']);
        //upadete pages details 
        Route::put('/pages/{pageId}/update/details', [PagesController::class, 'updatePageDetails']);
+       // Create page Post
+       Route::post('page/post/create', [PostsController::class, 'createPagePost']);
+
+
+
 
 
 
@@ -569,6 +574,8 @@ Route::middleware('auth:sanctum')->group(function () {
        Route::post('iaccount/leave/{iChannelId}', [IAccountController::class, 'leaveIAccount']);
        //upadete iaccount name 
        Route::put('/iaccount/{iChannelId}/update/name', [IAccountController::class, 'updateIAccountName']);
+       // Create page Post
+       Route::post('iaccount/post/create', [PostsController::class, 'createIAccountPost']);
 
 
 

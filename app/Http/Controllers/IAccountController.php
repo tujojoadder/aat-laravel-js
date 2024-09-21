@@ -771,7 +771,9 @@ class IAccountController extends Controller
         $iaccountId = cleanInput($iaccountId);
         $name = cleanInput($request->name);
 
-        $iaccount = IAccount::where('iaccount_creator', $userId)->first();
+        $iaccount = IAccount::where('iaccount_id', $iaccountId)
+        ->where('iaccount_creator', $userId)
+        ->first();
         if (!$iaccount) {
             return response([
                 'message' => 'You are not creator of this iaccount'
