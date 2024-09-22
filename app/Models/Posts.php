@@ -50,10 +50,7 @@ class Posts extends Model
     {
         return $this->belongsTo(IAccount::class, 'iaccount_id', 'iaccount_id');
     }
-    public function likes()
-    {
-        return $this->morphMany(Likes::class, 'like_on');
-    }
+
 
     // Define the relationship to the Groups model
     public function group()

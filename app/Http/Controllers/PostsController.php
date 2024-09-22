@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Groups;
 use App\Models\IAccount;
 use App\Models\ImagePosts;
+use App\Models\Loves;
 use App\Models\Pages;
 use App\Models\Posts;
 use App\Models\TextPosts;
 use App\Models\UniqeUser;
+use App\Models\Unlikes;
 use App\Models\User;
 use App\Models\UsersHasGroups;
 use App\Models\UsersHasPages;
@@ -559,11 +561,11 @@ class PostsController extends Controller
     public function getPosts(Request $request)
     {
         $user = auth()->user();
-
+    
         // Get pagination parameters from the request, with default values
         $perPage = $request->query('per_page', 5); // Number of items per page
         $page = $request->query('page', 1); // Current page
-
+    
         // Fetch paginated posts
         $posts = Posts::where('author_id', '!=', $user->user_id)
             ->whereNull('group_id')
@@ -571,8 +573,31 @@ class PostsController extends Controller
             ->whereNull('iaccount_id')
             ->with(['author', 'textPost', 'imagePost'])
             ->paginate($perPage, ['*'], 'page', $page);
-
+    
+        // Add isLove and isUnlike to each post
+        $posts->getCollection()->transform(function ($post) use ($user) {
+            $isLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $post->post_id)
+                ->where('love_by_id', $user->user_id)
+                ->exists();
+    
+            $isUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $post->post_id)
+                ->where('unlike_by_id', $user->user_id)
+                ->exists();
+    
+            $post->isLove = $isLove;
+            $post->isUnlike = $isUnlike;
+    
+            return $post;
+        });
+    
         // Return paginated posts as JSON
         return response()->json($posts);
     }
+    
+
+
+
+
 }

@@ -12,28 +12,30 @@ Relation::enforceMorphMap([
     'comment'=>'App\Models\Comments',
     'reply'=>'App\Models\Replies',
 ]);
-class Likes extends Model
+class Unlikes extends Model
 {
-     use HasApiTokens, HasFactory, Notifiable;
+    
+    use HasApiTokens, HasFactory, Notifiable;
 
-     protected $table = 'likes'; // Specify the custom table name
-     protected $primaryKey = 'like_id'; // Specify the custom primary key
-     public $incrementing = false;
-     protected $fillable = [
-         'like_id',
-         'like_on_type',
-         'like_on_id',
-         'like_by_id',
-         'reaction_type',
-     ];
-     public function like_on()
-     {
-         return $this->morphTo('like_on');
-     }
-     public function liker()
-     {
-         return $this->belongsTo(User::class, 'like_by_id', 'user_id');
-     } 
+    protected $table = 'unlike'; // Specify the custom table name
+    protected $primaryKey = 'unlike_id'; // Specify the custom primary key
+    public $incrementing = false;
+    protected $fillable = [
+        'unlike_id',
+        'unlike_on_type',
+        'unlike_on_id',
+        'unlike_by_id',
+      
+    ];
+    public function unlike_on()
+    {
+        return $this->morphTo('unlike_on');
+    }
+    public function unliker()
+    {
+        return $this->belongsTo(User::class, 'unlike_by_id', 'user_id');
+    } 
+
      /**
      * The attributes that should be hidden for serialization.
      *

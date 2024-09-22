@@ -18,6 +18,7 @@ use App\Http\Controllers\IAccountFollowersController;
 use App\Http\Controllers\IfollowController;
 use App\Http\Controllers\LikesController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\LoveController;
 use App\Http\Controllers\MprofilePicturesController;
 use App\Http\Controllers\PagesController;
 use App\Http\Controllers\PostsController;
@@ -764,10 +765,13 @@ Route::middleware('auth:sanctum')->group(function () {
      Route::get('get-current-story', [QuizGameController::class, 'getCurrentStory']);
 
 
+   /*  Love post */
+   Route::post('/toggle-love/{loveOnType}/{loveOnId}', [LoveController::class, 'toggleLove']);
 
 
-
-
+ /*  Unlike */
+   /*  Unlike post */
+   Route::post('/toggle-unlike/{unlikeOnType}/{unlikeOnId}', [LoveController::class, 'toggleUnlike']);
 
 
 });
