@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\FprofilePictures;
+use App\Models\Loves;
 use App\Models\MprofilePicture;
 use App\Models\Posts;
 use App\Models\UniqeUser;
+use App\Models\Unlikes;
 use App\Models\User;
 use App\Models\UserFollow;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -37,7 +39,44 @@ public function getSpecificUserPosts(Request $request)
         ->whereNull('iaccount_id')
         ->with(['author', 'textPost', 'imagePost'])
         ->paginate($perPage, ['*'], 'page', $page);
+ // Fetch paginated posts
+ $posts = Posts::where('author_id', '!=', $user->user_id)
+ ->whereNull('group_id')
+ ->whereNull('page_id')
+ ->whereNull('iaccount_id')
+ ->with(['author', 'textPost', 'imagePost'])
+ ->paginate($perPage, ['*'], 'page', $page);
 
+// Add isLove, isUnlike, totalLove, and totalUnlike to each post
+$posts->getCollection()->transform(function ($post) use ($user) {
+ // Check if the current user has loved or unliked the post
+ $isLove = Loves::where('love_on_type', 'post')
+     ->where('love_on_id', $post->post_id)
+     ->where('love_by_id', $user->user_id)
+     ->exists();
+
+ $isUnlike = Unlikes::where('unlike_on_type', 'post')
+     ->where('unlike_on_id', $post->post_id)
+     ->where('unlike_by_id', $user->user_id)
+     ->exists();
+
+ // Count the total loves and unlikes for the post
+ $totalLove = Loves::where('love_on_type', 'post')
+     ->where('love_on_id', $post->post_id)
+     ->count();
+
+ $totalUnlike = Unlikes::where('unlike_on_type', 'post')
+     ->where('unlike_on_id', $post->post_id)
+     ->count();
+
+ // Add the values to the post object
+ $post->isLove = $isLove;
+ $post->isUnlike = $isUnlike;
+ $post->totalLove = $totalLove;
+ $post->totalUnlike = $totalUnlike;
+
+ return $post;
+});
     return response()->json($posts);
 }
 
@@ -125,7 +164,36 @@ public function getAuthUserPosts(Request $request)
     $posts = Posts::where('author_id', $userId)
         ->with(['author', 'textPost', 'imagePost'])
         ->paginate($perPage, ['*'], 'page', $page);
+// Add isLove, isUnlike, totalLove, and totalUnlike to each post
+$posts->getCollection()->transform(function ($post) use ($user) {
+    // Check if the current user has loved or unliked the post
+    $isLove = Loves::where('love_on_type', 'post')
+        ->where('love_on_id', $post->post_id)
+        ->where('love_by_id', $user->user_id)
+        ->exists();
 
+    $isUnlike = Unlikes::where('unlike_on_type', 'post')
+        ->where('unlike_on_id', $post->post_id)
+        ->where('unlike_by_id', $user->user_id)
+        ->exists();
+
+    // Count the total loves and unlikes for the post
+    $totalLove = Loves::where('love_on_type', 'post')
+        ->where('love_on_id', $post->post_id)
+        ->count();
+
+    $totalUnlike = Unlikes::where('unlike_on_type', 'post')
+        ->where('unlike_on_id', $post->post_id)
+        ->count();
+
+    // Add the values to the post object
+    $post->isLove = $isLove;
+    $post->isUnlike = $isUnlike;
+    $post->totalLove = $totalLove;
+    $post->totalUnlike = $totalUnlike;
+
+    return $post;
+});
     return response()->json($posts);
 }
 
