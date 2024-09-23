@@ -559,42 +559,56 @@ class PostsController extends Controller
 
     /* get for home feed  */
     public function getPosts(Request $request)
-    {
-        $user = auth()->user();
-    
-        // Get pagination parameters from the request, with default values
-        $perPage = $request->query('per_page', 5); // Number of items per page
-        $page = $request->query('page', 1); // Current page
-    
-        // Fetch paginated posts
-        $posts = Posts::where('author_id', '!=', $user->user_id)
-            ->whereNull('group_id')
-            ->whereNull('page_id')
-            ->whereNull('iaccount_id')
-            ->with(['author', 'textPost', 'imagePost'])
-            ->paginate($perPage, ['*'], 'page', $page);
-    
-        // Add isLove and isUnlike to each post
-        $posts->getCollection()->transform(function ($post) use ($user) {
-            $isLove = Loves::where('love_on_type', 'post')
-                ->where('love_on_id', $post->post_id)
-                ->where('love_by_id', $user->user_id)
-                ->exists();
-    
-            $isUnlike = Unlikes::where('unlike_on_type', 'post')
-                ->where('unlike_on_id', $post->post_id)
-                ->where('unlike_by_id', $user->user_id)
-                ->exists();
-    
-            $post->isLove = $isLove;
-            $post->isUnlike = $isUnlike;
-    
-            return $post;
-        });
-    
-        // Return paginated posts as JSON
-        return response()->json($posts);
-    }
+{
+    $user = auth()->user();
+
+    // Get pagination parameters from the request, with default values
+    $perPage = $request->query('per_page', 5); // Number of items per page
+    $page = $request->query('page', 1); // Current page
+
+    // Fetch paginated posts
+    $posts = Posts::where('author_id', '!=', $user->user_id)
+        ->whereNull('group_id')
+        ->whereNull('page_id')
+        ->whereNull('iaccount_id')
+        ->with(['author', 'textPost', 'imagePost'])
+        ->paginate($perPage, ['*'], 'page', $page);
+
+    // Add isLove, isUnlike, totalLove, and totalUnlike to each post
+    $posts->getCollection()->transform(function ($post) use ($user) {
+        // Check if the current user has loved or unliked the post
+        $isLove = Loves::where('love_on_type', 'post')
+            ->where('love_on_id', $post->post_id)
+            ->where('love_by_id', $user->user_id)
+            ->exists();
+
+        $isUnlike = Unlikes::where('unlike_on_type', 'post')
+            ->where('unlike_on_id', $post->post_id)
+            ->where('unlike_by_id', $user->user_id)
+            ->exists();
+
+        // Count the total loves and unlikes for the post
+        $totalLove = Loves::where('love_on_type', 'post')
+            ->where('love_on_id', $post->post_id)
+            ->count();
+
+        $totalUnlike = Unlikes::where('unlike_on_type', 'post')
+            ->where('unlike_on_id', $post->post_id)
+            ->count();
+
+        // Add the values to the post object
+        $post->isLove = $isLove;
+        $post->isUnlike = $isUnlike;
+        $post->totalLove = $totalLove;
+        $post->totalUnlike = $totalUnlike;
+
+        return $post;
+    });
+
+    // Return paginated posts as JSON
+    return response()->json($posts);
+}
+
     
 
 
