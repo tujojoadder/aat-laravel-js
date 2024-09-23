@@ -7,10 +7,12 @@ use App\Models\FriendRequest;
 use App\Models\Groups;
 use App\Models\IAccount;
 use App\Models\ImagePosts;
+use App\Models\Loves;
 use App\Models\Pages;
 use App\Models\Posts;
 use App\Models\TextPosts;
 use App\Models\UniqeUser;
+use App\Models\Unlikes;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Models\UsersHasIAccounts;
@@ -492,6 +494,39 @@ class IAccountController extends Controller
             ])
             ->paginate($perPage, ['*'], 'page', $iaccount);
 
+
+        // Add isLove, isUnlike, totalLove, and totalUnlike to each post
+        $posts->getCollection()->transform(function ($post) use ($user) {
+            // Check if the current user has loved or unliked the post
+            $isLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $post->post_id)
+                ->where('love_by_id', $user->user_id)
+                ->exists();
+
+            $isUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $post->post_id)
+                ->where('unlike_by_id', $user->user_id)
+                ->exists();
+
+            // Count the total loves and unlikes for the post
+            $totalLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $post->post_id)
+                ->count();
+
+            $totalUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $post->post_id)
+                ->count();
+
+            // Add the values to the post object
+            $post->isLove = $isLove;
+            $post->isUnlike = $isUnlike;
+            $post->totalLove = $totalLove;
+            $post->totalUnlike = $totalUnlike;
+
+            return $post;
+        });
+
+
         return response()->json($posts);
     }
 
@@ -612,6 +647,36 @@ class IAccountController extends Controller
             ->with(['iaccount', 'textPost', 'imagePost'])
             ->paginate($perPage, ['*'], 'page', $page);
 
+        // Add isLove, isUnlike, totalLove, and totalUnlike to each post
+        $posts->getCollection()->transform(function ($post) use ($user) {
+            // Check if the current user has loved or unliked the post
+            $isLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $post->post_id)
+                ->where('love_by_id', $user->user_id)
+                ->exists();
+
+            $isUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $post->post_id)
+                ->where('unlike_by_id', $user->user_id)
+                ->exists();
+
+            // Count the total loves and unlikes for the post
+            $totalLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $post->post_id)
+                ->count();
+
+            $totalUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $post->post_id)
+                ->count();
+
+            // Add the values to the post object
+            $post->isLove = $isLove;
+            $post->isUnlike = $isUnlike;
+            $post->totalLove = $totalLove;
+            $post->totalUnlike = $totalUnlike;
+
+            return $post;
+        });
         return response()->json($posts);
     }
 
@@ -772,8 +837,8 @@ class IAccountController extends Controller
         $name = cleanInput($request->name);
 
         $iaccount = IAccount::where('iaccount_id', $iaccountId)
-        ->where('iaccount_creator', $userId)
-        ->first();
+            ->where('iaccount_creator', $userId)
+            ->first();
         if (!$iaccount) {
             return response([
                 'message' => 'You are not creator of this iaccount'
@@ -783,7 +848,4 @@ class IAccountController extends Controller
         $iaccount->update(['iaccount_name' => $name]);
         return response()->json(['message' => 'IAccount name updated successfully']);
     }
-
-
-
 }
