@@ -639,7 +639,36 @@ class GroupsController extends Controller
             ->where('approval', true)
             ->with(['author', 'textPost', 'imagePost'])
             ->paginate($perPage, ['*'], 'page', $page);
+        // Add isLove, isUnlike, totalLove, and totalUnlike to each post
+        $posts->getCollection()->transform(function ($post) use ($user) {
+            // Check if the current user has loved or unliked the post
+            $isLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $post->post_id)
+                ->where('love_by_id', $user->user_id)
+                ->exists();
 
+            $isUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $post->post_id)
+                ->where('unlike_by_id', $user->user_id)
+                ->exists();
+
+            // Count the total loves and unlikes for the post
+            $totalLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $post->post_id)
+                ->count();
+
+            $totalUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $post->post_id)
+                ->count();
+
+            // Add the values to the post object
+            $post->isLove = $isLove;
+            $post->isUnlike = $isUnlike;
+            $post->totalLove = $totalLove;
+            $post->totalUnlike = $totalUnlike;
+
+            return $post;
+        });
         return response()->json($posts);
     }
 
@@ -1260,7 +1289,36 @@ class GroupsController extends Controller
             ->where('approval', false)
             ->with(['author', 'textPost', 'imagePost'])
             ->paginate($perPage, ['*'], 'page', $page);
+        // Add isLove, isUnlike, totalLove, and totalUnlike to each post
+        $posts->getCollection()->transform(function ($post) use ($user) {
+            // Check if the current user has loved or unliked the post
+            $isLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $post->post_id)
+                ->where('love_by_id', $user->user_id)
+                ->exists();
 
+            $isUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $post->post_id)
+                ->where('unlike_by_id', $user->user_id)
+                ->exists();
+
+            // Count the total loves and unlikes for the post
+            $totalLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $post->post_id)
+                ->count();
+
+            $totalUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $post->post_id)
+                ->count();
+
+            // Add the values to the post object
+            $post->isLove = $isLove;
+            $post->isUnlike = $isUnlike;
+            $post->totalLove = $totalLove;
+            $post->totalUnlike = $totalUnlike;
+
+            return $post;
+        });
         return response()->json($posts);
     }
 
