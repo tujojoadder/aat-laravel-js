@@ -14,16 +14,15 @@ use Illuminate\Support\Facades\Broadcast;
 */
 
 
-Broadcast::channel('privateName', function ($user) {
+Broadcast::channel('ab-private', function ($user) {
     return !is_null($user);
 });
-Broadcast::channel('track-user', function ($user) {
-    return $user;
-});
-Broadcast::channel('track-channel', function ($user) {
+
+
+Broadcast::channel('ab-presence', function ($user) {
     return $user;
 });
 
-Broadcast::channel('user-status', function ($user) {
+Broadcast::channel('status-update', function ($user) {
     return $user;
 });

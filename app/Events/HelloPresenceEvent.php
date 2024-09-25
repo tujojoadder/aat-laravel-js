@@ -10,19 +10,14 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class NewTrade implements ShouldBroadcast
+class HelloPresenceEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $trade;
-    /**
-     * Create a new event instance.
-     *
-     * @return void
-     */
-    public function __construct($trade)
+     public $message;
+    public function __construct($message)
     {
-        $this->trade=$trade;
+      $this->message=$message;
     }
 
     /**
@@ -30,8 +25,12 @@ class NewTrade implements ShouldBroadcast
      *
      * @return \Illuminate\Broadcasting\Channel|array
      */
+
+     public function broadcastWith(){
+        return ['message'=>$this->message,'How are you suku'];
+     }
     public function broadcastOn()
     {
-        return new Channel('trade');
+        return new PresenceChannel('ab-presence');
     }
 }

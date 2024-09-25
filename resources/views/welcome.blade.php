@@ -31,7 +31,7 @@
 
 
 
-    <script>
+    <script defer>
         document.addEventListener('DOMContentLoaded', function() {
             Echo.channel('trade').listen('NewTrade', (e) => {
                 console.log(e);
@@ -73,6 +73,17 @@
                 console.log(e);
             });
         });
+
+
+
+/* Hello event */
+document.addEventListener('DOMContentLoaded', function() {
+            Echo.channel('ab').listen('Hello', (e) => {
+                console.log(e);
+                console.log('oooo')
+            });
+        });
+
     </script>
     
 </body>

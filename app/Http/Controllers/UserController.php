@@ -29,6 +29,7 @@ class UserController extends Controller
         if ($user) {
             // Extract the necessary fields
             $userDetails = [
+                'user_id' => $user->user_id,
                 'profile_picture' => $user->profile_picture,
                 'user_fname' => $user->user_fname,
                 'user_lname' => $user->user_lname,
