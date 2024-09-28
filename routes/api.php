@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\BluetickUserController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\CompanyDecisionsController;
 use App\Http\Controllers\CoverPhotoController;
@@ -772,6 +773,20 @@ Route::middleware('auth:sanctum')->group(function () {
  /*  Unlike */
    /*  Unlike post */
    Route::post('/toggle-unlike/{unlikeOnType}/{unlikeOnId}', [LoveController::class, 'toggleUnlike']);
+
+
+
+    /* One to One Messgae */
+    Route::post('/chatmessage', [ChatController::class, 'sendMessage']);
+    Route::post('/loadchat', [ChatController::class, 'loadChat']);
+
+
+
+
+
+
+
+
 
 
 });

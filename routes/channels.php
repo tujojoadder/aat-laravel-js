@@ -26,3 +26,7 @@ Broadcast::channel('ab-presence', function ($user) {
 Broadcast::channel('status-update', function ($user) {
     return $user;
 });
+
+Broadcast::channel('broadcast-message', function ($user) {
+    return $user;
+});

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class chat extends Model
+class Chat extends Model
 {
      use HasApiTokens, HasFactory, Notifiable;
 
@@ -19,7 +19,8 @@ class chat extends Model
      protected $fillable = [
        'id',
        'sender_id',
-       'receiver_id'
+       'receiver_id',
+       'message'
 
     ];
      /**
