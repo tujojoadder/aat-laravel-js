@@ -56,24 +56,30 @@ class ChatController extends Controller
 
     public function loadChat(Request $request)
     {
-    
         $request->validate([
-            'receiver_id' => 'required|string|max:40',
+            'receiver_id' => 'required|string|max:46',
         ]);
+        $perPage = 10;
         $auth_user = auth()->user()->user_id;
-
-        $chats = Chat::where(function ($query) use ($auth_user, $request) {
+    
+        // Use query parameters instead of request body
+        $receiver_id = $request->query('receiver_id');
+    
+        // Fetch the chat messages based on sender and receiver
+        $chats = Chat::where(function ($query) use ($auth_user, $receiver_id) {
             $query->where('sender_id', $auth_user)
-                ->orWhere('sender_id', $request->receiver_id);
+                  ->orWhere('sender_id', $receiver_id);
         })
-            ->where(function ($query) use ($auth_user, $request) {
-                $query->where('receiver_id', $auth_user)
-                    ->orWhere('receiver_id', $request->receiver_id);
-            })
-            ->orderBy('created_at') // Order by created_at column in descending order
-            ->get();
+        ->where(function ($query) use ($auth_user, $receiver_id) {
+            $query->where('receiver_id', $auth_user)
+                  ->orWhere('receiver_id', $receiver_id);
+        })
+        ->orderBy('created_at', 'asc') // Change 'asc' if you want ascending order
+        ->paginate($perPage);
+    
+        // Return the chat messages in JSON format
         return response()->json(['chat' => $chats]);
-    }
+    } 
 
     public function deleteChat(Request $request)
     {

@@ -27,7 +27,7 @@ public function getSpecificUserPosts(Request $request)
 {
     $user = auth()->user();
     $specificUserId = cleanInput($request->query('id'));
-    
+
     // Debug the value of $specificUserId if needed
     $perPage = $request->query('per_page', 5);
     $page = $request->query('page', 1);
@@ -37,16 +37,10 @@ public function getSpecificUserPosts(Request $request)
         ->whereNull('group_id')
         ->whereNull('page_id')
         ->whereNull('iaccount_id')
+        ->whereNull('iaccount_id')
         ->with(['author', 'textPost', 'imagePost'])
         ->paginate($perPage, ['*'], 'page', $page);
- // Fetch paginated posts
- $posts = Posts::where('author_id', '!=', $user->user_id)
- ->whereNull('group_id')
- ->whereNull('page_id')
- ->whereNull('iaccount_id')
- ->with(['author', 'textPost', 'imagePost'])
- ->paginate($perPage, ['*'], 'page', $page);
-
+ 
 // Add isLove, isUnlike, totalLove, and totalUnlike to each post
 $posts->getCollection()->transform(function ($post) use ($user) {
  // Check if the current user has loved or unliked the post
@@ -162,6 +156,9 @@ public function getAuthUserPosts(Request $request)
     $page = $request->query('page', 1);
 
     $posts = Posts::where('author_id', $userId)
+    ->whereNull('group_id')
+        ->whereNull('page_id')
+        ->whereNull('iaccount_id')
         ->with(['author', 'textPost', 'imagePost'])
         ->paginate($perPage, ['*'], 'page', $page);
 // Add isLove, isUnlike, totalLove, and totalUnlike to each post

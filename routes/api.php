@@ -778,7 +778,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /* One to One Messgae */
     Route::post('/chatmessage', [ChatController::class, 'sendMessage']);
-    Route::post('/loadchat', [ChatController::class, 'loadChat']);
+    Route::get('/loadchat', [ChatController::class, 'loadChat']);
 
 
 
