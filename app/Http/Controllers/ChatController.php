@@ -83,15 +83,36 @@ class ChatController extends Controller
     }
     
 
-    public function deleteChat(Request $request)
+    public function deleteMessage(Request $request)
     {
+        // Validate the request to ensure the message_id is provided
         $request->validate([
-            'id' => 'required|string|max:255',
+            'message_id' => 'required|string|exists:chat,id', // Ensure message exists in the chats table
         ]);
-        Chat::where('id', $request->id)->delete();
-
-     /*    event(new MessageDeleteEvent($request->id)); */
-
-        return response()->json(['id' => $request->id]);
+    
+        // Retrieve the message based on the provided message_id
+        $message = Chat::find($request->message_id);
+    
+        if (!$message) {
+            return response()->json(['error' => 'Message not found'], 404);
+        }
+    
+        // Get the authenticated user's ID
+        $user_id = auth()->user()->user_id;
+    
+        // Check if the authenticated user is either the sender or the receiver of the message
+        if ($message->sender_id !== $user_id && $message->receiver_id !== $user_id) {
+            return response()->json(['error' => 'Unauthorized action'], 403);
+        }
+    
+        // Delete the message if the user is authorized
+        $message->delete();
+    
+        // Return a success response after deletion
+        return response()->json(['message' => 'Message deleted successfully'], 200);
     }
+    
+
+
+
 }

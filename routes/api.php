@@ -779,6 +779,8 @@ Route::middleware('auth:sanctum')->group(function () {
     /* One to One Messgae */
     Route::post('/chatmessage', [ChatController::class, 'sendMessage']);
     Route::get('/loadchat', [ChatController::class, 'loadChat']);
+// In routes/api.php
+Route::delete('/message/delete', [ChatController::class, 'deleteMessage']);
 
 
 
