@@ -30,3 +30,7 @@ Broadcast::channel('status-update', function ($user) {
 Broadcast::channel('broadcast-message', function ($user) {
     return $user;
 });
+
+Broadcast::channel('message-deleted', function ($user) {
+    return $user;
+});

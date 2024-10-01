@@ -107,7 +107,7 @@ class ChatController extends Controller
     
         // Delete the message if the user is authorized
         $message->delete();
-    
+        event (new \App\Events\MessageDeleteEvent($request->message_id));
         // Return a success response after deletion
         return response()->json(['message' => 'Message deleted successfully'], 200);
     }
