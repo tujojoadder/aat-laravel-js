@@ -79,6 +79,7 @@ $postId = cleanInput($postId);
 
     // Fetch paginated posts
     $comments = Comments::where('post_id',$postId)
+    ->with('commenter:user_id,user_fname,user_lname,identifier,profile_picture')
         ->paginate($perPage);
 
     // Add isLove, isUnlike, totalLove, and totalUnlike to each post
