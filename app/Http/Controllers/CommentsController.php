@@ -28,7 +28,7 @@ class CommentsController extends Controller
         // Validate the incoming request data
         $request->validate([
             'postId' => 'required|string',
-            'comment_text' => 'required|max:2000',
+            'comment_text' => 'required|max:10000',
         ]);
         $postId = cleanInput($postId);
         $post = Posts::find($postId);

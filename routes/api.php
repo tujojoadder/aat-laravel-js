@@ -619,8 +619,8 @@ Route::middleware('auth:sanctum')->group(function () {
        /*  <<< --- Comments --->>> */
 
        //create comment to any post      
-       Route::post('/post/{postId}/createcomment', [CommentsController::class, 'createPostCommment'])
-              ->name('createPostCommment.comment');
+       Route::post('/posts/{postId}/comments', [CommentsController::class, 'createPostCommment']);
+       
 
        //create specific post comments     
        Route::get('/post/{postId}/getcomment', [CommentsController::class, 'getPostComments'])
