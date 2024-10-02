@@ -623,8 +623,10 @@ Route::middleware('auth:sanctum')->group(function () {
        
 
        //create specific post comments     
-       Route::get('/post/{postId}/getcomment', [CommentsController::class, 'getPostComments'])
-              ->name('getPostComments.comment');
+  
+       Route::get('/posts/{postId}/comments', [CommentsController::class, 'getComments']);
+
+
 
        //delete specific comments     
        Route::delete('/post/{postId}/deletecomment', [CommentsController::class, 'deleteComment'])

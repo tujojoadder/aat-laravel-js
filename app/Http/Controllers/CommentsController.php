@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Comments;
 use App\Models\Groups;
+use App\Models\Loves;
 use App\Models\User;
 use App\Models\Pages;
 use App\Models\Posts;
 use App\Models\UniqeUser;
-
+use App\Models\Unlikes;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Http\Request;
@@ -60,53 +61,61 @@ class CommentsController extends Controller
 
 
 
-    //get Comment of Specific Posts
-    public function getPostComments($postId, Request $request)
-    {
-        $request->merge(['postId' => $postId]);
-        $request->validate([
-            'postId' => 'required|string|max:50',
-        ]);
+    /* get comments for specific post */
+    public function getComments(Request $request, $postId)
+{
+    $user = auth()->user();
 
-        // Clean input
-        $postId = cleanInput($postId);
+$request->merge(['postId' => $postId]);
+// Validate the incoming request data
+$request->validate([
+      'postId' => 'required|string|exists:posts,post_id',
+   
+]);
+$postId = cleanInput($postId);
 
-        // Retrieve the post
-        $post = Posts::find($postId);
+// Get pagination parameters from the request, with default values
+    $perPage = 7; // Number of items per page
 
-        // Check if the post exists
-        if (!$post) {
-            return response()->json(['message' => 'Post not found']);
-        }
+    // Fetch paginated posts
+    $comments = Comments::where('post_id',$postId)
+        ->paginate($perPage);
 
-        // Retrieve the comments for the post along with the user details
-        $comments = Comments::where('post_id', $postId)
-            ->with('commenter') // Eager load the commenter relationship
-            ->orderBy('created_at', 'desc') // Order by creation date in descending order
-            ->get();
+    // Add isLove, isUnlike, totalLove, and totalUnlike to each post
+    $comments->getCollection()->transform(function ($comment) use ($user) {
+        // Check if the current user has loved or unliked the post
+        $isLove = Loves::where('love_on_type', 'comment')
+            ->where('love_on_id', $comment->post_id)
+            ->where('love_by_id', $user->user_id)
+            ->exists();
 
-        // Format the comments data
-        $formattedComments = [];
+        $isUnlike = Unlikes::where('unlike_on_type', 'comment')
+            ->where('unlike_on_id', $comment->post_id)
+            ->where('unlike_by_id', $user->user_id)
+            ->exists();
 
-        foreach ($comments as $comment) {
-            $formattedComment = [
-                'comment_id' => $comment->comment_id,
-                'comment_text' => $comment->comment_text,
-                'created_at' => $comment->created_at,
-                'user' => [
-                    'user_id' => $comment->commenter->user_id, // Access the user_id attribute
-                    'user_fullName' => $comment->commenter->user_fname . " " . $comment->commenter->user_lname, // Access the user_id attribute
-                    'user_profile' => $comment->commenter->profile_picture, // Access the user_id attribute
-                    // Add other user attributes you may need here
-                ],
-            ];
+        // Count the total loves and unlikes for the post
+        $totalLove = Loves::where('love_on_type', 'post')
+            ->where('love_on_id', $comment->post_id)
+            ->count();
 
-            $formattedComments[] = $formattedComment;
-        }
+        $totalUnlike = Unlikes::where('unlike_on_type', 'post')
+            ->where('unlike_on_id', $comment->post_id)
+            ->count();
 
-        // Return the formatted comments data
-        return response()->json(['comments' => $formattedComments]);
-    }
+        // Add the values to the post object
+        $comment->isLove = $isLove;
+        $comment->isUnlike = $isUnlike;
+        $comment->totalLove = $totalLove;
+        $comment->totalUnlike = $totalUnlike;
+
+        return $comment;
+    });
+
+    // Return paginated posts as JSON
+    return response()->json($comments);
+}
+
 
     //Delete Specific Comment
     public function deleteComment($commentId,Request $request)
