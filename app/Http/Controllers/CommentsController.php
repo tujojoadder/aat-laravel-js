@@ -63,63 +63,63 @@ class CommentsController extends Controller
 
     /* get comments for specific post */
     public function getComments(Request $request, $postId)
-{
-    $user = auth()->user();
+    {
+        $user = auth()->user();
 
-$request->merge(['postId' => $postId]);
-// Validate the incoming request data
-$request->validate([
-      'postId' => 'required|string|exists:posts,post_id',
-   
-]);
-$postId = cleanInput($postId);
+        $request->merge(['postId' => $postId]);
+        // Validate the incoming request data
+        $request->validate([
+            'postId' => 'required|string|exists:posts,post_id',
 
-// Get pagination parameters from the request, with default values
-    $perPage = 7; // Number of items per page
+        ]);
+        $postId = cleanInput($postId);
 
-    // Fetch paginated posts
-    $comments = Comments::where('post_id',$postId)
-    ->with('commenter:user_id,user_fname,user_lname,identifier,profile_picture')
-        ->paginate($perPage);
+        // Get pagination parameters from the request, with default values
+        $perPage = 7; // Number of items per page
 
-    // Add isLove, isUnlike, totalLove, and totalUnlike to each post
-    $comments->getCollection()->transform(function ($comment) use ($user) {
-        // Check if the current user has loved or unliked the post
-        $isLove = Loves::where('love_on_type', 'comment')
-            ->where('love_on_id', $comment->post_id)
-            ->where('love_by_id', $user->user_id)
-            ->exists();
+        // Fetch paginated posts
+        $comments = Comments::where('post_id', $postId)
+            ->with('commenter:user_id,user_fname,user_lname,identifier,profile_picture')
+            ->paginate($perPage);
 
-        $isUnlike = Unlikes::where('unlike_on_type', 'comment')
-            ->where('unlike_on_id', $comment->post_id)
-            ->where('unlike_by_id', $user->user_id)
-            ->exists();
+        // Add isLove, isUnlike, totalLove, and totalUnlike to each post
+        $comments->getCollection()->transform(function ($comment) use ($user) {
+            // Check if the current user has loved or unliked the post
+            $isLove = Loves::where('love_on_type', 'comment')
+                ->where('love_on_id', $comment->comment_id)
+                ->where('love_by_id', $user->user_id)
+                ->exists();
 
-        // Count the total loves and unlikes for the post
-        $totalLove = Loves::where('love_on_type', 'post')
-            ->where('love_on_id', $comment->post_id)
-            ->count();
+            $isUnlike = Unlikes::where('unlike_on_type', 'comment')
+                ->where('unlike_on_id', $comment->comment_id)
+                ->where('unlike_by_id', $user->user_id)
+                ->exists();
 
-        $totalUnlike = Unlikes::where('unlike_on_type', 'post')
-            ->where('unlike_on_id', $comment->post_id)
-            ->count();
+            // Count the total loves and unlikes for the post
+            $totalLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $comment->comment_id)
+                ->count();
 
-        // Add the values to the post object
-        $comment->isLove = $isLove;
-        $comment->isUnlike = $isUnlike;
-        $comment->totalLove = $totalLove;
-        $comment->totalUnlike = $totalUnlike;
+            $totalUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $comment->comment_id)
+                ->count();
 
-        return $comment;
-    });
+            // Add the values to the post object
+            $comment->isLove = $isLove;
+            $comment->isUnlike = $isUnlike;
+            $comment->totalLove = $totalLove;
+            $comment->totalUnlike = $totalUnlike;
 
-    // Return paginated posts as JSON
-    return response()->json($comments);
-}
+            return $comment;
+        });
+
+        // Return paginated posts as JSON
+        return response()->json($comments);
+    }
 
 
     //Delete Specific Comment
-    public function deleteComment($commentId,Request $request)
+    public function deleteComment($commentId, Request $request)
     {
         $user = auth()->user();
         $userId = $user->user_id;
