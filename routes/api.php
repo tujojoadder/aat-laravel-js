@@ -27,6 +27,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfilePictureController;
 use App\Http\Controllers\QuizGameController;
 use App\Http\Controllers\RepliesController;
+use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StoryController;
 use App\Http\Controllers\UploadRequestController;
@@ -624,6 +625,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
        //create specific post comments     
   
+
        Route::get('/posts/{postId}/comments', [CommentsController::class, 'getComments']);
 
 
@@ -638,8 +640,10 @@ Route::middleware('auth:sanctum')->group(function () {
        /*  <<< --- Replies --->>> */
 
        //Reply any Comment  
-       Route::post('/comments/{commentId}/createreplies', [RepliesController::class, 'createReplytoComment'])
-              ->name('createReplytoComment.replies');
+              //create comment to any post      
+              Route::post('/comments/{commentId}/replies', [ReplyController::class, 'createCommmentReply']);
+       
+
 
        //retrive any Comments  Replies 
        Route::get('/comments/{commentId}/getreplies', [RepliesController::class, 'getRepliesForComment'])
@@ -785,6 +789,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::delete('/message/delete', [ChatController::class, 'deleteMessage']);
 
 
+
+ 
 
 
 
