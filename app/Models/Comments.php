@@ -38,7 +38,11 @@ class Comments extends Model
     {
         return $this->morphMany(Report::class, 'reportable');
     }
-
+    public function replies()
+    {
+        return $this->hasMany(Replies::class, 'comment_id', 'comment_id');
+    }
+    
 
      /**
      * The attributes that should be hidden for serialization.

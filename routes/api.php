@@ -640,6 +640,8 @@ Route::middleware('auth:sanctum')->group(function () {
        //Reply any Comment  
               //create comment to any post      
               Route::post('/comments/{commentId}/replies', [ReplyController::class, 'createCommmentReply']);
+           //create replies to any reply      
+            Route::post('/reply/{commentId}/replies', [ReplyController::class, 'createRepliesToReply']);
            //get specific post comments     
            Route::get('/comments/{commentId}/replies', [ReplyController::class, 'getReplies']);
 

@@ -52,6 +52,50 @@ class RepliesController extends Controller
 
 
 
+  //make reply to any Comment
+  public function createReplytoReply(Request $request, $commentId)
+  {
+      $user = auth()->user();
+      $userId = $user->user_id;
+      // Validate the incoming request data
+      $request->merge(['commentId' => $commentId]);
+      $request->validate([
+          'reply_text' => 'required|string|max:255',
+          'parent_reply_id' => 'required|string|max:50',
+          'commentId' => 'required|string|max:50',
+      ]);
+
+      $commentId = cleanInput($commentId);
+      $replyText = cleanInput($request->reply_text);
+      $parentReplyId = cleanInput($request->parent_reply_id);
+
+      // Find the comment by ID
+      $comment = Comments::find($commentId);
+
+      if (!$comment) {
+          return response()->json(['message' => 'Comment not found'], 404);
+      }
+      //create reply id
+      $repalyId = Str::uuid();
+
+      Replies::create([
+          'reply_id' => $repalyId,
+          'comment_id' => $commentId,
+          'replied_by_id' => $userId,
+          'reply_text' => $replyText,
+          'parent_reply_id' => $parentReplyId,
+      ]);
+
+      // Return a success response
+      return response()->json(['message' => 'Reply created successfully'], 201);
+  }
+
+
+
+
+
+
+
     // Retrieve all replies for a specific comment
     public function getRepliesForComment($commentId, Request $request)
     {

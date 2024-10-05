@@ -80,6 +80,7 @@ class CommentsController extends Controller
         // Fetch paginated posts
         $comments = Comments::where('post_id', $postId)
             ->with('commenter:user_id,user_fname,user_lname,identifier,profile_picture')
+            ->withCount('replies') // Add this to count the number of replies for each comment
             ->paginate($perPage);
 
         // Add isLove, isUnlike, totalLove, and totalUnlike to each post

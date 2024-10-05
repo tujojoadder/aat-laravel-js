@@ -64,6 +64,58 @@ class ReplyController extends Controller
 
 
 
+
+public function createRepliesToReply(Request $request, $commentId)
+{
+    $user = auth()->user();
+    $userId = $user->user_id;
+
+    // Merge the comment ID into the request and validate it
+    $request->merge(['commentId' => $commentId]);
+    $request->validate([
+        'commentId' => 'required|string|max:50',
+        'parent_reply_id' => 'required|max:50|string',
+        'reply_text' => 'required|max:10000',
+    ]);
+
+    // Clean and find the comment
+    $commentId = cleanInput($commentId);
+    $parentReplyId = cleanInput($request->parent_reply_id);
+    $replyText = cleanInput($request->reply_text);
+    $comment = Comments::find($commentId);
+    if (!$comment) {
+        return response()->json(['message' => 'Comment not found'], 404);
+    }
+
+    // Generate a unique reply ID
+    $replyId = Str::uuid();
+
+    // Create a new reply
+    $reply = Replies::create([
+        'reply_id' => $replyId,
+        'comment_id' => $commentId,
+        'replied_by_id' => $userId,
+        'reply_text' => $replyText,
+        'parent_reply_id' => $parentReplyId,
+    ]);
+
+    // Return a detailed response
+    return response()->json([
+        'message' => 'Reply created successfully',
+        'reply' => [
+            'reply_id' => $replyId,
+            'user_id' => $userId,
+            'parent_reply_id' => $parentReplyId,
+
+            'reply_text' => $reply->reply_text,
+            'created_at' => $reply->created_at,
+        ],
+    ]);
+}
+
+
+
+
 /* get comments for specific post */
 public function getReplies(Request $request, $CommentID)
 {
