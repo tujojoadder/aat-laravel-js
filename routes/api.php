@@ -632,12 +632,15 @@ Route::middleware('auth:sanctum')->group(function () {
        Route::delete('/post/{postId}/deletecomment', [CommentsController::class, 'deleteComment'])
               ->name('deleteComment.comment');
 
+              Route::get('/comments/{commentId}/reply-count', [CommentsController::class, 'getCommentReplyCount']);
 
 
 
        /*  <<< --- Replies --->>> */
 
        //Reply any Comment  
+
+       
               //create comment to any post      
               Route::post('/comments/{commentId}/replies', [ReplyController::class, 'createCommmentReply']);
            //create replies to any reply      

@@ -48,6 +48,8 @@ class ReplyController extends Controller
         'reply_text' => $request->reply_text,
     ]);
 
+    event (new \App\Events\ReplyEvent($reply));
+
     // Return a detailed response
     return response()->json([
         'message' => 'Reply created successfully',
@@ -171,7 +173,6 @@ public function getReplies(Request $request, $CommentID)
     // Return paginated posts as JSON
     return response()->json($replies);
 }
-
 
 
 

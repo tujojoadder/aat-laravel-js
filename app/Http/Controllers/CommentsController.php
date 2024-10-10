@@ -8,6 +8,7 @@ use App\Models\Loves;
 use App\Models\User;
 use App\Models\Pages;
 use App\Models\Posts;
+use App\Models\Replies;
 use App\Models\UniqeUser;
 use App\Models\Unlikes;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -46,8 +47,10 @@ class CommentsController extends Controller
             'post_id' => $postId,
             'commenter_id' => $UserId,
             'comment_text' => $request->comment_text,
+            'commenter_id' => $UserId
         ]);
 
+        event (new \App\Events\CommentEvent($comment));
         // Return a detailed response
         return response()->json([
             'message' => 'Comment created successfully',
@@ -63,60 +66,64 @@ class CommentsController extends Controller
 
     /* get comments for specific post */
     public function getComments(Request $request, $postId)
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
 
-        $request->merge(['postId' => $postId]);
-        // Validate the incoming request data
-        $request->validate([
-            'postId' => 'required|string|exists:posts,post_id',
+    $request->merge(['postId' => $postId]);
+    // Validate the incoming request data
+    $request->validate([
+        'postId' => 'required|string|exists:posts,post_id',
+    ]);
+    $postId = cleanInput($postId);
 
-        ]);
-        $postId = cleanInput($postId);
+    // Get pagination parameters from the request, with default values
+    $perPage = 7; // Number of items per page
 
-        // Get pagination parameters from the request, with default values
-        $perPage = 7; // Number of items per page
+    // Fetch paginated comments
+    $comments = Comments::where('post_id', $postId)
+        ->with('commenter:user_id,user_fname,user_lname,identifier,profile_picture')
+        ->orderBy('created_at', 'desc') // Sort by creation date in descending order
+        ->paginate($perPage);
 
-        // Fetch paginated posts
-        $comments = Comments::where('post_id', $postId)
-            ->with('commenter:user_id,user_fname,user_lname,identifier,profile_picture')
-            ->withCount('replies') // Add this to count the number of replies for each comment
-            ->paginate($perPage);
+    // Add isLove, isUnlike, totalLove, and totalUnlike to each comment
+    $comments->getCollection()->transform(function ($comment) use ($user) {
+        // Check if the current user has loved or unliked the comment
+        $isLove = Loves::where('love_on_type', 'comment')
+            ->where('love_on_id', $comment->comment_id)
+            ->where('love_by_id', $user->user_id)
+            ->exists();
 
-        // Add isLove, isUnlike, totalLove, and totalUnlike to each post
-        $comments->getCollection()->transform(function ($comment) use ($user) {
-            // Check if the current user has loved or unliked the post
-            $isLove = Loves::where('love_on_type', 'comment')
-                ->where('love_on_id', $comment->comment_id)
-                ->where('love_by_id', $user->user_id)
-                ->exists();
+        $isUnlike = Unlikes::where('unlike_on_type', 'comment')
+            ->where('unlike_on_id', $comment->comment_id)
+            ->where('unlike_by_id', $user->user_id)
+            ->exists();
 
-            $isUnlike = Unlikes::where('unlike_on_type', 'comment')
-                ->where('unlike_on_id', $comment->comment_id)
-                ->where('unlike_by_id', $user->user_id)
-                ->exists();
+        // Count the total loves and unlikes for the comment
+        $totalLove = Loves::where('love_on_type', 'comment')
+            ->where('love_on_id', $comment->comment_id)
+            ->count();
 
-            // Count the total loves and unlikes for the post
-            $totalLove = Loves::where('love_on_type', 'post')
-                ->where('love_on_id', $comment->comment_id)
-                ->count();
+        $totalUnlike = Unlikes::where('unlike_on_type', 'comment')
+            ->where('unlike_on_id', $comment->comment_id)
+            ->count();
 
-            $totalUnlike = Unlikes::where('unlike_on_type', 'post')
-                ->where('unlike_on_id', $comment->comment_id)
-                ->count();
+        // Count the number of replies for the comment
+        $replyCount = Replies::where('comment_id', $comment->comment_id)->count();
 
-            // Add the values to the post object
-            $comment->isLove = $isLove;
-            $comment->isUnlike = $isUnlike;
-            $comment->totalLove = $totalLove;
-            $comment->totalUnlike = $totalUnlike;
+        // Add the values to the comment object
+        $comment->isLove = $isLove;
+        $comment->isUnlike = $isUnlike;
+        $comment->totalLove = $totalLove;
+        $comment->totalUnlike = $totalUnlike;
+        $comment->reply_count = $replyCount; // Add the reply count
 
-            return $comment;
-        });
+        return $comment;
+    });
 
-        // Return paginated posts as JSON
-        return response()->json($comments);
-    }
+    // Return paginated comments as JSON
+    return response()->json($comments);
+}
+
 
 
     //Delete Specific Comment
@@ -147,4 +154,32 @@ class CommentsController extends Controller
         // Return a success message
         return response()->json(['message' => 'Comment deleted successfully']);
     }
+
+
+    public function getCommentReplyCount($commentId)
+    {
+        // Validate the commentId exists in the comments table
+        $commentId = cleanInput($commentId);
+    
+        // Check if the comment exists
+        $comment = Comments::find($commentId);
+    
+        if (!$comment) {
+            return response()->json(['error' => 'Comment not found'], 404);
+        }
+    
+        // Get the number of replies to the comment
+        $replyCount = $comment->replies()->count();
+    
+        // Return the reply count as JSON
+        return response()->json([
+            'comment_id' => $commentId,
+            'reply_count' => $replyCount
+        ]);
+    }
+    
+
+
+
+
 }

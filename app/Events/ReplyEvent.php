@@ -10,39 +10,33 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class MessageEvent implements ShouldBroadcast
+class ReplyEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
-    private $chatData;
-    public function __construct($chatData)
+   
+    private $replyData;
+    public function __construct($replyData)
     {
-        $this->chatData = $chatData;
+        $this->replyData=$replyData;
     }
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return \Illuminate\Broadcasting\Channel|array
-     */
-
+    
 
 
     public function broadcastAs()
     {
-        return 'getChatMessage';
+        return 'getReply';
     }
-
-
     public function broadcastWith()
     {
-        return ['chat' => $this->chatData];
+        return ['reply' => $this->replyData];
     }
+
 
 
 
     public function broadcastOn()
     {
-        return new PrivateChannel('broadcast-message');
+        return new PrivateChannel('broadcast-reply');
     }
 }
