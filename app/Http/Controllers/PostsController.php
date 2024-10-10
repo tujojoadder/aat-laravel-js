@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comments;
 use App\Models\Groups;
 use App\Models\IAccount;
 use App\Models\ImagePosts;
 use App\Models\Loves;
 use App\Models\Pages;
 use App\Models\Posts;
+use App\Models\Replies;
 use App\Models\TextPosts;
 use App\Models\UniqeUser;
 use App\Models\Unlikes;
@@ -559,56 +561,67 @@ class PostsController extends Controller
 
     /* get for home feed  */
     public function getPosts(Request $request)
-{
-    $user = auth()->user();
-
-    // Get pagination parameters from the request, with default values
-    $perPage = $request->query('per_page', 5); // Number of items per page
-    $page = $request->query('page', 1); // Current page
-
-    // Fetch paginated posts
-    $posts = Posts::where('author_id', '!=', $user->user_id)
-        ->whereNull('group_id')
-        ->whereNull('page_id')
-        ->whereNull('iaccount_id')
-        ->with(['author', 'textPost', 'imagePost'])
-        ->paginate($perPage, ['*'], 'page', $page);
-
-    // Add isLove, isUnlike, totalLove, and totalUnlike to each post
-    $posts->getCollection()->transform(function ($post) use ($user) {
-        // Check if the current user has loved or unliked the post
-        $isLove = Loves::where('love_on_type', 'post')
-            ->where('love_on_id', $post->post_id)
-            ->where('love_by_id', $user->user_id)
-            ->exists();
-
-        $isUnlike = Unlikes::where('unlike_on_type', 'post')
-            ->where('unlike_on_id', $post->post_id)
-            ->where('unlike_by_id', $user->user_id)
-            ->exists();
-
-        // Count the total loves and unlikes for the post
-        $totalLove = Loves::where('love_on_type', 'post')
-            ->where('love_on_id', $post->post_id)
-            ->count();
-
-        $totalUnlike = Unlikes::where('unlike_on_type', 'post')
-            ->where('unlike_on_id', $post->post_id)
-            ->count();
-
-        // Add the values to the post object
-        $post->isLove = $isLove;
-        $post->isUnlike = $isUnlike;
-        $post->totalLove = $totalLove;
-        $post->totalUnlike = $totalUnlike;
-
-        return $post;
-    });
-
-    // Return paginated posts as JSON
-    return response()->json($posts);
-}
-
+    {
+        $user = auth()->user();
+    
+        // Get pagination parameters from the request, with default values
+        $perPage = $request->query('per_page', 5); // Number of items per page
+        $page = $request->query('page', 1); // Current page
+    
+        // Fetch paginated posts
+        $posts = Posts::where('author_id', '!=', $user->user_id)
+            ->whereNull('group_id')
+            ->whereNull('page_id')
+            ->whereNull('iaccount_id')
+            ->with(['author', 'textPost', 'imagePost']) // Eager load only necessary relations
+            ->paginate($perPage, ['*'], 'page', $page);
+    
+        // Add isLove, isUnlike, totalLove, totalUnlike, totalComments, and totalReplies to each post
+        $posts->getCollection()->transform(function ($post) use ($user) {
+            // Check if the current user has loved or unliked the post
+            $isLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $post->post_id)
+                ->where('love_by_id', $user->user_id)
+                ->exists();
+    
+            $isUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $post->post_id)
+                ->where('unlike_by_id', $user->user_id)
+                ->exists();
+    
+            // Count the total loves and unlikes for the post
+            $totalLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $post->post_id)
+                ->count();
+    
+            $totalUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $post->post_id)
+                ->count();
+    
+            // Count the total comments related to the post
+            $totalComments = Comments::where('post_id', $post->post_id)->count();
+    
+            // Count the total replies related to all comments of the post
+            $totalReplies = Replies::whereIn('comment_id', function ($query) use ($post) {
+                $query->select('comment_id')->from('comments')->where('post_id', $post->post_id);
+            })->count();
+    
+            // Add the values to the post object
+            $post->isLove = $isLove;
+            $post->isUnlike = $isUnlike;
+            $post->totalLove = $totalLove;
+            $post->totalUnlike = $totalUnlike;
+          /*   sum of replies and comments */
+            $post->total_comments = $totalComments+$totalReplies;
+          
+    
+            return $post;
+        });
+    
+        // Return paginated posts as JSON
+        return response()->json($posts);
+    }
+    
     
 
 
