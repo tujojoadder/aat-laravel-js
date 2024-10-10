@@ -137,6 +137,7 @@ public function getReplies(Request $request, $CommentID)
     // Fetch paginated posts
     $replies = Replies::where('comment_id', $CommentID)
         ->with('repliedBy:user_id,user_fname,user_lname,identifier,profile_picture')
+        ->orderBy('created_at', 'desc') // Sort by creation date in descending order
         ->paginate($perPage);
 
     // Add isLove, isUnlike, totalLove, and totalUnlike to each post
