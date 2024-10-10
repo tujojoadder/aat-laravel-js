@@ -40,6 +40,7 @@ class LoveController extends Controller
             // Find the existing love record
             $love = Loves::where('love_on_type', $loveOnType)
                 ->where('love_on_id', $loveOnId)
+                ->where('love_by_id', $userId)
                 ->first();
 
             // If a love record exists, delete it
@@ -50,6 +51,7 @@ class LoveController extends Controller
                 // Check if there's an unlike record, and delete if found
                 $unlike = Unlikes::where('unlike_on_type', $loveOnType)
                     ->where('unlike_on_id', $loveOnId)
+                    ->where('unlike_by_id', $userId)
                     ->first();
 
                 if ($unlike) {
@@ -95,6 +97,7 @@ class LoveController extends Controller
             // Find the existing unlike record
             $unlike = Unlikes::where('unlike_on_type', $unlikeOnType)
                 ->where('unlike_on_id', $unlikeOnId)
+                ->where('unlike_by_id', $userId)
                 ->first();
 
             // If a love record exists, delete it
@@ -105,6 +108,7 @@ class LoveController extends Controller
                 // Check if there's an love record, and delete if found
                 $love = Loves::where('love_on_type', $unlikeOnType)
                     ->where('love_on_id', $unlikeOnId)
+                    ->where('love_by_id', $userId)
                     ->first();
 
                 if ($love) {

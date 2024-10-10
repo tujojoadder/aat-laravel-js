@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comments;
 use App\Models\FriendList;
 use App\Models\FriendRequest;
 use App\Models\Groups;
 use App\Models\Loves;
 use App\Models\Pages;
 use App\Models\Posts;
+use App\Models\Replies;
 use App\Models\UniqeUser;
 use App\Models\Unlikes;
 use App\Models\UploadRequest;
@@ -325,7 +327,7 @@ class PagesController extends Controller
         ]);
     }
 
-    
+
 
     /*    Pages that auth user are admin */
     public function getPagesWhereAdmin()
@@ -475,7 +477,7 @@ class PagesController extends Controller
         // Get Authenticated user
         $user = auth()->user();
         $userId = $user->user_id;
-    
+
         // Find the page by ID, selecting the fields except 'page_admins'
         $page = Pages::select(
             'page_id',
@@ -489,35 +491,35 @@ class PagesController extends Controller
             'phone',
             'email'
         )
-        ->where('page_id', $request->id)->firstOrFail();
-    
+            ->where('page_id', $request->id)->firstOrFail();
+
         // Initialize variables
         $isAdmin = false;
         $joinStatus = false;
-    
+
         // Check if the page exists
         if ($page) {
             // Fetch the page_admins to process, but not return
             $pageAdmins = Pages::where('page_id', $request->id)->value('page_admins');
-    
+
             // Check if the authenticated user is an admin of the page
             $isAdmin = str_contains($pageAdmins, $userId);
-    
+
             // Check if the authenticated user is a member of the page
             $joinStatus = UsersHasPages::where('user_id', $userId)
                 ->where('page_id', $request->id)
                 ->exists();
         }
-    
+
         // Convert the page data to an array and add custom flags
         $pageData = $page ? $page->toArray() : [];
         $pageData['isAdmin'] = $isAdmin; // Add isAdmin flag
         $pageData['joinStatus'] = $joinStatus; // Add joinStatus flag
-    
+
         // Return the response without 'page_admins'
         return response()->json(['data' => $pageData]);
     }
-    
+
 
 
     /* getSpecificPagePosts */
@@ -534,36 +536,47 @@ class PagesController extends Controller
         $posts = Posts::where('page_id', $specificPageId)
             ->with(['page:identifier,page_name,page_picture,page_id', 'textPost', 'imagePost'])
             ->paginate($perPage, ['*'], 'page', $page);
- // Add isLove, isUnlike, totalLove, and totalUnlike to each post
- $posts->getCollection()->transform(function ($post) use ($user) {
-    // Check if the current user has loved or unliked the post
-    $isLove = Loves::where('love_on_type', 'post')
-        ->where('love_on_id', $post->post_id)
-        ->where('love_by_id', $user->user_id)
-        ->exists();
+        // Add isLove, isUnlike, totalLove, and totalUnlike to each post
+        $posts->getCollection()->transform(function ($post) use ($user) {
+            // Check if the current user has loved or unliked the post
+            $isLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $post->post_id)
+                ->where('love_by_id', $user->user_id)
+                ->exists();
 
-    $isUnlike = Unlikes::where('unlike_on_type', 'post')
-        ->where('unlike_on_id', $post->post_id)
-        ->where('unlike_by_id', $user->user_id)
-        ->exists();
+            $isUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $post->post_id)
+                ->where('unlike_by_id', $user->user_id)
+                ->exists();
 
-    // Count the total loves and unlikes for the post
-    $totalLove = Loves::where('love_on_type', 'post')
-        ->where('love_on_id', $post->post_id)
-        ->count();
+            // Count the total loves and unlikes for the post
+            $totalLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $post->post_id)
+                ->count();
 
-    $totalUnlike = Unlikes::where('unlike_on_type', 'post')
-        ->where('unlike_on_id', $post->post_id)
-        ->count();
+            $totalUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $post->post_id)
+                ->count();
 
-    // Add the values to the post object
-    $post->isLove = $isLove;
-    $post->isUnlike = $isUnlike;
-    $post->totalLove = $totalLove;
-    $post->totalUnlike = $totalUnlike;
 
-    return $post;
-});
+            // Count the total comments related to the post
+            $totalComments = Comments::where('post_id', $post->post_id)->count();
+
+            // Count the total replies related to all comments of the post
+            $totalReplies = Replies::whereIn('comment_id', function ($query) use ($post) {
+                $query->select('comment_id')->from('comments')->where('post_id', $post->post_id);
+            })->count();
+
+            // Add the values to the post object
+            $post->isLove = $isLove;
+            $post->isUnlike = $isUnlike;
+            $post->totalLove = $totalLove;
+            $post->totalUnlike = $totalUnlike;
+            /*   sum of replies and comments */
+            $post->total_comments = $totalComments + $totalReplies;
+
+            return $post;
+        });
         return response()->json($posts);
     }
 
@@ -659,74 +672,73 @@ class PagesController extends Controller
         // Return the page members as a JSON response, including the is_friend and friend_request_sent fields
         return response()->json($users);
     }
-    
-    
+
+
     /* public page */
-     public function joinPage(Request $request, $pageId)
-     {
-         // Get the authenticated user
-         $user = auth()->user();
-         $userId = $user->user_id;
-         // Clean the input
- 
-         $pageId = cleanInput($pageId);
-         // Data transaction
-         DB::transaction(function () use ($userId, $pageId) {
-             // Check if the group exists
-             $page = Pages::where('page_id', $pageId)->first();
- 
-             if (!$page) {
-                 // Group does not exist, throw an exception to trigger transaction rollback
-                 throw new \Exception('Group not found');
-             }
+    public function joinPage(Request $request, $pageId)
+    {
+        // Get the authenticated user
+        $user = auth()->user();
+        $userId = $user->user_id;
+        // Clean the input
 
-                 // Create a record in the UsersHasPage model
-                 UsersHasPages::create([
-                     'user_id' => $userId,
-                     'page_id' => $pageId
-                 ]);
-            
-         });
- 
-         // Handle success response
-         return response()->json(['message' => 'Page joined successful'], 200);
-     }
+        $pageId = cleanInput($pageId);
+        // Data transaction
+        DB::transaction(function () use ($userId, $pageId) {
+            // Check if the group exists
+            $page = Pages::where('page_id', $pageId)->first();
 
-/* public page leave */
-public function leavePage(Request $request, $pageId)
-{
+            if (!$page) {
+                // Group does not exist, throw an exception to trigger transaction rollback
+                throw new \Exception('Group not found');
+            }
+
+            // Create a record in the UsersHasPage model
+            UsersHasPages::create([
+                'user_id' => $userId,
+                'page_id' => $pageId
+            ]);
+        });
+
+        // Handle success response
+        return response()->json(['message' => 'Page joined successful'], 200);
+    }
+
+    /* public page leave */
+    public function leavePage(Request $request, $pageId)
+    {
 
 
-    // Get the authenticated user
-    $user = auth()->user();
-    $userId = $user->user_id;
-    // Clean the input
-    $pageId = cleanInput($pageId);
-    // Data transaction
-    DB::transaction(function () use ($userId, $pageId) {
-        // Check if the group exists
-        $page = Pages::where('page_id', $pageId)->first();
+        // Get the authenticated user
+        $user = auth()->user();
+        $userId = $user->user_id;
+        // Clean the input
+        $pageId = cleanInput($pageId);
+        // Data transaction
+        DB::transaction(function () use ($userId, $pageId) {
+            // Check if the group exists
+            $page = Pages::where('page_id', $pageId)->first();
 
-        if (!$page) {
-            // Group does not exist, throw an exception to trigger transaction rollback
-            throw new \Exception('Page not found');
-        }
+            if (!$page) {
+                // Group does not exist, throw an exception to trigger transaction rollback
+                throw new \Exception('Page not found');
+            }
 
-        // Check if the user is a member of the group
-        $membership = UsersHasPages::where('user_id', $userId)->where('page_id', $pageId)->first();
+            // Check if the user is a member of the group
+            $membership = UsersHasPages::where('user_id', $userId)->where('page_id', $pageId)->first();
 
-        if (!$membership) {
-            // Membership record does not exist
-            throw new \Exception('User is not a member of the Page');
-        }
+            if (!$membership) {
+                // Membership record does not exist
+                throw new \Exception('User is not a member of the Page');
+            }
 
-        // Remove the user from the group
-        UsersHasPages::where('user_id', $userId)->where('page_id', $pageId)->delete();
-    });
+            // Remove the user from the group
+            UsersHasPages::where('user_id', $userId)->where('page_id', $pageId)->delete();
+        });
 
-    // Handle success response
-    return response()->json(['message' => 'Successfully left the page'], 200);
-}
+        // Handle success response
+        return response()->json(['message' => 'Successfully left the page'], 200);
+    }
 
 
 
@@ -734,7 +746,7 @@ public function leavePage(Request $request, $pageId)
     public function updatePageName($pageId, Request $request)
     {
 
-       
+
         $request->merge(['pageId' => $pageId]);
         $this->validate($request, [
             'name' => 'required|string|max:40',
@@ -810,7 +822,7 @@ public function leavePage(Request $request, $pageId)
     public function updatePageLocation($pageId, Request $request)
     {
 
-       
+
         $request->merge(['pageId' => $pageId]);
         $this->validate($request, [
             'location' => 'required|string|max:100',
@@ -841,72 +853,72 @@ public function leavePage(Request $request, $pageId)
     }
 
 
- // Update Group location
- public function updatePagePhone($pageId, Request $request)
- {
-    
-     $request->merge(['pageId' => $pageId]);
-     $this->validate($request, [
-         'phone' => 'required|string|max:30',
-         'pageId' => 'required|string|max:40',
-     ]);
-     $user = auth()->user();
-     $userId = $user->user_id;
-     $pageId = cleanInput($pageId);
-     $phone = cleanInput($request->phone);
+    // Update Group location
+    public function updatePagePhone($pageId, Request $request)
+    {
 
-     $pageMember = UsersHasPages::where('user_id', $userId)
-         ->where('page_id', $pageId)
-         ->first();
-     if (!$pageMember) {
-         return response([
-             'message' => 'You are not member of this page'
-         ], 422);
-     }
+        $request->merge(['pageId' => $pageId]);
+        $this->validate($request, [
+            'phone' => 'required|string|max:30',
+            'pageId' => 'required|string|max:40',
+        ]);
+        $user = auth()->user();
+        $userId = $user->user_id;
+        $pageId = cleanInput($pageId);
+        $phone = cleanInput($request->phone);
 
-
-     $page = Pages::where('page_id', $pageId)->first();
-
-     if (!$page) {
-         return response()->json(['message' => 'Page not found'], 404);
-     }
-     $page->update(['phone' => $phone]);
-     return response()->json(['message' => 'Page phone updated successfully']);
- }
+        $pageMember = UsersHasPages::where('user_id', $userId)
+            ->where('page_id', $pageId)
+            ->first();
+        if (!$pageMember) {
+            return response([
+                'message' => 'You are not member of this page'
+            ], 422);
+        }
 
 
-// Update Group location
-public function updatePageEmail($pageId, Request $request)
-{
-   
-    $request->merge(['pageId' => $pageId]);
-    $this->validate($request, [
-        'email' => 'required|email|max:50',
-        'pageId' => 'required|string|max:40',
-    ]);
-    $user = auth()->user();
-    $userId = $user->user_id;
-    $pageId = cleanInput($pageId);
-    $email = cleanInput($request->email);
+        $page = Pages::where('page_id', $pageId)->first();
 
-    $pageMember = UsersHasPages::where('user_id', $userId)
-        ->where('page_id', $pageId)
-        ->first();
-    if (!$pageMember) {
-        return response([
-            'message' => 'You are not member of this page'
-        ], 422);
+        if (!$page) {
+            return response()->json(['message' => 'Page not found'], 404);
+        }
+        $page->update(['phone' => $phone]);
+        return response()->json(['message' => 'Page phone updated successfully']);
     }
 
 
-    $page = Pages::where('page_id', $pageId)->first();
+    // Update Group location
+    public function updatePageEmail($pageId, Request $request)
+    {
 
-    if (!$page) {
-        return response()->json(['message' => 'Page not found'], 404);
+        $request->merge(['pageId' => $pageId]);
+        $this->validate($request, [
+            'email' => 'required|email|max:50',
+            'pageId' => 'required|string|max:40',
+        ]);
+        $user = auth()->user();
+        $userId = $user->user_id;
+        $pageId = cleanInput($pageId);
+        $email = cleanInput($request->email);
+
+        $pageMember = UsersHasPages::where('user_id', $userId)
+            ->where('page_id', $pageId)
+            ->first();
+        if (!$pageMember) {
+            return response([
+                'message' => 'You are not member of this page'
+            ], 422);
+        }
+
+
+        $page = Pages::where('page_id', $pageId)->first();
+
+        if (!$page) {
+            return response()->json(['message' => 'Page not found'], 404);
+        }
+        $page->update(['email' => $email]);
+        return response()->json(['message' => 'Page email updated successfully']);
     }
-    $page->update(['email' => $email]);
-    return response()->json(['message' => 'Page email updated successfully']);
-}
 
 
     /* gettAllGroupMemberManage */
@@ -939,10 +951,10 @@ public function updatePageEmail($pageId, Request $request)
         // Get the authenticated user's ID
         $authUserId = auth()->user()->user_id;
         //is auth user is isCreator
-        $isAuthIsCreator = auth()->user()->user_id == $pagesCreatorId ? true : false  ;
+        $isAuthIsCreator = auth()->user()->user_id == $pagesCreatorId ? true : false;
 
         // Iterate over the paginated group members to add the isAdmin, isCreator, and isAuth fields
-        $users->getCollection()->transform(function ($user) use ($adminIds, $pageId, $pagesCreatorId, $authUserId,$isAuthIsCreator) {
+        $users->getCollection()->transform(function ($user) use ($adminIds, $pageId, $pagesCreatorId, $authUserId, $isAuthIsCreator) {
             return [
                 'page_id' => $pageId,
                 'user_id' => $user->user_id,
@@ -953,7 +965,7 @@ public function updatePageEmail($pageId, Request $request)
                 'isAdmin' => in_array($user->user_id, $adminIds) ? true : false, // Set isAdmin to true if the member is an admin, false otherwise
                 'isCreator' => $user->user_id == $pagesCreatorId ? true : false, // Set isCreator to true if the member is the group creator, false otherwise
                 'isAuth' => $user->user_id == $authUserId ? true : false, // Set isAuth to true if the member is the authenticated user, false otherwise
-                'isAuthIsCreator'=>$isAuthIsCreator
+                'isAuthIsCreator' => $isAuthIsCreator
             ];
         });
 
@@ -1031,58 +1043,58 @@ public function updatePageEmail($pageId, Request $request)
     public function kickOutUser(Request $request, $pageId, $memberId)
     {
         $user = auth()->user(); // The authenticated user (the one performing the action)
-    
+
         // Clean the input
         $pageId = cleanInput($pageId);
         $memberId = cleanInput($memberId);
-    
+
         // Find the page
         $page = Pages::where('page_id', $pageId)->first();
-    
+
         if (!$page) {
             return response()->json(['message' => 'Page not found'], 404);
         }
-    
+
         // Check if the authenticated user is an admin of the group
         $adminList = explode(',', $page->page_admins);
-    
+
         if (!in_array($user->user_id, $adminList)) {
             return response()->json(['message' => 'You are not an admin of this page'], 403); // HTTP 403 Forbidden
         }
-    
+
         // Check if the user being kicked is the group creator
         if ($page->page_creator === $memberId) {
             return response()->json(['message' => 'You cannot kick out the page creator'], 403);
         }
-    
+
         // Ensure that only the group creator can kick out an admin
         if (in_array($memberId, $adminList) && $user->user_id !== $page->page_creator) {
             return response()->json(['message' => 'Only the page creator can kick out other admins'], 403);
         }
-    
+
         // Prevent the group creator from kicking themselves out
         if ($user->user_id === $page->page_creator && $page->page_creator === $memberId) {
             return response()->json(['message' => 'You cannot remove yourself as the page creator'], 403);
         }
-    
+
         // Check if the user to be kicked is a member of the group
         $userInPage = UsersHasPages::where('page_id', $pageId)
             ->where('user_id', $memberId)
             ->first();
-    
+
         if (!$userInPage) {
             return response()->json(['message' => 'User is not a member of this page'], 404);
         }
-    
+
         // Begin transaction
         DB::beginTransaction();
-    
+
         try {
             // Remove the user from the group
             UsersHasPages::where('page_id', $pageId)
                 ->where('user_id', $memberId)
                 ->delete();
-    
+
             // If the user is an admin, remove them from the admin list
             if (in_array($memberId, $adminList)) {
                 $adminList = array_filter(explode(',', $page->page_admins)); // Filter out empty values
@@ -1090,26 +1102,19 @@ public function updatePageEmail($pageId, Request $request)
                 $page->page_admins = implode(',', $adminList); // Update the admin list in the group
                 $page->save();
             }
-    
+
             // Commit the transaction
             DB::commit();
-    
+
             return response()->json(['message' => 'User has been kicked out successfully'], 200);
         } catch (\Exception $e) {
             // Rollback the transaction if something goes wrong
             DB::rollBack();
-    
+
             // Log detailed error information
             Log::error('Error in kickOutUser: ', ['error' => $e->getMessage()]);
-    
+
             return response()->json(['message' => 'Failed to kick out the user', 'error' => $e->getMessage()], 500);
         }
     }
-
-
-
-
-
-    
-
 }
