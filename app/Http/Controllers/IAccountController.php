@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comments;
 use App\Models\FriendList;
 use App\Models\FriendRequest;
 use App\Models\Groups;
@@ -10,6 +11,7 @@ use App\Models\ImagePosts;
 use App\Models\Loves;
 use App\Models\Pages;
 use App\Models\Posts;
+use App\Models\Replies;
 use App\Models\TextPosts;
 use App\Models\UniqeUser;
 use App\Models\Unlikes;
@@ -51,7 +53,8 @@ class IAccountController extends Controller
         while (
             User::where('identifier', $baseIdentifier)->exists() ||
             Groups::where('identifier', $baseIdentifier)->exists() ||
-            Pages::where('identifier', $baseIdentifier)->exists()
+            Pages::where('identifier', $baseIdentifier)->exists() ||
+            IAccount::where('identifier', $baseIdentifier)->exists()
         ) {
             // If it does, append new random letters
             $letters = '_';
@@ -517,11 +520,23 @@ class IAccountController extends Controller
                 ->where('unlike_on_id', $post->post_id)
                 ->count();
 
+            // Count the total comments related to the post
+            $totalComments = Comments::where('post_id', $post->post_id)->count();
+
+            // Count the total replies related to all comments of the post
+            $totalReplies = Replies::whereIn('comment_id', function ($query) use ($post) {
+                $query->select('comment_id')->from('comments')->where('post_id', $post->post_id);
+            })->count();
+
+
+
             // Add the values to the post object
             $post->isLove = $isLove;
             $post->isUnlike = $isUnlike;
             $post->totalLove = $totalLove;
             $post->totalUnlike = $totalUnlike;
+            /*   sum of replies and comments */
+            $post->total_comments = $totalComments + $totalReplies;
 
             return $post;
         });
@@ -634,7 +649,7 @@ class IAccountController extends Controller
 
 
 
-    /* get for specific group posts  */
+    /* getSpecificIaccountPosts */
     public function getSpecificIaccountPosts(Request $request)
     {
         $user = auth()->user();
@@ -669,11 +684,22 @@ class IAccountController extends Controller
                 ->where('unlike_on_id', $post->post_id)
                 ->count();
 
+
+            // Count the total comments related to the post
+            $totalComments = Comments::where('post_id', $post->post_id)->count();
+
+            // Count the total replies related to all comments of the post
+            $totalReplies = Replies::whereIn('comment_id', function ($query) use ($post) {
+                $query->select('comment_id')->from('comments')->where('post_id', $post->post_id);
+            })->count();
+
             // Add the values to the post object
             $post->isLove = $isLove;
             $post->isUnlike = $isUnlike;
             $post->totalLove = $totalLove;
             $post->totalUnlike = $totalUnlike;
+            /*   sum of replies and comments */
+            $post->total_comments = $totalComments + $totalReplies;
 
             return $post;
         });

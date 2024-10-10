@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Ramsey\Uuid\Uuid;
+
 class UserController extends Controller
 {
 
@@ -25,7 +26,7 @@ class UserController extends Controller
     {
         // Get Auth user
         $user = auth()->user();
-    
+
         if ($user) {
             // Extract the necessary fields
             $userDetails = [
@@ -39,14 +40,14 @@ class UserController extends Controller
                 'gender' => $user->gender, // assuming 'identifier' is the user id
                 'birthdate' => $user->birthdate, // assuming 'identifier' is the user id
             ];
-    
+
             return response()->json(['data' => $userDetails]);
         } else {
-            return response()->json(['message' => 'Invalid token or user not authenticated.',401]);
+            return response()->json(['message' => 'Invalid token or user not authenticated.', 401]);
         }
     }
-    
-    
+
+
 
 
 
@@ -236,41 +237,39 @@ class UserController extends Controller
     }
 
 
-/*     Get other user information (name,identifire,profile,cover_photo) */
-public function getUserInfo($id) {
-  // Sanitize and validate the ID
-  if (empty($id) || !Uuid::isValid($id)) {
-    Log::warning("Invalid User ID format: {$id}");
+    /*     Get other user information (name,identifire,profile,cover_photo) */
+    public function getUserInfo($id)
+    {
+        // Sanitize and validate the ID
+        if (empty($id) || !Uuid::isValid($id)) {
+            Log::warning("Invalid User ID format: {$id}");
 
-    return response()->json([
-        'error' => 'Invalid User ID format'
-    ], 400); // Bad Request
-}
-
-
-     // Retrieve the user by ID
-     $user = User::where('user_id', $id)->first();
-// Check if user exists
-if (!$user) {
-    Log::warning("User not found for ID: {$id}");
-
-    return response()->json([
-        'error' => 'User not found'
-    ], 404); // Not Found
-}
+            return response()->json([
+                'error' => 'Invalid User ID format'
+            ], 400); // Bad Request
+        }
 
 
+        // Retrieve the user by ID
+        $user = User::where('user_id', $id)->first();
+        // Check if user exists
+        if (!$user) {
+            Log::warning("User not found for ID: {$id}");
 
-  // Return the user data as JSON
-  return response()->json([
-    'user' => $user
-], 200); // OK
+            return response()->json([
+                'error' => 'User not found'
+            ], 404); // Not Found
+        }
 
 
 
+        // Return the user data as JSON
+        return response()->json([
+            'user' => $user
+        ], 200); // OK
 
-}
 
 
 
+    }
 }

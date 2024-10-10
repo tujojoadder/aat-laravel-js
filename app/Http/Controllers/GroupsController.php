@@ -7,6 +7,7 @@ use App\Models\FriendList;
 use App\Models\FriendRequest;
 use App\Models\GroupJoinRequest;
 use App\Models\Groups;
+use App\Models\IAccount;
 use App\Models\Loves;
 use App\Models\Pages;
 use App\Models\Posts;
@@ -47,7 +48,8 @@ class GroupsController extends Controller
         while (
             User::where('identifier', $baseIdentifier)->exists() ||
             Groups::where('identifier', $baseIdentifier)->exists() ||
-            Pages::where('identifier', $baseIdentifier)->exists()
+            Pages::where('identifier', $baseIdentifier)->exists() ||
+            IAccount::where('identifier', $baseIdentifier)->exists()
         ) {
             // If it does, append new random letters
             $letters = '_';

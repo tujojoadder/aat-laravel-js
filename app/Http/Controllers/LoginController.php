@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\About;
 use App\Models\Groups;
+use App\Models\IAccount;
 use App\Models\Pages;
 use App\Models\PasswordReset;
 use App\Models\UniqeUser;
@@ -25,7 +26,41 @@ use Illuminate\Support\Facades\Mail;
 class LoginController extends Controller
 {
 
+// Function to generate a unique identifier with at least three numbers appended
+private function generateIdentifier($baseIdentifier)
+{
+    // If baseIdentifier is empty, generate a random six-letter string
+    if (empty($baseIdentifier)) {
+        $baseIdentifier = '';
+        for ($i = 0; $i < 6; $i++) {
+            $baseIdentifier .= chr(rand(97, 122)); // ASCII codes for lowercase letters (a-z)
+        }
+    }
 
+    // Append an underscore (_) followed by two random letters
+    $letters = '_';
+    for ($i = 0; $i < 2; $i++) {
+        $letters .= chr(rand(97, 122)); // ASCII codes for lowercase letters (a-z)
+    }
+    $baseIdentifier .= $letters;
+
+    // Check if the generated identifier already exists
+    while (
+        User::where('identifier', $baseIdentifier)->exists() ||
+        Groups::where('identifier', $baseIdentifier)->exists() ||
+        Pages::where('identifier', $baseIdentifier)->exists() ||
+        IAccount::where('identifier', $baseIdentifier)->exists()
+    ) {
+        // If it does, append new random letters
+        $letters = '_';
+        for ($i = 0; $i < 2; $i++) {
+            $letters .= chr(rand(97, 122)); // ASCII codes for lowercase letters (a-z)
+        }
+        $baseIdentifier .= $letters;
+    }
+
+    return $baseIdentifier;
+}
     /*  google login  */
     public function googleHandle(Request $request)
     {
@@ -159,40 +194,7 @@ class LoginController extends Controller
         });
     }
 
-    // Function to generate a unique identifier with at least three numbers appended
-    private function generateIdentifier($baseIdentifier)
-    {
-        // If baseIdentifier is empty, generate a random six-letter string
-        if (empty($baseIdentifier)) {
-            $baseIdentifier = '';
-            for ($i = 0; $i < 6; $i++) {
-                $baseIdentifier .= chr(rand(97, 122)); // ASCII codes for lowercase letters (a-z)
-            }
-        }
-
-        // Append an underscore (_) followed by two random letters
-        $letters = '_';
-        for ($i = 0; $i < 2; $i++) {
-            $letters .= chr(rand(97, 122)); // ASCII codes for lowercase letters (a-z)
-        }
-        $baseIdentifier .= $letters;
-
-        // Check if the generated identifier already exists
-        while (
-            User::where('identifier', $baseIdentifier)->exists() ||
-            Groups::where('identifier', $baseIdentifier)->exists() ||
-            Pages::where('identifier', $baseIdentifier)->exists()
-        ) {
-            // If it does, append new random letters
-            $letters = '_';
-            for ($i = 0; $i < 2; $i++) {
-                $letters .= chr(rand(97, 122)); // ASCII codes for lowercase letters (a-z)
-            }
-            $baseIdentifier .= $letters;
-        }
-
-        return $baseIdentifier;
-    }
+    
 
 
 
