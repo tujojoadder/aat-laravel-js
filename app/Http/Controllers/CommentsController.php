@@ -25,43 +25,73 @@ class CommentsController extends Controller
     public function createPostCommment(Request $request, $postId)
     {
         $user = auth()->user();
-        $UserId = $user->user_id;
+        $userId = $user->user_id;
+        
+        // Merge postId into the request and validate the input
         $request->merge(['postId' => $postId]);
-        // Validate the incoming request data
         $request->validate([
             'postId' => 'required|string',
             'comment_text' => 'required|max:10000',
         ]);
+    
+        // Clean the postId input
         $postId = cleanInput($postId);
+    
+        // Check if the post exists
         $post = Posts::find($postId);
         if (!$post) {
-            return response()->json(['message' => 'Post not founded']);
+            return response()->json(['message' => 'Post not found'], 404);
         }
-
-        //make unique id
+    
+        // Generate a unique ID for the comment
         $commentId = Str::uuid();
-
-        // Create a new comment using the create method
+    
+        // Create a new comment
         $comment = Comments::create([
             'comment_id' => $commentId,
             'post_id' => $postId,
-            'commenter_id' => $UserId,
+            'commenter_id' => $userId,
             'comment_text' => $request->comment_text,
-            'commenter_id' => $UserId
         ]);
+    
+        // Count the total comments related to the post
+        $totalComments = Comments::where('post_id', $postId)->count();
+    
+        // Count the total replies related to all comments of the post
+        $totalReplies = Replies::whereIn('comment_id', function ($query) use ($postId) {
+            $query->select('comment_id')->from('comments')->where('post_id', $postId);
+        })->count();
+    
+        // Compute the sum of total comments and replies
+        $totalActivity = $totalComments + $totalReplies;
+    
+        // Prepare the data to be broadcasted
+        $commentData = [
+            'commenter_id' => $userId,
+            'post_id' => $postId,
+            'comment_text' => $comment->comment_text,
+            'created_at' => $comment->created_at,
+      
+        ];
 
-        event (new \App\Events\CommentEvent($comment));
-        // Return a detailed response
+        $replyData = [
+
+            'replied_by_id' => $userId,
+            'post_id' => $postId,
+            'total_comment' => $totalActivity // Optional: If you want to return this in the response
+        ];
+
+        // Broadcast the new comment along with the updated total comments and replies count
+        event(new \App\Events\CommentEvent($commentData));
+        event(new \App\Events\ReplyEvent($replyData));
+
+        // Return a response with the created comment details
         return response()->json([
             'message' => 'Comment created successfully',
-            'comment' => [
-                'user_id' => $UserId,
-                'comment_text' => $comment->comment_text,
-                'created_at' => $comment->created_at,
-            ],
+            'comment' => $commentData,
         ]);
     }
-
+    
 
 
     /* get comments for specific post */
