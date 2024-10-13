@@ -716,8 +716,12 @@ Route::middleware('auth:sanctum')->group(function () {
        Route::get('/getspecificuserfollower', [ProfileController::class, 'getAllUserFollower']);
        /* Following User */
        Route::get('/getspecificuserfollowing', [ProfileController::class, 'getAllUserFollowing']);
+    
+    
+    
+    
        // view specific user friend list
-       Route::get('/getspecificuserfriendids', [FriendRequestController::class, 'getSpecificUserFriendDetails'])->name('getSpecificUserFriendIds');
+       Route::get('/getspecificuserfriendids', [FriendRequestController::class, 'getSpecificUserFriendDetails']);
 
 
 
