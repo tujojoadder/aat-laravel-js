@@ -660,6 +660,7 @@ class IAccountController extends Controller
 
         $posts = Posts::where('iaccount_id', $specificIaccountId)
             ->with(['iaccount', 'textPost', 'imagePost'])
+            ->orderBy('created_at', 'desc') // Sort by creation date in descending order
             ->paginate($perPage, ['*'], 'page', $page);
 
         // Add isLove, isUnlike, totalLove, and totalUnlike to each post
@@ -721,6 +722,7 @@ class IAccountController extends Controller
         $posts = Posts::where('iaccount_id', $specificIAccountId)
             ->with('imagePost') // Eager load the image posts relationship
             ->whereHas('imagePost') // Ensure we only get posts with associated image posts
+            ->orderBy('created_at', 'desc') // Sort by creation date in descending order
             ->paginate($perPage, ['*'], 'page', $page);
 
         // Return the paginated result as JSON
