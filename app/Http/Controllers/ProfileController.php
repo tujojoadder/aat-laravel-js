@@ -41,6 +41,7 @@ class ProfileController extends Controller
             ->whereNull('iaccount_id')
             ->whereNull('iaccount_id')
             ->with(['author', 'textPost', 'imagePost'])
+            ->orderBy('created_at', 'desc') // Sort by creation date in descending order
             ->paginate($perPage, ['*'], 'page', $page);
 
         // Add isLove, isUnlike, totalLove, and totalUnlike to each post
@@ -104,6 +105,7 @@ class ProfileController extends Controller
             ->whereNull('iaccount_id')
             ->with('imagePost') // Eager load the image posts relationship
             ->whereHas('imagePost') // Ensure we only get posts with associated image posts
+            ->orderBy('created_at', 'desc') // Sort by creation date in descending order
             ->paginate($perPage, ['*'], 'page', $page);
 
         // Return the paginated result as JSON
@@ -173,6 +175,7 @@ class ProfileController extends Controller
             ->whereNull('page_id')
             ->whereNull('iaccount_id')
             ->with(['author', 'textPost', 'imagePost'])
+            ->orderBy('created_at', 'desc') // Sort by creation date in descending order
             ->paginate($perPage, ['*'], 'page', $page);
         // Add isLove, isUnlike, totalLove, and totalUnlike to each post
         $posts->getCollection()->transform(function ($post) use ($user) {
@@ -231,6 +234,7 @@ class ProfileController extends Controller
         $posts = Posts::where('author_id', $userId)
             ->with('imagePost') // Eager load the image posts relationship
             ->whereHas('imagePost') // Ensure we only get posts with associated image posts
+            ->orderBy('created_at', 'desc') // Sort by creation date in descending order
             ->paginate($perPage, ['*'], 'page', $page);
 
         // Return the paginated result as JSON

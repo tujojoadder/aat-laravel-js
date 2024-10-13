@@ -642,6 +642,7 @@ class GroupsController extends Controller
         $posts = Posts::where('group_id', $specificGroupId)
             ->where('approval', true)
             ->with(['author', 'textPost', 'imagePost'])
+            ->orderBy('created_at', 'desc') // Sort by creation date in descending order
             ->paginate($perPage, ['*'], 'page', $page);
         // Add isLove, isUnlike, totalLove, and totalUnlike to each post
         $posts->getCollection()->transform(function ($post) use ($user) {
@@ -703,6 +704,7 @@ class GroupsController extends Controller
             ->where('approval', true)
             ->with('imagePost') // Eager load the image posts relationship
             ->whereHas('imagePost') // Ensure we only get posts with associated image posts
+            ->orderBy('created_at', 'desc') // Sort by creation date in descending order
             ->paginate($perPage, ['*'], 'page', $page);
 
         // Return the paginated result as JSON
@@ -1311,6 +1313,7 @@ class GroupsController extends Controller
         $posts = Posts::where('group_id', $specificGroupId)
             ->where('approval', false)
             ->with(['author', 'textPost', 'imagePost'])
+            ->orderBy('created_at', 'desc') // Sort by creation date in descending order
             ->paginate($perPage, ['*'], 'page', $page);
         // Add isLove, isUnlike, totalLove, and totalUnlike to each post
         $posts->getCollection()->transform(function ($post) use ($user) {

@@ -537,6 +537,7 @@ class PagesController extends Controller
 
         $posts = Posts::where('page_id', $specificPageId)
             ->with(['page:identifier,page_name,page_picture,page_id', 'textPost', 'imagePost'])
+            ->orderBy('created_at', 'desc') // Sort by creation date in descending order
             ->paginate($perPage, ['*'], 'page', $page);
         // Add isLove, isUnlike, totalLove, and totalUnlike to each post
         $posts->getCollection()->transform(function ($post) use ($user) {
@@ -599,6 +600,7 @@ class PagesController extends Controller
 
             ->with('imagePost') // Eager load the image posts relationship
             ->whereHas('imagePost') // Ensure we only get posts with associated image posts
+            ->orderBy('created_at', 'desc') // Sort by creation date in descending order
             ->paginate($perPage, ['*'], 'page', $page);
 
         // Return the paginated result as JSON
