@@ -395,42 +395,60 @@ class FriendRequestController extends Controller
 
 
     /* Get friend for Auth user */
-    public function getAuthUserFriendDetails(Request $request)
-    {
-        // Define the number of friends per page
-        $perPage = 10;
-        $user = auth()->user();
-        // Get the authenticated user's ID
-        $authUserId = $user->user_id;
+ /* Get friend for Auth user */
+public function getAuthUserFriendDetails(Request $request)
+{
+    // Define the number of friends per page
+    $perPage = 10;
 
-        // Retrieve the friend list for the authenticated user
-        $authFriendList = FriendList::where('user_id', $authUserId)->first();
+    // Get the page number from the request (default to 1 if not provided)
+    $page = $request->get('page', 1);
 
-        if ($authFriendList) {
-            // Access the user_friends_ids column
-            $userFriendsIds = $authFriendList->user_friends_ids;
+    // Get the authenticated user
+    $user = auth()->user();
 
-            // Check if user_friends_ids column is not empty
-            if (!empty($userFriendsIds)) {
-                // Split the comma-separated string into an array of friend IDs
-                $friendIdsArray = explode(',', $userFriendsIds);
+    // Get the authenticated user's ID
+    $authUserId = $user->user_id;
 
-                // Retrieve friend details from the users table with pagination
-                $friends = User::whereIn('user_id', $friendIdsArray)
-                    ->select('user_id', 'user_fname', 'user_lname', 'profile_picture', 'identifier')
-                    ->paginate($perPage);
+    // Retrieve the friend list for the authenticated user
+    $authFriendList = FriendList::where('user_id', $authUserId)->first();
 
-                // Return the friend details as JSON response
-                return response()->json($friends);
-            } else {
-                // Handle the case where user_friends_ids column is empty
-                return response()->json(['message' => 'you have no friends '], 200);
+    if ($authFriendList) {
+        // Access the user_friends_ids column
+        $userFriendsIds = $authFriendList->user_friends_ids;
+
+        // Check if user_friends_ids column is not empty
+        if (!empty($userFriendsIds)) {
+            // Split the comma-separated string into an array of friend IDs
+            $friendIdsArray = explode(',', $userFriendsIds);
+
+            // Retrieve friend details from the users table with pagination
+            $friends = User::whereIn('user_id', $friendIdsArray)
+                ->select('user_id', 'user_fname', 'user_lname', 'profile_picture', 'identifier')
+                ->paginate($perPage, ['*'], 'page', $page);
+
+            // If no friends are found, return an empty 'data' field
+            if ($friends->isEmpty()) {
+                return response()->json(['data' => []], 200);
             }
+
+            // Return the friend details in a 'data' field as expected by the frontend
+            return response()->json([
+                'data' => $friends->items(), // Only returning the items (friends)
+                'current_page' => $friends->currentPage(),
+                'last_page' => $friends->lastPage(),
+                'total' => $friends->total(),
+            ]);
         } else {
-            // Handle the case where the friend list is not found for the authenticated user
-            return response()->json(['message' =>  'you have no friends '], 200);
+            // If no friend IDs found, return empty 'data'
+            return response()->json(['data' => [],'messsage'=>'you have no friend'], 200);
         }
+    } else {
+        // If no friend list found, return empty 'data'
+        return response()->json(['data' => [],'messsage'=>'you have no friend'], 200);
     }
+}
+
 
 
 
