@@ -214,8 +214,20 @@ Route::middleware('auth:sanctum')->group(function () {
 
        // Manage friend request(Accepted,rejected)
        Route::post('managefriendrequest', [FriendRequestController::class, 'manageFriendRequest'])->name('manageFriendRequest');
-       // unfriend any friend
-       Route::post('/users/unfrienduser/{useridtoremove}', [FriendRequestController::class, 'unfriendUser'])->name('unfriendUser');
+       
+       
+       
+       
+       Route::delete('friends/unfriend', [FriendRequestController::class, 'unfriendUser']);
+
+
+
+
+
+
+
+
+
        // Retrive all friends of auth user
        Route::get('/users/getfriendids', [FriendRequestController::class, 'getFriendIds'])->name('getFriendIds');
 

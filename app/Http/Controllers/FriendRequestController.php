@@ -258,67 +258,56 @@ class FriendRequestController extends Controller
 
 
 
-    //
-
-    public function unfriendUser($useridtoremove)
+    public function unfriendUser(Request $request) // Get the user ID from the route parameter
     {
-        // Create a request instance manually
-        $request = new \Illuminate\Http\Request();
-        $request->merge(['useridtoremove' => $useridtoremove]);
+         // Validate the incoming request
+    $this->validate($request, [
+        'useridtoremove' => 'required|string|max:50',
+    ]);
 
-        // Validate input parameters
-        $this->validate($request, [
-            'useridtoremove' => "required|string|max:50"
-        ]);
+    $useridtoremove = $request->useridtoremove; // Get user ID from the request body
+        // Get the authenticated user
+        $user = auth()->user();
 
-        // Clean the input if necessary
-        $useridtoremove = cleanInput($useridtoremove); // Uncomment if needed
 
-        // Initialize the message variable
-        $message = '';
+        // Find the authenticated user's friend list
+        $authUserFriendList = FriendList::where('user_id', $user->user_id)->first();
+        // Find the friend's friend list to remove the authenticated user
+        $requestedUserFriendList = FriendList::where('user_id', $useridtoremove)->first();
 
-        // Use the DB::transaction method for simplified transactions
-        DB::transaction(function () use ($useridtoremove, &$message) {
-            // Get the authenticated user
-            $user = auth()->user();
+        if ($authUserFriendList && $requestedUserFriendList) {
+            // Update the authenticated user's friend list by removing the friend's ID
+            $authUserFriends = explode(',', $authUserFriendList->user_friends_ids);
+            $authUserFriends = array_filter($authUserFriends, function ($id) use ($useridtoremove) {
+                return $id !== $useridtoremove; // Remove the friend ID
+            });
+            $authUserFriendList->update(['user_friends_ids' => implode(',', $authUserFriends)]);
 
-            // Find the authenticated user's friend list
-            $authUserFriendList = FriendList::where('user_id', $user->user_id)->first();
+            // Update the friend's friend list by removing the authenticated user's ID
+            $requestedUserFriends = explode(',', $requestedUserFriendList->user_friends_ids);
+            $requestedUserFriends = array_filter($requestedUserFriends, function ($id) use ($user) {
+                return $id !== $user->user_id; // Remove the authenticated user ID
+            });
+            $requestedUserFriendList->update(['user_friends_ids' => implode(',', $requestedUserFriends)]);
 
-            // Find the requested user's friend list
-            $requestedUserFriendList = FriendList::where('user_id', $useridtoremove)->first();
+            // Update any pending friend requests between the users to 'rejected'
+            $friendRequest = FriendRequest::where(function ($query) use ($user, $useridtoremove) {
+                $query->where('receiver_id', $user->user_id)->where('sender_id', $useridtoremove);
+            })->orWhere(function ($query) use ($user, $useridtoremove) {
+                $query->where('receiver_id', $useridtoremove)->where('sender_id', $user->user_id);
+            })->first();
 
-            if ($authUserFriendList && $requestedUserFriendList) {
-                // Remove the requested user's ID from the authenticated user's friend list
-                $updatedAuthUserFriendList = str_replace([$useridtoremove . ',', $useridtoremove], '', $authUserFriendList->user_friends_ids);
-                $updatedAuthUserFriendList = rtrim($updatedAuthUserFriendList, ',');
-                $authUserFriendList->update(['user_friends_ids' => $updatedAuthUserFriendList]);
-
-                // Remove the authenticated user's ID from the requested user's friend list
-                $updatedRequestedUserFriendList = str_replace([$user->user_id . ',', $user->user_id], '', $requestedUserFriendList->user_friends_ids);
-                $updatedRequestedUserFriendList = rtrim($updatedRequestedUserFriendList, ',');
-                $requestedUserFriendList->update(['user_friends_ids' => $updatedRequestedUserFriendList]);
-
-                // Update the friend request status to 'rejected' (assuming a friend request was sent)
-                $friendRequest = FriendRequest::where(function ($query) use ($user, $useridtoremove) {
-                    $query->where('receiver_id', $user->user_id)->where('sender_id', $useridtoremove);
-                })->orWhere(function ($query) use ($user, $useridtoremove) {
-                    $query->where('receiver_id', $useridtoremove)->where('sender_id', $user->user_id);
-                })->first();
-
-                if ($friendRequest) {
-                    $friendRequest->update(['status' => 'rejected']);
-                }
-
-                $message = 'Unfriend Successfully';
-            } else {
-                $message = 'Friend lists not found';
+            if ($friendRequest) {
+                $friendRequest->update(['status' => 'rejected']);
             }
-        });
 
-        return response()->json(['message' => $message]);
+            // Return success response
+            return response()->json(['message' => 'Unfriend Successfully'], 200);
+        } else {
+            // Return error if the friend list is not found
+            return response()->json(['error' => 'Friend list not found or user does not exist'], 404);
+        }
     }
-
 
 
 
@@ -509,35 +498,67 @@ public function getAuthUserFriendDetails(Request $request)
 
     //get User info for show others profile 
     public function getUserInfo($id)
-    {
-        /*    // Sanitize and validate the ID
-    if (empty($id) || !Uuid::isValid($id)) {
-        Log::warning("Invalid User ID format: {$id}");
+{
+    // Retrieve the authenticated user
+    $authUser = auth()->user();
+    $authUserId = $authUser->user_id;
+
+    // Retrieve the user by ID, selecting specific fields
+    $user = User::where('user_id', $id)
+        ->select('cover_photo', 'identifier', 'profile_picture', 'user_fname', 'user_lname')
+        ->first();
+
+    // Check if user exists
+    if (!$user) {
+        Log::warning("User not found for ID: {$id}");
         return response()->json([
-            'error' => 'Invalid User ID format'
-        ], 400); // Bad Request
+            'error' => 'User not found'
+        ], 404); // Not Found
     }
- */
-        // Retrieve the user by ID, selecting specific fields
-        $user = User::where('user_id', $id)
-            ->select('cover_photo', 'identifier', 'profile_picture', 'user_fname', 'user_lname')
+
+    // Default friend_state to 'not_friend'
+    $friend_state = 'not_friend';
+
+    // 1. Check if they are already friends by looking for them in the friend list
+    $authFriendList = FriendList::where('user_id', $authUserId)->first();
+    if ($authFriendList) {
+        $friendIds = explode(',', $authFriendList->user_friends_ids);
+        if (in_array($id, $friendIds)) {
+            $friend_state = 'friend'; // Already friends
+        }
+    }
+
+    // 2. If not friends, check if a pending friend request exists between the authenticated user and the target user
+    if ($friend_state === 'not_friend') {
+        // Check if auth user sent a friend request to the target user
+        $sentFriendRequest = FriendRequest::where('sender_id', $authUserId)
+            ->where('receiver_id', $id)
+            ->where('status', 'pending')
             ->first();
 
-        // Check if user exists
-        if (!$user) {
-            Log::warning("User not found for ID: {$id}");
-            return response()->json([
-                'error' => 'User not found'
-            ], 404); // Not Found
+        if ($sentFriendRequest) {
+            $friend_state = 'sended'; // Auth user sent the request
         }
 
-        // Return the user data as JSON
-        return response()->json([
-            'data' => $user
-        ], 200); // OK
+        // Check if the auth user is the receiver of a pending request from the target user
+        $receivedFriendRequest = FriendRequest::where('sender_id', $id)
+            ->where('receiver_id', $authUserId)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($receivedFriendRequest) {
+            $friend_state = 'received'; // Auth user received the request
+        }
     }
 
+    // Return the user data with the 'friend_state'
+    return response()->json([
+        'data' => $user,
+        'friend_state' => $friend_state // Return the determined friend state
+    ], 200); // OK
+}
 
+/* sended,not_friend, received,friend, */
 
 
 
