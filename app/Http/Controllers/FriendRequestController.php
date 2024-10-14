@@ -498,23 +498,34 @@ public function getAuthUserFriendDetails(Request $request)
 
     //get User info for show others profile 
     public function getUserInfo($id)
+    {
+        // Retrieve the user by ID, selecting specific fields
+        $user = User::where('user_id', $id)
+            ->select('cover_photo', 'identifier', 'profile_picture', 'user_fname', 'user_lname')
+            ->first();
+
+        // Check if user exists
+        if (!$user) {
+            Log::warning("User not found for ID: {$id}");
+            return response()->json([
+                'error' => 'User not found'
+            ], 404); // Not Found
+        }
+
+        // Return user data (without friend state)
+        return response()->json([
+            'data' => $user
+        ], 200); // OK
+    }
+
+
+
+// Method to get the friend state between authenticated user and target user
+public function getFriendState($id)
 {
     // Retrieve the authenticated user
     $authUser = auth()->user();
     $authUserId = $authUser->user_id;
-
-    // Retrieve the user by ID, selecting specific fields
-    $user = User::where('user_id', $id)
-        ->select('cover_photo', 'identifier', 'profile_picture', 'user_fname', 'user_lname')
-        ->first();
-
-    // Check if user exists
-    if (!$user) {
-        Log::warning("User not found for ID: {$id}");
-        return response()->json([
-            'error' => 'User not found'
-        ], 404); // Not Found
-    }
 
     // Default friend_state to 'not_friend'
     $friend_state = 'not_friend';
@@ -551,12 +562,17 @@ public function getAuthUserFriendDetails(Request $request)
         }
     }
 
-    // Return the user data with the 'friend_state'
+    // Return the determined friend state
     return response()->json([
-        'data' => $user,
-        'friend_state' => $friend_state // Return the determined friend state
+        'friend_state' => $friend_state
     ], 200); // OK
 }
+
+
+
+
+
+
 
 /* sended,received,   not_friend, ,friend, */
 
