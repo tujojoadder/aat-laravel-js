@@ -558,7 +558,7 @@ public function getAuthUserFriendDetails(Request $request)
     ], 200); // OK
 }
 
-/* sended,not_friend, received,friend, */
+/* sended,received,   not_friend, ,friend, */
 
 
 
