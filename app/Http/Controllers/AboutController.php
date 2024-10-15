@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\About;
 use App\Models\UniqeUser;
+use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Http\Request;
@@ -63,24 +64,80 @@ class AboutController extends Controller
 
 public function getAbout(Request $request) {
     // Get Auth user
-    $user = auth()->user(); 
-    $userId = $user->user_id;
-    $about = About::where('user_id', $userId)->first();
+    $user = auth()->user();
 
-
-    /* This is for which is not created by valid gmail */
-    if (!$about) {
-        // If no data is found, return a response with null values for each key
-        return response()->json(['data' => [
-            'location' => null,
-            'relationship_status' => 'single',
-            'work' => null,
-            'education' => null
-        ]]);
+    // If no authenticated user is found, return an error response
+    if (!$user) {
+        return response()->json([
+            'error' => 'User not authenticated'
+        ], 401);
     }
 
-    return response()->json(['data' => $about]);
+    // Fetch the user's "About" details from the About table
+    $about = About::where('user_id', $user->user_id)->first();
+
+    // If no "About" data is found, return default values for "About" fields and gender, birthdate from users table
+    if (!$about) {
+        return response()->json([
+            'data' => [
+                'location' => null,
+                'relationship_status' => 'single',  // Default value
+                'work' => null,
+                'education' => null,
+                'gender' => $user->gender,
+                'birthdate' => $user->birthdate,
+            ]
+        ]);
+    }
+
+    // Combine "About" data with "User" data (gender and birthdate)
+    return response()->json([
+        'data' => [
+            'location' => $about->location,
+            'relationship_status' => $about->relationship_status,
+            'work' => $about->work,
+            'education' => $about->education,
+            'gender' => $user->gender,
+            'birthdate' => $user->birthdate,
+        ]
+    ]);
 }
+
+/* Specific user About data */
+public function getUserAbout(Request $request, $id) {
+    // Fetch the user's "About" details from the About table
+    $about = About::where('user_id', $id)->first();
+
+    // Fetch gender and birthdate from the users table
+    $user = User::where('user_id', $id)->select('gender', 'birthdate')->first();
+
+    // If no "About" data is found, return default values for "About" fields and null for gender and birthdate
+    if (!$about) {
+        return response()->json([
+            'data' => [
+                'location' => null,
+                'relationship_status' => 'single',  // Default value
+                'work' => null,
+                'education' => null,
+                'gender' => $user ? $user->gender : null,
+                'birthdate' => $user ? $user->birthdate : null,
+            ]
+        ]);
+    }
+
+    // Combine "About" data with "User" data (gender and birthdate)
+    return response()->json([
+        'data' => [
+            'location' => $about->location,
+            'relationship_status' => $about->relationship_status,
+            'work' => $about->work,
+            'education' => $about->education,
+            'gender' => $user ? $user->gender : null,
+            'birthdate' => $user ? $user->birthdate : null,
+        ]
+    ]);
+}
+
     
 
 

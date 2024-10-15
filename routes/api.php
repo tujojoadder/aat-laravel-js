@@ -765,7 +765,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
        /*  About */
        Route::post('/about/createorupdate', [AboutController::class, 'storeOrUpdate']);
+      /* auth user */
        Route::get('/getabout', [AboutController::class, 'getAbout']);
+       /* specific user */
+       Route::get('/about/{id}', [AboutController::class, 'getUserAbout']);
 
        /*<---- Cover photo ----> */
        //view cover photo
