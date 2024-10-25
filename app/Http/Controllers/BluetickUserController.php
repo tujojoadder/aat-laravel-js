@@ -326,41 +326,4 @@ class BluetickUserController extends Controller
             return response()->json(['message' => 'You does not have blue tik'], 400);
         }
     }
-    public function updaeIAccountIdentifier($iaccount, Request $request)
-    {
-        $user = auth()->user();
-        if ($user->blueticks) {
-            $request->merge(['iaccount' => $iaccount]);
-            $this->validate($request, [
-                'identifier' => 'required|string|max:200',
-                'iaccount' => 'required',
-            ]);
-            $userId = $user->user_id;
-            $iaccount = cleanInput($iaccount);
-            $identifiercln = cleanInput($request->identifier);
-            $identifierremove = preg_replace('/[^\p{L}0-9]+/u', '', $identifiercln);
-            $identifierBase = strtolower($identifierremove);
-
-            if (
-                User::where('identifier', $identifierBase)->exists() ||
-                Groups::where('identifier', $identifierBase)->exists() ||
-                Pages::where('identifier', $identifierBase)->exists()
-            ) {
-                // Identifier already exists
-                return response()->json(['message' => 'The identifier is already in use.'], 422);
-            }
-
-            $iaccountId = IAccount::where('iaccount_id',$iaccount)
-            ->where('iaccount_creator',$userId)
-            ->first();
-            if (!$iaccountId) {
-                return response()->json(['message' => 'You are not owner of this IAccount']);
-            }
-            $iaccountId->update(['identifier' => $identifierBase]);
-            return response()->json(['message' => 'IAccountIdentifier updated successfully']);
-        } else {
-            // Return error response if user is not male or does not have blue_tik
-            return response()->json(['message' => 'You does not have blue tik'], 400);
-        }
-    }
 }
