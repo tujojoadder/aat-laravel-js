@@ -68,6 +68,7 @@ class ReplyController extends Controller
             'reply_text' => $reply->reply_text,
             'created_at' => $reply->created_at,
             'reply_id' => $reply->reply_id,
+            'comment_id' => $reply->comment_id,
             'total_comment' => $totalActivity // Optional: If you want to return this in the response
         ];
 
@@ -134,8 +135,10 @@ class ReplyController extends Controller
        $replyData = [
 
            'replied_by_id' => $userId,
-           'post_id' => $postId,
+           'post_id' => $postId,   
            'reply_text' => $reply->reply_text,
+           'comment_id' => $reply->comment_id,
+           'reply_id' => $reply->reply_id,
            'created_at' => $reply->created_at,
            'total_comment' => $totalActivity // Optional: If you want to return this in the response
        ];
@@ -145,7 +148,7 @@ class ReplyController extends Controller
        // Return a detailed response
        return response()->json([
            'message' => 'Reply created successfully',
-           'reply' => $replyData,
+           
        ]);
     }
 
