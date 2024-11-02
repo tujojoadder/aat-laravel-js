@@ -67,6 +67,7 @@ class ReplyController extends Controller
             'post_id' => $postId,
             'reply_text' => $reply->reply_text,
             'created_at' => $reply->created_at,
+            'reply_id' => $reply->reply_id,
             'total_comment' => $totalActivity // Optional: If you want to return this in the response
         ];
 

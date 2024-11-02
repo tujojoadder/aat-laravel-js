@@ -71,6 +71,8 @@ class CommentsController extends Controller
             'post_id' => $postId,
             'comment_text' => $comment->comment_text,
             'created_at' => $comment->created_at,
+            'comment_id' => $comment->comment_id,
+          
       
         ];
 
@@ -88,7 +90,7 @@ class CommentsController extends Controller
         // Return a response with the created comment details
         return response()->json([
             'message' => 'Comment created successfully',
-            'comment' => $commentData,
+            'comment_id' => $commentId,
         ]);
     }
     
