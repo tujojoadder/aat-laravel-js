@@ -71,7 +71,7 @@ class PostsController extends Controller
 
                 // Move file to public directory directly
                 $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl = asset('storage/upload/images/' . $customFileName); // Generate a public URL
+                $imageUrl =  'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -92,7 +92,7 @@ class PostsController extends Controller
 
                 // Move file to public directory directly
                 $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl = asset('storage/upload/images/' . $customFileName); // Generate a public URL
+                $imageUrl =  'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -165,7 +165,7 @@ class PostsController extends Controller
                 $customFileName = $request->file('image')->hashName();
                 // Move file to public directory directly
                 $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl = asset('storage/upload/images/' . $customFileName); // Generate a public URL
+                $imageUrl =  'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -185,7 +185,7 @@ class PostsController extends Controller
                 $customFileName = $request->file('image')->hashName();
                 // Move file to public directory directly
                 $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl = asset('storage/upload/images/' . $customFileName); // Generate a public URL
+                $imageUrl =  'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -250,7 +250,7 @@ class PostsController extends Controller
                 $customFileName = $request->file('image')->hashName();
                 // Move file to public directory directly
                 $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl = asset('storage/upload/images/' . $customFileName); // Generate a public URL
+                $imageUrl =  'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -270,7 +270,7 @@ class PostsController extends Controller
                 $customFileName = $request->file('image')->hashName();
                 // Move file to public directory directly
                 $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl = asset('storage/upload/images/' . $customFileName); // Generate a public URL
+                $imageUrl =  'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -332,7 +332,7 @@ class PostsController extends Controller
                 $customFileName = $request->file('image')->hashName();
                 // Move file to public directory directly
                 $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl = asset('storage/upload/images/' . $customFileName); // Generate a public URL
+                $imageUrl =  'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -352,7 +352,7 @@ class PostsController extends Controller
                 $customFileName = $request->file('image')->hashName();
                 // Move file to public directory directly
                 $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl = asset('storage/upload/images/' . $customFileName); // Generate a public URL
+                $imageUrl =  'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),

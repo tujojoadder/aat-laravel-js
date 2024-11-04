@@ -60,7 +60,7 @@ public function store(Request $request)
                 $path = $image->move(public_path('storage/cover_photo/'), $fileNameToUse);
 
                 // Generate a public URL for the stored image
-                $imageUrl = asset('storage/cover_photo/' . $fileNameToUse);
+                $imageUrl = 'storage/cover_photo/' . $fileNameToUse;
 
                 // Save the image record to the database
                 $data = CoverPhoto::create([

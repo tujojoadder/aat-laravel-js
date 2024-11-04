@@ -52,7 +52,7 @@ class FprofilePicturesController extends Controller
                     $path = $image->move(public_path('storage/fprofile_picture/'), $fileName);
     
                     // Generate a public URL for the stored image
-                    $imageUrl = asset('storage/fprofile_picture/' . $fileName);
+                    $imageUrl = 'storage/fprofile_picture/' . $fileName;
     
                     // Save the image record to the database
                     $data = FprofilePictures::create([

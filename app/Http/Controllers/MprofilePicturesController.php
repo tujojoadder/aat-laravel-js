@@ -58,7 +58,7 @@ class MprofilePicturesController extends Controller
                     $path = $image->move(public_path('storage/mprofile_picture/'), $fileName);
     
                     // Generate a public URL for the stored image
-                    $imageUrl = asset('storage/mprofile_picture/' . $fileName);
+                    $imageUrl = 'storage/mprofile_picture/' . $fileName;
     
                     // Save the image record to the database
                     $data = MprofilePicture::create([
