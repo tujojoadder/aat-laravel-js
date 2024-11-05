@@ -35,7 +35,7 @@ class GroupsController extends Controller
             for ($i = 0; $i < 6; $i++) {
                 $baseIdentifier .= chr(rand(97, 122)); // ASCII codes for lowercase letters (a-z)
             }
-        }
+        } 
 
         // Append an underscore (_) followed by two random letters
         $letters = '_';
