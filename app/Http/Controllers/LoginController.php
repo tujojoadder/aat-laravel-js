@@ -125,13 +125,13 @@ private function generateIdentifier($baseIdentifier)
         $photoPath = '';
         switch (cleanInput($formData['gender'])) {
             case 'male':
-                $photoPath = 'http://127.0.0.1:8000/storage/mprofile_picture/male.PNG';
+                $photoPath = 'storage/mprofile_picture/male.PNG';
                 break;
             case 'female':
-                $photoPath = 'http://127.0.0.1:8000/storage/fprofile_picture/female.png';
+                $photoPath = 'storage/fprofile_picture/female.png';
                 break;
             default:
-                $photoPath = 'http://127.0.0.1:8000/storage/fprofile_picture/others.png';
+                $photoPath = 'storage/fprofile_picture/others.png';
         }
 
 
@@ -174,7 +174,7 @@ private function generateIdentifier($baseIdentifier)
                 'gender' => $gender,
                 'birthdate' => $birthdate,
                 'identifier' => $identifier,
-                'cover_photo' => 'http://127.0.0.1:8000/storage/cover_photo/user.jpg'
+                'cover_photo' => 'storage/cover_photo/user.jpg'
             ]);
 
 

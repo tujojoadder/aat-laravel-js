@@ -106,8 +106,8 @@ class GroupsController extends Controller
                     'group_creator' => $user->user_id,
                     'group_admins' => $user->user_id,
                     'audience' => $audience,
-                    'group_picture' => 'http://127.0.0.1:8000/storage/mprofile_picture/group.jpg',
-                    'group_cover' => 'http://127.0.0.1:8000/storage/cover_photo/group.jpg',
+                    'group_picture' => 'storage/mprofile_picture/group.jpg',
+                    'group_cover' => 'storage/cover_photo/group.jpg',
                 ]);
 
                 // Associate the user with the group

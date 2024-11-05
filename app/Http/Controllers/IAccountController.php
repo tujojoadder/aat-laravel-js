@@ -103,8 +103,8 @@ class IAccountController extends Controller
             'identifier' => $identifier,
             'iaccount_name' => $iaccountName,
             'iaccount_creator' => $userId,
-            'iaccount_picture' => 'http://127.0.0.1:8000/storage/mprofile_picture/iaccount.jpg',
-            'iaccount_cover' => 'http://127.0.0.1:8000/storage/cover_photo/iaccount.jpg',
+            'iaccount_picture' => 'storage/mprofile_picture/iaccount.jpg',
+            'iaccount_cover' => 'storage/cover_photo/iaccount.jpg',
         ]);
 
         return response()->json([

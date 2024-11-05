@@ -105,8 +105,8 @@ class PagesController extends Controller
                     'page_details' => $pageDetails,
                     'page_creator' => $userId,
                     'page_admins' => $userId,
-                    'page_picture' => 'http://127.0.0.1:8000/storage/mprofile_picture/page.jpg',
-                    'page_cover' => 'http://127.0.0.1:8000/storage/cover_photo/page.jpg',
+                    'page_picture' => 'storage/mprofile_picture/page.jpg',
+                    'page_cover' => 'storage/cover_photo/page.jpg',
                     'category' => $pageCategory,
                 ]);
 
