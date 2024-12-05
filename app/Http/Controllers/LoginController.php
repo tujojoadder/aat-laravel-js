@@ -85,6 +85,39 @@ private function generateIdentifier($baseIdentifier)
         }
     }
 
+/* React native google login  */
+    public function googleSignInOnNative(Request $request)
+    {
+        // Initialize the Google Client with your Web Client ID
+        $client = new Google_Client(['client_id' => '212461889410-pt3bcbmi4j56lgvvrc7vp21kc8805td2.apps.googleusercontent.com']); 
+    
+        // Verify the Google ID token
+        $payload = $client->verifyIdToken($request->token); // Verify the token from the React Native app
+    
+        if ($payload) {
+            $email = $payload['email']; // Extract email from the payload
+            $user = User::where('email', $email)->first(); // Check if the user already exists
+    
+            if ($user) {
+                // User found, generate API token and return
+                $token = $user->createToken('user')->plainTextToken;
+                return response()->json(['message' => 'have account', 'token' => $token]);
+            } else {
+                // User not found, prompt for registration
+                return response()->json(['message' => 'no account', 'email' => $email]);
+            }
+        } else {
+            // Invalid token
+            return response()->json(['message' => 'Invalid token'], 401);
+        }
+    }
+
+
+
+
+
+
+
     public function additionalinformation(Request $request)
     {
 

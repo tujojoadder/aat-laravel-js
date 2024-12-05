@@ -47,10 +47,12 @@ use PHPUnit\TextUI\XmlConfiguration\GroupCollection;
 
 //<-- public Routes -->
 
-/* for google */
-
+/* for google React js */
 Route::post('/googlehandle', [LoginController::class, 'googlehandle']);
 Route::post('/additionalinformation', [LoginController::class, 'additionalinformation']);
+
+/* for google React Native */
+Route::post('/google-sign-in', [LoginController::class, 'googleSignInOnNative']);
 
 /* normal login */
 Route::post('/login', [LoginController::class, 'login']);
