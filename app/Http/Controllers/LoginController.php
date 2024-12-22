@@ -156,15 +156,17 @@ private function generateIdentifier($baseIdentifier)
         $formData = $validatedData['formData'];
         // Set the default profile photo based on gender
         $photoPath = '';
+
+       /*<<<---  we have to store male,female,others and etc default image on .jpg formate --->>> */
         switch (cleanInput($formData['gender'])) {
             case 'male':
-                $photoPath = 'storage/mprofile_picture/male.PNG';
+                $photoPath = 'storage/mprofile_picture/male.jpg';
                 break;
             case 'female':
-                $photoPath = 'storage/fprofile_picture/female.png';
+                $photoPath = 'storage/fprofile_picture/female.jpg';
                 break;
             default:
-                $photoPath = 'storage/fprofile_picture/others.png';
+                $photoPath = 'storage/fprofile_picture/others.jpg';
         }
 
 
