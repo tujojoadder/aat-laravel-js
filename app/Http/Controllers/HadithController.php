@@ -337,6 +337,4 @@ return response()->json(['message' => $dayHadith]);
 
 }
 
-
-
 }

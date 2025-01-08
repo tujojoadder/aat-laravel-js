@@ -345,11 +345,25 @@ if ($password ==$confirm_password ) {
     //logut
     public function logOut(Request $request)
     {
-        // Revoke the token that was used to authenticate the current request
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json(['message' => 'Logged out successfully'], 200);
+        try {
+            // Retrieve the authenticated user using auth() helper
+            $user = auth()->user();
+    
+            if (!$user) {
+                return response()->json(['message' => 'No authenticated user found'], 401);
+            }
+    
+            // Revoke the token for the current user
+            $user->currentAccessToken()->delete();
+    
+            return response()->json(['message' => 'Logged out successfully'], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while logging out',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
-
+    
 
 }
