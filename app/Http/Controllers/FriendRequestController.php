@@ -318,7 +318,7 @@ class FriendRequestController extends Controller
         $specificUserId = cleanInput($request->query('id'));
     
         // Define the number of friends per page
-        $perPage = 10;
+        $perPage = 5;
     
         // Get the authenticated user's ID
         $authUserId = auth()->id();

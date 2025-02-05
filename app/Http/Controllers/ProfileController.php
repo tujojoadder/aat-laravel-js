@@ -31,7 +31,7 @@ class ProfileController extends Controller
         $specificUserId = cleanInput($request->query('id'));
 
         // Debug the value of $specificUserId if needed
-        $perPage = $request->query('per_page', 5);
+        $perPage = $request->query('per_page', 7);
         $page = $request->query('page', 1);
 
         // Fetch posts where author_id matches the specific user ID and group_id, page_id, iaccount_id are NULL
@@ -95,7 +95,7 @@ class ProfileController extends Controller
         $specificUserId = cleanInput($request->query('id'));
 
         // Set default pagination values, with the option to customize via query parameters
-        $perPage = $request->query('per_page', 6); // default to 10 per page
+        $perPage = $request->query('per_page', 7); // default to 10 per page
         $page = $request->query('page', 1);
 
         // Query for the posts with associated image posts for the specific user, paginate the results
