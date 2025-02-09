@@ -502,20 +502,21 @@ public function getAuthUserFriendDetails(Request $request)
         // Retrieve the user by ID, selecting specific fields
         $user = User::where('user_id', $id)
             ->select('cover_photo', 'identifier', 'profile_picture', 'user_fname', 'user_lname')
+            ->withCount(['friends', 'followers', 'followings']) // Add counts for relationships
             ->first();
-
-        // Check if user exists
+    
+        // Check if user not exists
         if (!$user) {
             Log::warning("User not found for ID: {$id}");
             return response()->json([
                 'error' => 'User not found'
             ], 404); // Not Found
         }
-
-        // Return user data (without friend state)
+    
+        // Return user data with friend, follower, and following counts
         return response()->json([
-            'data' => $user
-        ], 200); // OK
+                        'data' => $user,          
+                           ], 200); // OK
     }
 
 
