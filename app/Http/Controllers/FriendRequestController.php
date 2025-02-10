@@ -498,26 +498,36 @@ public function getAuthUserFriendDetails(Request $request)
 
     //get User info for show others profile 
     public function getUserInfo($id)
-    {
-        // Retrieve the user by ID, selecting specific fields
-        $user = User::where('user_id', $id)
-            ->select('cover_photo', 'identifier', 'profile_picture', 'user_fname', 'user_lname')
-            ->withCount(['friends', 'followers', 'followings']) // Add counts for relationships
-            ->first();
-    
-        // Check if user not exists
-        if (!$user) {
-            Log::warning("User not found for ID: {$id}");
-            return response()->json([
-                'error' => 'User not found'
-            ], 404); // Not Found
-        }
-    
-        // Return user data with friend, follower, and following counts
+{
+    // Retrieve the user by ID, selecting specific fields
+    $user = User::where('user_id', $id)
+        ->select('cover_photo', 'identifier', 'profile_picture', 'user_fname', 'user_lname')
+        ->withCount(['followers', 'followings']) // Keep follower & following counts
+        ->first();
+
+    // Check if user not exists
+    if (!$user) {
+        Log::warning("User not found for ID: {$id}");
         return response()->json([
-                        'data' => $user,          
-                           ], 200); // OK
+            'error' => 'User not found'
+        ], 404);
     }
+
+    // Retrieve the friend list for the specified user ID
+    $friendList = FriendList::where('user_id', $id)->first();
+
+    // Count the number of friends based on user_friends_ids
+    $friendCount = ($friendList && !empty($friendList->user_friends_ids))
+        ? count(explode(',', $friendList->user_friends_ids))
+        : 0;
+
+    // Add friendCount as a column in the user object
+    $user->setAttribute('friends_count', $friendCount);
+
+    // Return user data with the additional column
+    return response()->json(['data' => $user], 200);
+}
+
 
 
 
