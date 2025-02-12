@@ -21,6 +21,7 @@ class FriendRequestController extends Controller
     /*   Send Friend Request */
     public function send_friendrequest(Request $request)
     {
+   
         $user = auth()->user();
         $userId = $user->user_id;
         $message = '';
@@ -318,7 +319,7 @@ class FriendRequestController extends Controller
         $specificUserId = cleanInput($request->query('id'));
     
         // Define the number of friends per page
-        $perPage = 5;
+        $perPage = 15;
     
         // Get the authenticated user's ID
         $authUserId = auth()->id();
@@ -387,7 +388,7 @@ class FriendRequestController extends Controller
 public function getAuthUserFriendDetails(Request $request)
 {
     // Define the number of friends per page
-    $perPage = 10;
+    $perPage = 15;
 
     // Get the page number from the request (default to 1 if not provided)
     $page = $request->get('page', 1);
