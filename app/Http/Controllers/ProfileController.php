@@ -124,10 +124,10 @@ class ProfileController extends Controller
             return response()->json(['error' => 'User not found.'], 404);
         }
 
-        $perPage = $request->query('per_page', 7);
+        $perPage = $request->query('per_page', 15);
         $page = $request->query('page', 1);
 
-        $followers = $user->followers()->with(['follower' => function ($query) {
+        $followers = $user->followers()->select('follower_id')->with(['follower' => function ($query) {
             $query->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier');
         }])->paginate($perPage, ['*'], 'page', $page);
 
