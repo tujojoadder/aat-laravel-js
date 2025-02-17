@@ -28,6 +28,10 @@ class Groups extends Model
        'identifier',
     ];
 
+
+    /* group_id → Foreign key for the Groups model inside users_has_groups.
+user_id → Foreign key for the User model inside users_has_groups */
+
         //Get all group from specific users
     public function user(){
         return $this->belongsToMany('App\Models\User', 'users_has_groups', 'group_id', 'user_id');

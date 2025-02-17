@@ -63,7 +63,7 @@ class User extends Authenticatable
     }
     public function reply()
     {
-        return $this->hasMany(Replies::class,'replied_by_id' );
+        return $this->hasMaany(Replies::class,'replied_by_id' );
     }
 
   
@@ -76,6 +76,10 @@ class User extends Authenticatable
         return $this->hasMany(FriendRequest::class, 'receiver_id', 'user_id');
     }
 
+
+    /* user_id → Foreign key for the User model inside users_has_groups.
+       group_id → Foreign key for the Groups model inside users_has_groups.
+   */
     //Get users groups
     public function groups()
     {
@@ -113,15 +117,19 @@ class User extends Authenticatable
 
                 /* User  */
       // Define the relationship to retrieve the followers
-      public function followers()
-      {
-          return $this->hasMany(UserFollower::class, 'user_id', 'user_id');
-      }
-      public function followings()
-      {
-          return $this->hasMany(UserFollowing::class, 'user_id', 'user_id');
-      }
 
+      
+ // Users that this user follows
+ public function followings()
+ {
+     return $this->belongsToMany(User::class, 'user_follows', 'follower_id', 'following_id');
+ }
+
+ // Users that follow this user
+ public function followers()
+ {
+     return $this->belongsToMany(User::class, 'user_follows', 'following_id', 'follower_id');
+ }
 
 
    /*  Get User Friends */

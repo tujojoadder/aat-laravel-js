@@ -118,18 +118,16 @@ class ProfileController extends Controller
     {
         $specificUserId = cleanInput($request->query('id'));
 
-        $user = User::where('user_id', $specificUserId)->first();
+        $specificUser = User::where('user_id', $specificUserId)->first();
 
-        if (!$user) {
+        if (!$specificUser) {
             return response()->json(['error' => 'User not found.'], 404);
         }
 
         $perPage = $request->query('per_page', 15);
         $page = $request->query('page', 1);
 
-        $followers = $user->followers()->select('follower_id')->with(['follower' => function ($query) {
-            $query->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier');
-        }])->paginate($perPage, ['*'], 'page', $page);
+        $followers = $specificUser->followers()->where()->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json($followers);
     }

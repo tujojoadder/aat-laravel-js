@@ -7,37 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class UserFollower extends Model
+class UserFollow extends Model
 {
      use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'user_followers'; // Specify the custom table name
-    protected $primaryKey = 'user_followers_id';
+    protected $table = 'user_follows'; // Specify the custom table name
+    protected $primaryKey = 'user_follows_id';
     public $incrementing = false; // if primay key is string
 
 
      protected $fillable = [
-       'user_followers_id',
-       'user_id',
+       'user_follows_id',
        'follower_id',
+       'following_id',
 
     ];
-
-
-
-
-
-    public function follower()
-    {
-        return $this->belongsTo(User::class, 'follower_id', 'user_id');
-    }
-
-
-
-
-
-
-
      /**
      * The attributes that should be hidden for serialization.
      *
