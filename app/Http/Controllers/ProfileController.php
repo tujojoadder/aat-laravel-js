@@ -127,8 +127,16 @@ class ProfileController extends Controller
         $perPage = $request->query('per_page', 15);
         $page = $request->query('page', 1);
 
-        $followers = $specificUser->followers()->where()->paginate($perPage, ['*'], 'page', $page);
-
+        $followers = $specificUser->followers()->paginate($perPage, ['*'], 'page', $page);
+        $followers->getCollection()->transform(function ($item) {
+            return [
+                'user_id'         => $item->user_id,
+                'user_fname'      => $item->user_fname,
+                'user_lname'      => $item->user_lname,
+                'identifier'      => $item->identifier,
+                'profile_picture' => $item->profile_picture,
+            ];
+        });
         return response()->json($followers);
     }
 
