@@ -133,31 +133,38 @@ class ProfileController extends Controller
     }
 
 
-
-    /*   Get all user following  for profile */
     public function getAllUserFollowing(Request $request)
-{
-    $specificUserId = cleanInput($request->query('id'));
-
-    $user = User::where('user_id', $specificUserId)->first();
-
-    if (!$user) {
-        return response()->json(['error' => 'User not found.'], 404);
+    {
+        $specificUserId = cleanInput($request->query('id'));
+    
+        $user = User::where('user_id', $specificUserId)->first();
+    
+        if (!$user) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+    
+        $perPage = $request->query('per_page', 15);
+        $page = $request->query('page', 1);
+    
+        $followings = $user->followings()
+            ->select('users.user_id', 'users.user_fname', 'users.user_lname', 'users.identifier', 'users.profile_picture')
+            ->paginate($perPage, ['*'], 'page', $page);
+    
+        // Transform each item in the collection to include only the required fields:
+        $followings->getCollection()->transform(fn($item)=> {
+            return [
+                'user_id'         => $item->user_id,
+                'user_fname'      => $item->user_fname,
+                'user_lname'      => $item->user_lname,
+                'identifier'      => $item->identifier,
+                'profile_picture' => $item->profile_picture,
+            ];
+        });
+    
+        return response()->json($followings);
     }
-
-    $perPage = $request->query('per_page', 15);
-    $page = $request->query('page', 1);
-
-    $followings = $user->followings()
-
- 
-    ->select('user_id','user_fname','user_lname','identifier','profile_picture')
-       
-        ->paginate($perPage, ['*'], 'page', $page); // Selecting only 'following_id'
-
-    return response()->json($followings);
-}
-
+    
+    
 
 
 

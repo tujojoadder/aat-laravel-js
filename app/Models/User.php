@@ -123,6 +123,7 @@ class User extends Authenticatable
  public function followings()
  {
      return $this->belongsToMany(User::class, 'user_follows', 'follower_id', 'following_id');
+     
  }
 
  // Users that follow this user
