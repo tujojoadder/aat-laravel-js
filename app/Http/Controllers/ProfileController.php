@@ -151,7 +151,7 @@ class ProfileController extends Controller
             ->paginate($perPage, ['*'], 'page', $page);
     
         // Transform each item in the collection to include only the required fields:
-        $followings->getCollection()->transform(fn($item)=> {
+        $followings->getCollection()->transform(function ($item) {
             return [
                 'user_id'         => $item->user_id,
                 'user_fname'      => $item->user_fname,
