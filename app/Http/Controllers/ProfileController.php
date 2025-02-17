@@ -149,13 +149,11 @@ class ProfileController extends Controller
     $page = $request->query('page', 1);
 
     $followings = $user->followings()
-        ->select('following_id') // Selecting only the necessary field
-        ->with([
-            'following' => function ($query) {
-                $query->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier');
-            }
-        ])
-        ->paginate($perPage, ['following_id'], 'page', $page); // Selecting only 'following_id'
+
+ 
+    ->select('user_id','user_fname','user_lname','identifier','profile_picture')
+       
+        ->paginate($perPage, ['*'], 'page', $page); // Selecting only 'following_id'
 
     return response()->json($followings);
 }
