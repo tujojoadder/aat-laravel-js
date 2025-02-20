@@ -365,4 +365,58 @@ class ProfileController extends Controller
         // Return the updated cover photo as a JSON response
         return response()->json(['data' => $Profilephoto], 200);
     }
+
+
+
+    /* toggoleuserfollow */
+    
+    public function toggoleuserfollow(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'userId' => 'required|string|exists:users,user_id',
+        ]);
+    
+        // Get authenticated user ID
+        $authUserId = auth()->user()->user_id;
+        $userId = $request->input('userId');
+    
+        // Prevent user from following themselves
+        if ($authUserId === $userId) {
+            return response()->json(['message' => 'You cannot follow yourself.'], 400);
+        }
+    
+        // Variable to store the result message
+        $message = '';
+    
+        // Use a database transaction
+        DB::transaction(function () use ($authUserId, $userId, &$message) {
+            // Check if the user is already following the target user
+            $isFollowing = UserFollow::where('follower_id', $authUserId)
+                ->where('following_id', $userId)
+                ->first();
+    
+            if ($isFollowing) {
+                // Unfollow: Delete the follow relationship
+                $isFollowing->delete();
+                $message = 'unfollow';
+            } else {
+                // Follow: Create a new follow relationship
+                UserFollow::create([
+                    'user_follows_id' => Str::uuid(),
+                    'follower_id' => $authUserId,
+                    'following_id' => $userId,
+                ]);
+                $message = 'follow';
+            }
+        });
+    
+        return response()->json(['message' => $message]);
+    }
+
+
+
+
+
+
 }

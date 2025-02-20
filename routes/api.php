@@ -803,9 +803,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::delete('/message/delete', [ChatController::class, 'deleteMessage']);
 
 
-
- 
-
+/* user follow unfollow */
+Route::post('/toggoleuserfollow',[ProfileController::class,'toggoleuserfollow']);
 
 
 

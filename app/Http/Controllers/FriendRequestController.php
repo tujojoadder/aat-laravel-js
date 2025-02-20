@@ -6,6 +6,7 @@ use App\Models\FriendList;
 use App\Models\FriendRequest;
 use App\Models\UniqeUser;
 use App\Models\User;
+use App\Models\UserFollow;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\RelationNotFoundException;
@@ -500,6 +501,8 @@ public function getAuthUserFriendDetails(Request $request)
     //get User info for show others profile 
     public function getUserInfo($id)
 {
+    $id=cleanInput($id);
+    $userId=auth()->user()->user_id;
     // Retrieve the user by ID, selecting specific fields
     $user = User::where('user_id', $id)
         ->select('cover_photo', 'identifier', 'profile_picture', 'user_fname', 'user_lname')
@@ -522,8 +525,14 @@ public function getAuthUserFriendDetails(Request $request)
         ? count(explode(',', $friendList->user_friends_ids))
         : 0;
 
+        $isFollowing = UserFollow::where('follower_id',$userId)
+        ->where('following_id', $id)
+        ->exists();
+
+
     // Add friendCount as a column in the user object
     $user->setAttribute('friends_count', $friendCount);
+    $user->setAttribute('is_following', $isFollowing);
 
     // Return user data with the additional column
     return response()->json(['data' => $user], 200);
