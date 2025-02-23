@@ -528,68 +528,51 @@ public function getAuthUserFriendDetails(Request $request)
         $isFollowing = UserFollow::where('follower_id',$userId)
         ->where('following_id', $id)
         ->exists();
+    /* friend_status */
+     // Default friend_state to 'not_friend'
+     $friend_state = 'not_friend';
 
+     // 1. Check if they are already friends by looking for them in the friend list
+     $authFriendList = FriendList::where('user_id', $userId)->first();
+     if ($authFriendList) {
+         $friendIds = explode(',', $authFriendList->user_friends_ids);
+         if (in_array($id, $friendIds)) {
+             $friend_state = 'friend'; // Already friends
+         }
+     }
+ 
+     // 2. If not friends, check if a pending friend request exists between the authenticated user and the target user
+     if ($friend_state === 'not_friend') {
+         // Check if auth user sent a friend request to the target user
+         $sentFriendRequest = FriendRequest::where('sender_id', $userId)
+             ->where('receiver_id', $id)
+             ->where('status', 'pending')
+             ->first();
+ 
+         if ($sentFriendRequest) {
+             $friend_state = 'sended'; // Auth user sent the request
+         }
+ 
+         // Check if the auth user is the receiver of a pending request from the target user
+         $receivedFriendRequest = FriendRequest::where('sender_id', $id)
+             ->where('receiver_id', $userId)
+             ->where('status', 'pending')
+             ->first();
+ 
+         if ($receivedFriendRequest) {
+             $friend_state = 'received'; // Auth user received the request
+         }
+     }
+ 
 
     // Add friendCount as a column in the user object
+    $user->setAttribute('friend_state', $friend_state);
     $user->setAttribute('friends_count', $friendCount);
     $user->setAttribute('is_following', $isFollowing);
 
     // Return user data with the additional column
     return response()->json(['data' => $user], 200);
 }
-
-
-
-
-// Method to get the friend state between authenticated user and target user
-public function getFriendState($id)
-{
-    // Retrieve the authenticated user
-    $authUser = auth()->user();
-    $authUserId = $authUser->user_id;
-
-    // Default friend_state to 'not_friend'
-    $friend_state = 'not_friend';
-
-    // 1. Check if they are already friends by looking for them in the friend list
-    $authFriendList = FriendList::where('user_id', $authUserId)->first();
-    if ($authFriendList) {
-        $friendIds = explode(',', $authFriendList->user_friends_ids);
-        if (in_array($id, $friendIds)) {
-            $friend_state = 'friend'; // Already friends
-        }
-    }
-
-    // 2. If not friends, check if a pending friend request exists between the authenticated user and the target user
-    if ($friend_state === 'not_friend') {
-        // Check if auth user sent a friend request to the target user
-        $sentFriendRequest = FriendRequest::where('sender_id', $authUserId)
-            ->where('receiver_id', $id)
-            ->where('status', 'pending')
-            ->first();
-
-        if ($sentFriendRequest) {
-            $friend_state = 'sended'; // Auth user sent the request
-        }
-
-        // Check if the auth user is the receiver of a pending request from the target user
-        $receivedFriendRequest = FriendRequest::where('sender_id', $id)
-            ->where('receiver_id', $authUserId)
-            ->where('status', 'pending')
-            ->first();
-
-        if ($receivedFriendRequest) {
-            $friend_state = 'received'; // Auth user received the request
-        }
-    }
-
-    // Return the determined friend state
-    return response()->json([
-        'friend_state' => $friend_state
-    ], 200); // OK
-}
-
-
 
 
 

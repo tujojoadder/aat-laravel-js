@@ -737,9 +737,6 @@ Route::middleware('auth:sanctum')->group(function () {
        // view specific user friend list
        Route::get('/getspecificuserfriendids', [FriendRequestController::class, 'getSpecificUserFriendDetails']);
 
-            /*   is Friend or not */
-            Route::get('/friend-state/{id}', [FriendRequestController::class, 'getFriendState']);
-
        /* Auth user Profile   */
 
        Route::get('/getauthuserposts', [ProfileController::class, 'getAuthUserPosts']);
