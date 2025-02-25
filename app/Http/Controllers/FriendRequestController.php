@@ -525,7 +525,7 @@ public function getAuthUserFriendDetails(Request $request)
         ? count(explode(',', $friendList->user_friends_ids))
         : 0;
 
-        $isFollowing = UserFollow::where('follower_id',$userId)
+    $isFollowing = UserFollow::where('follower_id',$userId)
         ->where('following_id', $id)
         ->exists();
     /* friend_status */

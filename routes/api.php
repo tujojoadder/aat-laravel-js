@@ -803,7 +803,8 @@ Route::delete('/message/delete', [ChatController::class, 'deleteMessage']);
 /* user follow unfollow */
 Route::post('/toggoleuserfollow',[ProfileController::class,'toggoleuserfollow']);
 
-
+/* only react native */
+Route::get('/get-auth-user-deatils',[ProfileController::class,'authUserDetails']);
 
 
 

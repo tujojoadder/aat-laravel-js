@@ -415,6 +415,19 @@ class ProfileController extends Controller
     }
 
 
+/* only react native */
+public function authUserDetails() {
+    // Get Authenticated User
+    $user = auth()->user(); 
+
+    // Return only the required fields
+    return response()->json([
+        'profile_picture' => $user->profile_picture,
+        'user_fname' => $user->user_fname,
+        'user_lname' => $user->user_lname,
+        'email' => $user->email,
+    ]);
+}
 
 
 
