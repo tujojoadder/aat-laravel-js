@@ -505,7 +505,7 @@ public function getAuthUserFriendDetails(Request $request)
     $userId=auth()->user()->user_id;
     // Retrieve the user by ID, selecting specific fields
     $user = User::where('user_id', $id)
-        ->select('cover_photo', 'identifier', 'profile_picture', 'user_fname', 'user_lname')
+        ->select('cover_photo', 'identifier', 'profile_picture', 'user_fname', 'user_lname','privacy_setting')
         ->withCount(['followers', 'followings']) // Keep follower & following counts
         ->first();
 
