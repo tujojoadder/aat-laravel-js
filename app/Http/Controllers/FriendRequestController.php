@@ -593,7 +593,7 @@ public function getAuthUserFriendDetails(Request $request)
 
         // Get paginated friend requests with selected user details where status is 'pending'
         $friend_requests = FriendRequest::select(
-            'friend_requests.*', // Select all columns from the friend_requests table
+            'friend_requests.friend_request_id', // Select all columns from the friend_requests table
             'users.user_id', // Select the user_id column from the users table
             'users.profile_picture', // Select the profile_picture column from the users table
             'users.user_fname', // Select the user_fname column from the users table
@@ -603,7 +603,7 @@ public function getAuthUserFriendDetails(Request $request)
             ->join('users', 'friend_requests.sender_id', '=', 'users.user_id') // Join the users table on the sender_id column
             ->where('friend_requests.receiver_id', $userId) // Filter the friend requests to only those where the receiver_id matches the authenticated user's ID
             ->where('friend_requests.status', 'pending') // Filter the friend requests to only those with a 'pending' status
-            ->paginate(6);
+            ->paginate(15);
 
         return response()->json($friend_requests); // Return the paginated results as JSON
     }
