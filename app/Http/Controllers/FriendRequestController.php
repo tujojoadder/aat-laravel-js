@@ -390,7 +390,7 @@ public function getAuthUserFriendDetails(Request $request)
 {
     // Define the number of friends per page
     $perPage = 15;
-
+    
     // Get the page number from the request (default to 1 if not provided)
     $page = $request->get('page', 1);
 
@@ -603,7 +603,7 @@ public function getAuthUserFriendDetails(Request $request)
             ->join('users', 'friend_requests.sender_id', '=', 'users.user_id') // Join the users table on the sender_id column
             ->where('friend_requests.receiver_id', $userId) // Filter the friend requests to only those where the receiver_id matches the authenticated user's ID
             ->where('friend_requests.status', 'pending') // Filter the friend requests to only those with a 'pending' status
-            ->paginate(15);
+            ->paginate(5);
 
         return response()->json($friend_requests); // Return the paginated results as JSON
     }
@@ -652,7 +652,7 @@ public function getAuthUserFriendDetails(Request $request)
         // Fetch 10 users, excluding the authenticated user, their friends, and pending friend requests
         $otherUsers = User::whereNotIn('user_id', $excludeIds)
             ->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier')
-            ->paginate(9); // Ensure page parameter is handled correctly
+            ->paginate(15); // Ensure page parameter is handled correctly
 
         return response()->json($otherUsers);
     }
@@ -669,7 +669,7 @@ public function getAuthUserFriendDetails(Request $request)
         $sentRequests = User::whereHas('friendRequest', function ($query) use ($authUserId) {
             $query->where('sender_id', $authUserId)
                 ->where('status', 'pending');
-        })->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier')->paginate(4);;
+        })->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier')->paginate(15);;
 
         return response()->json($sentRequests);
     }
