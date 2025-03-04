@@ -613,7 +613,7 @@ class PostsController extends Controller
                 'user_lname' => $post->author->user_lname,
                 'user_id' => $post->author->user_id,
             ],
-            'created_at' => $post->created_at->toDateTimeString(),
+            'created_at' => $post->created_at,
             'image_post' => $post->imagePost ? [
                 'post_url' => $post->imagePost->post_url,
             ] : null,
