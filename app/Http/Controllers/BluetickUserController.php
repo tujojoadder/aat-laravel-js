@@ -25,12 +25,23 @@ use Illuminate\Support\Facades\Storage;
 
 class BluetickUserController extends Controller
 {
+    /* --->>>Bluetik user can upload his user ,groups,page
+    profile and cover photos with a limit like 10 request for 7days
+    other hand normal user has UploadRequest table there they can 
+    request 2 for every week  */
+
+
+    /* upload request for user profile_picture */
+    /* post_type--->>>user */
+    /* request_for--->>>profile_picture */
+    /* 10 request limit for 7 days */
+    
     public function uploadprofilepicture(Request $request)
     {
         // Validate the request data
         $this->validate($request, [
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'visibility' => 'required|in:public,private,only_me'
+            'audience' => 'required|in:public,private,only_me', // Validation for audience
         ]);
 
         // Get the authenticated user
@@ -38,13 +49,14 @@ class BluetickUserController extends Controller
 
         // Check if the user has a blue_tik and is male
         if ($user->blueticks) {
-            // Check if the user has already uploaded 3 profile pictures in the last 30 days
-            $uploadsLast30Days = BluetikPost::where('author_id', $user->user_id)
-                ->where('post_type', 'profile_picture')
-                ->whereDate('posted_at', '>=', now()->subDays(30)) // Filter posts within the last 30 days
+            // Check if the user has already uploaded 10 profile pictures in the last 7 days
+            $uploadsLast7Days = BluetikPost::where('author_id', $user->user_id)
+                ->where('post_type','user')
+                ->where('request_for','profile_picture')
+                ->whereDate('posted_at','>=', now()->subDays(7)) // Filter posts within the last 7 days
                 ->count();
 
-            if ($uploadsLast30Days < 5) {
+            if ($uploadsLast7Days < 11) {
                 // Start a database transaction
                 DB::transaction(function () use ($request, $user) {
                     //Delete the old profile physical file if that has no post
@@ -65,9 +77,9 @@ class BluetickUserController extends Controller
                     $postData = [
                         'post_id' => $postId,
                         'author_id' => $user->user_id,
+                        'post_type' => 'general',
                         'timeline_ids' => $user->user_id, // Because profile pictures cannot be tagged
-                        'visibility' => cleanInput($request->visibility),
-                        'post_type' => 'profile_picture'
+                        'audience' => cleanInput($request->audience),       
                     ];
 
                     // Create the main post
@@ -87,13 +99,15 @@ class BluetickUserController extends Controller
                         'image_posts_id' => Str::uuid(),
                         'post_id' => $postId, // Use the same post_id generated for the main post
                         'post_url' => $imageUrl,
-                        'author_id' => $user->user_id
+
                     ]);
+
                     // Create a new BluetikPost record
                     BluetikPost::create([
                         'bluetik_post_id' => Str::uuid(),
                         'author_id' => $user->user_id,
-                        'post_type' => 'profile_picture',
+                        'post_type' => 'user',
+                        'request_for' => 'profile_picture',
                         'posted_at' => Carbon::now(), // Set posted_at with current timestamp
                     ]);
 
@@ -115,7 +129,7 @@ class BluetickUserController extends Controller
 
 
 
-    // Delete profile update post of male(we will not delete the physical image becase we need the profile picture of user )
+    // Delete profile update post(we will not delete the physical image becase we need the profile picture of user )
     public function destroyppicturePost(Request $request)
     {
         $user = auth()->user();

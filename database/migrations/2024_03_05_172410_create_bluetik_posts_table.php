@@ -16,8 +16,8 @@ return new class extends Migration
         Schema::create('bluetik_posts', function (Blueprint $table) {
             $table->string('bluetik_post_id')->primary();
             $table->string('author_id');
-            $table->string('post_type'); 
-            $table->string('request_for'); 
+            $table->string('post_type'); /* user,group,page,iaccount */
+            $table->string('request_for'); /* profile_picture,cover_picture */
             $table->foreign('author_id')->references('user_id')->on('users')
             ->onDelete('cascade')
             ->onUpdate('cascade');

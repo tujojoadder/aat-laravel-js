@@ -281,6 +281,7 @@ private function generateIdentifier($baseIdentifier)
         // Create new token and password reset record
         $token = Str::uuid();
         PasswordReset::create([
+            'id' => Str::uuid(),
             'email' => $email,
             'token' => $token,
             'created_at' => Carbon::now()
@@ -301,7 +302,7 @@ private function generateIdentifier($baseIdentifier)
     {
 
         $token = cleanInput($request->token);
-$emailuser=PasswordReset::where('token',$token)->first();
+        $emailuser=PasswordReset::where('token',$token)->first();
 
         //we will move 404 
         PasswordReset::where('token',$token)->firstOrFail();

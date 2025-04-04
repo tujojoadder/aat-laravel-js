@@ -9,17 +9,14 @@ use Laravel\Sanctum\HasApiTokens;
 
 class PasswordReset extends Model
 {
-     use HasApiTokens, HasFactory, Notifiable;
 
-     public $timestamps = false; // Disable timestamps
+    public $timestamps = false; // Disable timestamps
     protected $table = 'password_resets'; 
-    protected $primaryKey = 'email';
+    protected $primaryKey = 'id';
     public $incrementing = false; // if primay key is string
 
-  
-
-
      protected $fillable = [
+       'id',
        'email',
        'token',
        'created_at',

@@ -28,10 +28,10 @@ class User extends Authenticatable
         'gender',
         'privacy_setting',
         'birthdate',
-    
         'identifier',
         'blueticks',
-        'cover_photo'
+        'cover_photo',
+        'bluetik_activated_at'
     ];
 
     protected $hidden = [

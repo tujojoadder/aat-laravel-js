@@ -20,92 +20,77 @@ use Illuminate\Support\Facades\Storage;
 
 class UploadRequestController extends Controller
 {
-    //User Profile Request
+
     public function userprofile_request(Request $request)
-    {
-        // Validate the request data
-        $this->validate($request, [
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'visibility' => 'required|in:public,private,only_me',
-        ]);
+{
+    $this->validate($request, [
+        'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'visibility' => 'required|in:public,private,only_me',
+    ]);
 
-        // Get the authenticated user
-        $user = auth()->user();
-
-        // Check if the user has a blue_tik and is male
-        if ($user->blueticks) {
-            // Check if the user has already uploaded 3 profile pictures in the last 30 days
-            $uploadsLast30Days = BluetikPost::where('author_id', $user->user_id)
-                ->where('post_type', 'user_profile')
-                ->whereDate('posted_at', '>=', now()->subDays(30)) // Filter posts within the last 30 days
-                ->count();
-
-            // User can upload profile picture for 5 times
-            $maxUploadsAllowed = 100;
-
-            if ($uploadsLast30Days < $maxUploadsAllowed) {
-                // Start a database transaction
-                DB::transaction(function () use ($request, $user) {
-                    // Check if there is an existing pending request with type 'user_profile' for the user
-                    $existingRequest = UploadRequest::where('uploadrequest_on_id', $user->user_id)
-                        ->where('uploadrequest_on_type', 'user')
-                        ->where('type', 'user_profile')
-                        ->first();
-
-                    // If an existing request is found, delete it and its associated physical image
-                    if ($existingRequest) {
-                        // Extract the file name from the photo URL
-                        $fileName = basename($existingRequest->photo_url);
-
-                        // Delete the physical image from storage
-                        Storage::delete('public/upload/images/' . $fileName);
-
-                        // Delete the existing request
-                        $existingRequest->delete();
-                    }
-
-                    // Generate a unique filename for the image
-                    $customFileName = $request->file('image')->hashName();
-
-                    // Store the image
-                    $path = $request->file('image')->storeAs('public/upload/images', $customFileName);
-
-                    // Generate a URL for the stored image
-                    $imageUrl = Storage::url($path);
-
-                    // Create the new image post request
-                    UploadRequest::create([
-                        'uploadrequest_id' => Str::uuid(),
-                        'uploadrequest_on_id' => $user->user_id,
-                        'uploadrequest_by' => $user->user_id,
-                        'uploadrequest_on_type' => 'user',
-                        'photo_url' => $imageUrl,
-                        'type' => 'user_profile',
-                        'audience' => $request->visibility
-                    ]);
-
-                    // Create a new BluetikPost record
-                    BluetikPost::create([
-                        'bluetik_post_id' => Str::uuid(),
-                        'author_id' => $user->user_id,
-                        'post_type' => 'user_profile',
-                        'request_for' => $user->user_id,
-                        'posted_at' => Carbon::now(), // Set posted_at with current timestamp
-                    ]);
-                });
-
-                // Return success response
-                return response()->json(['message' => 'Profile picture request successful']);
-            } else {
-                // Return error response if the user has already uploaded 5 times this month
-                return response()->json(['message' => 'You have reached the maximum upload limit for this month'], 400);
-            }
-        } else {
-            // Return error response if the user is not male or does not have a blue tick
-            return response()->json(['message' => 'You do not have a blue tick'], 400);
-        }
+    $user = auth()->user();
+    $isBlueTikActive = $user->blueticks && $user->bluetik_activated_at && now()->diffInDays($user->bluetik_activated_at) <= 30;
+    
+    // Define max uploads based on Blue Tik status
+    $maxUploadsAllowed = $isBlueTikActive ? 15 : 1;
+    $timeFrame = $isBlueTikActive ? $user->bluetik_activated_at : Carbon::now()->subDays(30);
+    
+    // Delete old non-pending requests before the defined timeframe
+    UploadRequest::where('uploadrequest_by', $user->user_id)
+        ->where('uploadrequest_on_id', $user->user_id)
+        ->where('uploadrequest_on_type', 'user')
+        ->where('type', 'user_profile')
+        ->whereNot('status', 'pending')
+        ->where('created_at', '<', $timeFrame)
+        ->delete();
+    
+    // Count uploads within the active period
+    $uploadsCurrentPeriod = UploadRequest::where('uploadrequest_by', $user->user_id)
+        ->where('uploadrequest_on_id', $user->user_id)
+        ->where('uploadrequest_on_type', 'user')
+        ->where('type', 'user_profile')
+        ->whereNot('status', 'pending')
+        ->where('posted_at', '>=', $timeFrame)
+        ->count();
+    
+    if ($uploadsCurrentPeriod >= $maxUploadsAllowed) {
+        return response()->json(['message' => 'You have reached the maximum upload limit for this period'], 400);
     }
+    
+    DB::transaction(function () use ($request, $user) {
+        // Check for an existing pending request and delete the associated image
+        $existingRequest = UploadRequest::where('uploadrequest_by', $user->user_id)
+            ->where('uploadrequest_on_id', $user->user_id)
+            ->where('uploadrequest_on_type', 'user')
+            ->where('type', 'user_profile')
+            ->where('status', 'pending')
+            ->first();
+        
+        if ($existingRequest) {
+            Storage::delete('public/upload/images/' . basename($existingRequest->photo_url));
+        }
+        
+        // Store the new image
+        $fileName = $request->file('image')->hashName();
+        $path = $request->file('image')->storeAs('public/upload/images', $fileName);
+        
+        // Create new upload request
+        UploadRequest::create([
+            'uploadrequest_id' => Str::uuid(),
+            'uploadrequest_on_id' => $user->user_id,
+            'uploadrequest_on_type' => 'user',
+            'uploadrequest_by' => $user->user_id,
+            'photo_url' => Storage::url($path),
+            'type' => 'user_profile',
+            'status' => 'pending',
+            'audience' => $request->visibility
+        ]);
+    });
+    
+    return response()->json(['message' => 'Profile picture request successful']);
+}
 
+/* We need to modify all below code accoding userprofile_request controller  */
 
     //User Cover Photo Request
     public function usercover_request(Request $request)

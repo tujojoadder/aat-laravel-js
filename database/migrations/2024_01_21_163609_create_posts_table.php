@@ -21,10 +21,10 @@ return new class extends Migration
             $table->string('page_id')->nullable();
             $table->string('iaccount_id')->nullable();
             $table->text('timeline_ids')->nullable(); // Nullable timeline_ids column
-            $table->enum('audience', ['public', 'private','only_me']);
+            $table->enum('audience', ['public', 'private','only_me']);/* only matters for user posts not group,page,iaccount */
             $table->integer('reported_count')->default(0);
-            $table->string('post_type')->default('general');
-            $table->string('approval')->nullable();//(pending,accepted)
+            $table->string('post_type')->default('general'); //general or islamic
+            $table->string('approval')->nullable();//(true,false-->>0/1) reject means deleted 
             $table->timestamps();
 
             $table->foreign('author_id')->references('user_id')->on('users')
