@@ -1,7 +1,7 @@
 # Stage 1 - Build with PHP
 FROM php:8.2-cli
 
-# Install system dependencies
+# Install system dependencies and clean up in one layer
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -15,28 +15,47 @@ RUN apt-get update && apt-get install -y \
     default-mysql-client \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_pgsql pdo_mysql mbstring exif pcntl bcmath gd zip sodium
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions with parallel compilation (-j flag is KEY!)
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+    pdo_pgsql \
+    pdo_mysql \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
+    zip \
+    sodium
 
 # Get Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Install Node.js and npm
-RUN curl -sL https://deb.nodesource.com/setup_18.x | bash && \
-    apt-get update && apt-get install -y nodejs
+# Install Node.js 20 (LTS, more stable)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /var/www/html
 
+# Copy dependency files first for better Docker layer caching
+COPY composer.json composer.lock* ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
+COPY package*.json ./
+RUN npm ci --omit=dev
+
 # Copy application files
 COPY . .
 
+# Finalize composer autoload
+RUN composer dump-autoload --optimize
+
 # Expose port used by 'php artisan serve'
 EXPOSE 8000
-
-# Install PHP and JS dependencies
-RUN composer install
-RUN npm install
 
 # Run Laravel migrations & start server
 CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000
