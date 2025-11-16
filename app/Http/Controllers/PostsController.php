@@ -115,6 +115,7 @@ class PostsController extends Controller
             'text' => 'nullable|max:10000',
             'groupId' => 'required',
             'image_or_text' => 'required_without_all:image,text',
+            
         ]);
 
         $groupId = cleanInput($request->groupId);
