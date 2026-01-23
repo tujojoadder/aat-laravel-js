@@ -9,6 +9,7 @@ use Faker\Factory as Faker;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Ramsey\Uuid\Uuid;
+
 class UserSeeder extends Seeder
 {
     /**
@@ -54,10 +55,9 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password123'), // Change to desired default password
                 'gender' => $gender,
                 'birthdate' => $birthdate,
+                'identifier' => Str::uuid()->toString(),
             ]);
             $token = $newUser->createToken('user')->plainTextToken;
-
-       
         }
     }
 }

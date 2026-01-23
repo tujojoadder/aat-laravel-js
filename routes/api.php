@@ -179,6 +179,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
        Route::get('/userdetails', [UserController::class, 'userDetails'])->name('userDetails');
 
+       // Update Profile Picture (Direct Upload)
+       Route::post('/update-profile-picture', [ProfileController::class, 'updateProfilePicture']);
+       // Update Cover Photo (Direct Upload)
+       Route::post('/update-cover-photo', [ProfileController::class, 'updateCoverPhoto']);
+
 
        //<-- Bluetick Users (Everyone gender) -->
        Route::post('/uploadprofilepicture', [BluetickUserController::class, 'uploadprofilepicture'])->name('uploadpp');
@@ -216,10 +221,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
        // Manage friend request(Accepted,rejected)
        Route::post('managefriendrequest', [FriendRequestController::class, 'manageFriendRequest'])->name('manageFriendRequest');
-       
-       
-       
-       
+
+
+
+
        Route::delete('friends/unfriend', [FriendRequestController::class, 'unfriendUser']);
 
 
@@ -572,7 +577,7 @@ Route::middleware('auth:sanctum')->group(function () {
               ->name('createIAccount.iaccount');
        //get random group Post
        Route::get('iaccount/randomposts', [IAccountController::class, 'getRandomIaccountPosts']);
-    
+
        // get pages where auth user is admin
        Route::get('/get-your-iaccounts', [IAccountController::class, 'getYourIaccounts']);
        // get liked iaccounts
@@ -596,11 +601,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-    
-    
-    
-    
-              //Retrive Iaccount followers
+
+
+
+
+       //Retrive Iaccount followers
        Route::get('/iaccount/getfollowers/{iaccountId}', [IAccountController::class, 'getIaccountFollower'])
               ->name('getfollowers.iaccount');
        //Retrive how many iaccount user following
@@ -635,7 +640,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
        //create comment to any post      
        Route::post('/posts/{postId}/comments', [CommentsController::class, 'createPostCommment']);
-       
+
 
        //get specific post comments     
        Route::get('/posts/{postId}/comments', [CommentsController::class, 'getComments']);
@@ -646,7 +651,7 @@ Route::middleware('auth:sanctum')->group(function () {
        Route::delete('/post/{postId}/deletecomment', [CommentsController::class, 'deleteComment'])
               ->name('deleteComment.comment');
 
-              Route::get('/comments/{commentId}/reply-count', [CommentsController::class, 'getCommentReplyCount']);
+       Route::get('/comments/{commentId}/reply-count', [CommentsController::class, 'getCommentReplyCount']);
 
 
 
@@ -654,13 +659,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
        //Reply any Comment  
 
-       
-              //create comment to any post      
-              Route::post('/comments/{commentId}/replies', [ReplyController::class, 'createCommmentReply']);
-           //create replies to any reply      
-            Route::post('/reply/{commentId}/replies', [ReplyController::class, 'createRepliesToReply']);
-           //get specific post comments     
-           Route::get('/comments/{commentId}/replies', [ReplyController::class, 'getReplies']);
+
+       //create comment to any post      
+       Route::post('/comments/{commentId}/replies', [ReplyController::class, 'createCommmentReply']);
+       //create replies to any reply      
+       Route::post('/reply/{commentId}/replies', [ReplyController::class, 'createRepliesToReply']);
+       //get specific post comments     
+       Route::get('/comments/{commentId}/replies', [ReplyController::class, 'getReplies']);
 
 
 
@@ -730,10 +735,10 @@ Route::middleware('auth:sanctum')->group(function () {
        Route::get('/getspecificuserfollower', [ProfileController::class, 'getAllUserFollower']);
        /* Following User */
        Route::get('/getspecificuserfollowing', [ProfileController::class, 'getAllUserFollowing']);
-    
-    
-    
-    
+
+
+
+
        // view specific user friend list
        Route::get('/getspecificuserfriendids', [FriendRequestController::class, 'getSpecificUserFriendDetails']);
 
@@ -764,7 +769,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
        /*  About */
        Route::post('/about/createorupdate', [AboutController::class, 'storeOrUpdate']);
-      /* auth user */
+       /* auth user */
        Route::get('/getabout', [AboutController::class, 'getAbout']);
        /* specific user */
        Route::get('/about/{id}', [AboutController::class, 'getUserAbout']);
@@ -776,39 +781,38 @@ Route::middleware('auth:sanctum')->group(function () {
        Route::post('/setcoverphoto', [CoverPhotoController::class, 'setcoverphoto'])->name('setcp');
 
 
-     /*  Quiz */
-     Route::post('/random-hadith', [QuizGameController::class, 'getRandomHadith']);
-     Route::post('get-random-question/{hadithId}', [QuizGameController::class, 'getRandomQuestionAnswerSet']);
-     Route::post('check-answer', [QuizGameController::class, 'checkAnswer']);
-     Route::get('get-current-story', [QuizGameController::class, 'getCurrentStory']);
+       /*  Quiz */
+       Route::post('/random-hadith', [QuizGameController::class, 'getRandomHadith']);
+       Route::post('get-random-question/{hadithId}', [QuizGameController::class, 'getRandomQuestionAnswerSet']);
+       Route::post('check-answer', [QuizGameController::class, 'checkAnswer']);
+       Route::get('get-current-story', [QuizGameController::class, 'getCurrentStory']);
 
 
-   /*  Love post */
-   Route::post('/toggle-love/{loveOnType}/{loveOnId}', [LoveController::class, 'toggleLove']);
+       /*  Love post */
+       Route::post('/toggle-love/{loveOnType}/{loveOnId}', [LoveController::class, 'toggleLove']);
 
 
- /*  Unlike */
-   /*  Unlike post */
-   Route::post('/toggle-unlike/{unlikeOnType}/{unlikeOnId}', [LoveController::class, 'toggleUnlike']);
+       /*  Unlike */
+       /*  Unlike post */
+       Route::post('/toggle-unlike/{unlikeOnType}/{unlikeOnId}', [LoveController::class, 'toggleUnlike']);
 
 
 
-    /* One to One Messgae */
-    Route::post('/chatmessage', [ChatController::class, 'sendMessage']);
-    Route::get('/loadchat', [ChatController::class, 'loadChat']);
-// In routes/api.php
-Route::delete('/message/delete', [ChatController::class, 'deleteMessage']);
+       /* One to One Messgae */
+       Route::post('/chatmessage', [ChatController::class, 'sendMessage']);
+       Route::get('/loadchat', [ChatController::class, 'loadChat']);
+       // In routes/api.php
+       Route::delete('/message/delete', [ChatController::class, 'deleteMessage']);
 
 
-/* user follow unfollow */
-Route::post('/toggoleuserfollow',[ProfileController::class,'toggoleuserfollow']);
+       /* user follow unfollow */
+       Route::post('/toggoleuserfollow', [ProfileController::class, 'toggoleuserfollow']);
 
-/* only react native */
-Route::get('/get-auth-user-deatils',[ProfileController::class,'authUserDetails']);
+       /* only react native */
+       Route::get('/get-auth-user-deatils', [ProfileController::class, 'authUserDetails']);
 
 
 
 
 
 });
-       

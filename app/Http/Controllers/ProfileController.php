@@ -130,10 +130,10 @@ class ProfileController extends Controller
         $followers = $specificUser->followers()->paginate($perPage, ['*'], 'page', $page);
         $followers->getCollection()->transform(function ($item) {
             return [
-                'user_id'         => $item->user_id,
-                'user_fname'      => $item->user_fname,
-                'user_lname'      => $item->user_lname,
-                'identifier'      => $item->identifier,
+                'user_id' => $item->user_id,
+                'user_fname' => $item->user_fname,
+                'user_lname' => $item->user_lname,
+                'identifier' => $item->identifier,
                 'profile_picture' => $item->profile_picture,
             ];
         });
@@ -144,35 +144,35 @@ class ProfileController extends Controller
     public function getAllUserFollowing(Request $request)
     {
         $specificUserId = cleanInput($request->query('id'));
-    
+
         $user = User::where('user_id', $specificUserId)->first();
-    
+
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-    
+
         $perPage = $request->query('per_page', 15);
         $page = $request->query('page', 1);
-    
+
         $followings = $user->followings()
             ->select('users.user_id', 'users.user_fname', 'users.user_lname', 'users.identifier', 'users.profile_picture')
             ->paginate($perPage, ['*'], 'page', $page);
-    
+
         // Transform each item in the collection to include only the required fields:
         $followings->getCollection()->transform(function ($item) {
             return [
-                'user_id'         => $item->user_id,
-                'user_fname'      => $item->user_fname,
-                'user_lname'      => $item->user_lname,
-                'identifier'      => $item->identifier,
+                'user_id' => $item->user_id,
+                'user_fname' => $item->user_fname,
+                'user_lname' => $item->user_lname,
+                'identifier' => $item->identifier,
                 'profile_picture' => $item->profile_picture,
             ];
         });
-    
+
         return response()->json($followings);
     }
-    
-    
+
+
 
 
 
@@ -273,9 +273,11 @@ class ProfileController extends Controller
         $page = $request->query('page', 1);
 
         // Get the authenticated user's followers, including the follower details
-        $followers = $authUser->followers()->with(['follower' => function ($query) {
-            $query->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier');
-        }])->paginate($perPage, ['*'], 'page', $page);
+        $followers = $authUser->followers()->with([
+            'follower' => function ($query) {
+                $query->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier');
+            }
+        ])->paginate($perPage, ['*'], 'page', $page);
 
         // Return the paginated list of followers
         return response()->json($followers);
@@ -297,9 +299,11 @@ class ProfileController extends Controller
         $page = $request->query('page', 1);
 
         // Get the authenticated user's followings, including the following details
-        $followings = $authUser->followings()->with(['following' => function ($query) {
-            $query->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier');
-        }])->paginate($perPage, ['*'], 'page', $page);
+        $followings = $authUser->followings()->with([
+            'following' => function ($query) {
+                $query->select('user_id', 'profile_picture', 'user_fname', 'user_lname', 'identifier');
+            }
+        ])->paginate($perPage, ['*'], 'page', $page);
 
         // Return the paginated list of followings
         return response()->json($followings);
@@ -369,33 +373,33 @@ class ProfileController extends Controller
 
 
     /* toggoleuserfollow */
-    
+
     public function toggoleuserfollow(Request $request)
     {
         // Validate the request
         $request->validate([
             'userId' => 'required|string|exists:users,user_id',
         ]);
-    
+
         // Get authenticated user ID
         $authUserId = auth()->user()->user_id;
         $userId = $request->input('userId');
-    
+
         // Prevent user from following themselves
         if ($authUserId === $userId) {
             return response()->json(['message' => 'You cannot follow yourself.'], 400);
         }
-    
+
         // Variable to store the result message
         $message = '';
-    
+
         // Use a database transaction
         DB::transaction(function () use ($authUserId, $userId, &$message) {
             // Check if the user is already following the target user
             $isFollowing = UserFollow::where('follower_id', $authUserId)
                 ->where('following_id', $userId)
                 ->first();
-    
+
             if ($isFollowing) {
                 // Unfollow: Delete the follow relationship
                 $isFollowing->delete();
@@ -410,26 +414,92 @@ class ProfileController extends Controller
                 $message = 'follow';
             }
         });
-    
+
         return response()->json(['message' => $message]);
     }
 
 
-/* only react native */
-public function authUserDetails() {
-    // Get Authenticated User
-    $user = auth()->user(); 
+    /* only react native */
+    public function authUserDetails()
+    {
+        // Get Authenticated User
+        $user = auth()->user();
 
-    // Return only the required fields
-    return response()->json([
-        'profile_picture' => $user->profile_picture,
-        'user_fname' => $user->user_fname,
-        'user_lname' => $user->user_lname,
-        'email' => $user->email,
-    ]);
+        // Return only the required fields
+        return response()->json([
+            'profile_picture' => $user->profile_picture,
+            'user_fname' => $user->user_fname,
+            'user_lname' => $user->user_lname,
+            'email' => $user->email,
+        ]);
+    }
+
+
+
+
+
+    /* Update Profile Picture */
+    public function updateProfilePicture(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $fileNameToUse = $image->hashName();
+
+            // Store in public/profile_pictures
+            $path = $image->storeAs('public/profile_pictures', $fileNameToUse);
+
+            // Generate URL (storage/profile_pictures/filename)
+            $imageUrl = 'storage/profile_pictures/' . $fileNameToUse;
+
+            // Update user
+            $user->profile_picture = $imageUrl;
+            $user->save();
+
+            return response()->json([
+                'message' => 'Profile picture updated successfully',
+                'image_url' => $imageUrl
+            ]);
+        }
+
+        return response()->json(['message' => 'No image uploaded'], 400);
+    }
+
+    /* Update Cover Photo */
+    public function updateCoverPhoto(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $fileNameToUse = $image->hashName();
+
+            // Store in public/cover_photos
+            $path = $image->storeAs('public/cover_photos', $fileNameToUse);
+
+            // Generate URL
+            $imageUrl = 'storage/cover_photos/' . $fileNameToUse;
+
+            // Update user
+            $user->cover_photo = $imageUrl;
+            $user->save();
+
+            return response()->json([
+                'message' => 'Cover photo updated successfully',
+                'image_url' => $imageUrl
+            ]);
+        }
+
+        return response()->json(['message' => 'No image uploaded'], 400);
+    }
 }
 
-
-
-
-}
