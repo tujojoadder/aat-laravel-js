@@ -220,8 +220,8 @@ class IAccountController extends Controller
 
             // Handle image
             $customFileName = $request->file('image')->hashName();
-            $path = $request->file('image')->storeAs('public/upload/images', $customFileName);
-            $imageUrl = Storage::url($path);
+            $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
+            $imageUrl = 'storage/upload/images/' . $customFileName;
             ImagePosts::create([
                 'image_posts_id' => Str::uuid(),
                 'post_id' => $post_id,
@@ -240,8 +240,8 @@ class IAccountController extends Controller
         } elseif (!$request->filled('text') && $request->hasFile('image')) {
 
             $customFileName = $request->file('image')->hashName();
-            $path = $request->file('image')->storeAs('public/upload/images', $customFileName);
-            $imageUrl = Storage::url($path);
+            $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
+            $imageUrl = 'storage/upload/images/' . $customFileName;
             ImagePosts::create([
                 'image_posts_id' => Str::uuid(),
                 'post_id' => $post_id,

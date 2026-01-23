@@ -69,9 +69,9 @@ class PostsController extends Controller
                 // Handle image
                 $customFileName = $request->file('image')->hashName();
 
-                // Move file to public directory directly
-                $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl =  'storage/upload/images/' . $customFileName;
+                // Move file to public directory using Storage facade
+                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
+                $imageUrl = 'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -90,9 +90,9 @@ class PostsController extends Controller
             } elseif (!$request->filled('text') && $request->hasFile('image')) {
                 $customFileName = $request->file('image')->hashName();
 
-                // Move file to public directory directly
-                $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl =  'storage/upload/images/' . $customFileName;
+                // Move file to public directory using Storage facade
+                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
+                $imageUrl = 'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -163,9 +163,9 @@ class PostsController extends Controller
 
                 // Handle image
                 $customFileName = $request->file('image')->hashName();
-                // Move file to public directory directly
-                $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl =  'storage/upload/images/' . $customFileName;
+                // Move file to public directory using Storage facade
+                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
+                $imageUrl = 'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -183,9 +183,9 @@ class PostsController extends Controller
                 return response()->json(['message' => 'Text successfully stored']);
             } elseif (!$request->filled('text') && $request->hasFile('image')) {
                 $customFileName = $request->file('image')->hashName();
-                // Move file to public directory directly
-                $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl =  'storage/upload/images/' . $customFileName;
+                // Move file to public directory using Storage facade
+                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
+                $imageUrl = 'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -249,8 +249,8 @@ class PostsController extends Controller
                 // Handle image
                 $customFileName = $request->file('image')->hashName();
                 // Move file to public directory directly
-                $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl =  'storage/upload/images/' . $customFileName;
+                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
+                $imageUrl = 'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -269,8 +269,8 @@ class PostsController extends Controller
             } elseif (!$request->filled('text') && $request->hasFile('image')) {
                 $customFileName = $request->file('image')->hashName();
                 // Move file to public directory directly
-                $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl =  'storage/upload/images/' . $customFileName;
+                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
+                $imageUrl = 'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -297,8 +297,8 @@ class PostsController extends Controller
         $iChannelId = cleanInput($request->iChannelId);
 
         $iaccount = IAccount::where('iaccount_id', $iChannelId)
-        ->where('iaccount_creator', $userId)
-        ->first();
+            ->where('iaccount_creator', $userId)
+            ->first();
         if (!$iaccount) {
             return response([
                 'message' => 'You are not creator of this iaccount'
@@ -331,8 +331,8 @@ class PostsController extends Controller
                 // Handle image
                 $customFileName = $request->file('image')->hashName();
                 // Move file to public directory directly
-                $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl =  'storage/upload/images/' . $customFileName;
+                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
+                $imageUrl = 'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -351,8 +351,8 @@ class PostsController extends Controller
             } elseif (!$request->filled('text') && $request->hasFile('image')) {
                 $customFileName = $request->file('image')->hashName();
                 // Move file to public directory directly
-                $path = $request->file('image')->move(public_path('storage/upload/images/'), $customFileName);
-                $imageUrl =  'storage/upload/images/' . $customFileName;
+                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
+                $imageUrl = 'storage/upload/images/' . $customFileName;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -449,7 +449,7 @@ class PostsController extends Controller
                     // Extract the file name from the URL(only the imagename.jpg/png etc)
                     $fileName = basename($imagepath->post_url);
                     // Delete the physical file from storage
-                    Storage::delete('public/upload/images/' . $fileName);
+                    Storage::disk('public')->delete('upload/images/' . $fileName);
                 }
                 $message = "User Cover Post deleted sucessfully";
                 $statusCode = 404; // Not Found.
@@ -461,7 +461,7 @@ class PostsController extends Controller
                     // Extract the file name from the URL(only the imagename.jpg/png etc)
                     $fileName = basename($imagepath->post_url);
                     // Delete the physical file from storage
-                    Storage::delete('public/upload/images/' . $fileName);
+                    Storage::disk('public')->delete('upload/images/' . $fileName);
                 }
                 $message = "Group picture post deleted successfully.";
                 $statusCode = 200; // OK
@@ -474,7 +474,7 @@ class PostsController extends Controller
                     // Extract the file name from the URL(only the imagename.jpg/png etc)
                     $fileName = basename($imagepath->post_url);
                     // Delete the physical file from storage
-                    Storage::delete('public/upload/images/' . $fileName);
+                    Storage::disk('public')->delete('upload/images/' . $fileName);
                 }
                 $message = "Group Cover picture post deleted successfully.";
                 $statusCode = 200; // OK
@@ -487,7 +487,7 @@ class PostsController extends Controller
                     // Extract the file name from the URL(only the imagename.jpg/png etc)
                     $fileName = basename($imagepath->post_url);
                     // Delete the physical file from storage
-                    Storage::delete('public/upload/images/' . $fileName);
+                    Storage::disk('public')->delete('upload/images/' . $fileName);
                 }
                 $message = "Page Profile deleted successfully.";
                 $statusCode = 200; // OK
@@ -500,7 +500,7 @@ class PostsController extends Controller
                     // Extract the file name from the URL(only the imagename.jpg/png etc)
                     $fileName = basename($imagepath->post_url);
                     // Delete the physical file from storage
-                    Storage::delete('public/upload/images/' . $fileName);
+                    Storage::disk('public')->delete('upload/images/' . $fileName);
                 }
                 $message = "Page Cover deleted successfully.";
                 $statusCode = 200; // OK
@@ -517,12 +517,12 @@ class PostsController extends Controller
                     // Extract the file name from the URL (only the imagename.jpg/png etc)
                     $fileName = basename($imagepath->post_url);
                     // Delete the physical file from storage
-                    Storage::delete('public/upload/images/' . $fileName);
+                    Storage::disk('public')->delete('upload/images/' . $fileName);
                     // Set the success message and status code
                     $message = "Post deleted successfully.";
                     $statusCode = 200; // OK
                 }
-            } elseif ($iaccount  && $post->post_type === 'iaccount_profile') { //user post/islamic
+            } elseif ($iaccount && $post->post_type === 'iaccount_profile') { //user post/islamic
                 // Check if the current user is the author of the post
 
                 // User is the author of the post, proceed with deletion
@@ -531,7 +531,7 @@ class PostsController extends Controller
                     // Extract the file name from the URL (only the imagename.jpg/png etc)
                     $fileName = basename($imagepath->post_url);
                     // Delete the physical file from storage
-                    Storage::delete('public/upload/images/' . $fileName);
+                    Storage::disk('public')->delete('upload/images/' . $fileName);
                 }
                 // Set the success message and status code
                 $message = "Post deleted successfully.";
@@ -561,80 +561,80 @@ class PostsController extends Controller
 
     /* get for home feed  */
     public function getPosts(Request $request)
-{
-    $user = auth()->user();
+    {
+        $user = auth()->user();
 
-    // Get pagination parameters from the request, with default values
-    $perPage = $request->query('per_page', 10); // Number of items per page
-    $page = $request->query('page', 1); // Current page
+        // Get pagination parameters from the request, with default values
+        $perPage = $request->query('per_page', 10); // Number of items per page
+        $page = $request->query('page', 1); // Current page
 
-    // Fetch paginated posts
-    $posts = Posts::where('author_id', '!=', $user->user_id)
-        ->whereNull('group_id')
-        ->whereNull('page_id')
-        ->whereNull('iaccount_id')
-        ->with(['author', 'textPost', 'imagePost']) // Eager load only necessary relations
-        ->paginate($perPage, ['*'], 'page', $page);
+        // Fetch paginated posts
+        $posts = Posts::where('author_id', '!=', $user->user_id)
+            ->whereNull('group_id')
+            ->whereNull('page_id')
+            ->whereNull('iaccount_id')
+            ->with(['author', 'textPost', 'imagePost']) // Eager load only necessary relations
+            ->paginate($perPage, ['*'], 'page', $page);
 
-    // Transform the post data to match the required structure
-    $posts->getCollection()->transform(function ($post) use ($user) {
-        // Check if the current user has loved or unliked the post
-        $isLove = Loves::where('love_on_type', 'post')
-            ->where('love_on_id', $post->post_id)
-            ->where('love_by_id', $user->user_id)
-            ->exists();
+        // Transform the post data to match the required structure
+        $posts->getCollection()->transform(function ($post) use ($user) {
+            // Check if the current user has loved or unliked the post
+            $isLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $post->post_id)
+                ->where('love_by_id', $user->user_id)
+                ->exists();
 
-        $isUnlike = Unlikes::where('unlike_on_type', 'post')
-            ->where('unlike_on_id', $post->post_id)
-            ->where('unlike_by_id', $user->user_id)
-            ->exists();
+            $isUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $post->post_id)
+                ->where('unlike_by_id', $user->user_id)
+                ->exists();
 
-        // Count the total loves and unlikes for the post
-        $totalLove = Loves::where('love_on_type', 'post')
-            ->where('love_on_id', $post->post_id)
-            ->count();
+            // Count the total loves and unlikes for the post
+            $totalLove = Loves::where('love_on_type', 'post')
+                ->where('love_on_id', $post->post_id)
+                ->count();
 
-        $totalUnlike = Unlikes::where('unlike_on_type', 'post')
-            ->where('unlike_on_id', $post->post_id)
-            ->count();
+            $totalUnlike = Unlikes::where('unlike_on_type', 'post')
+                ->where('unlike_on_id', $post->post_id)
+                ->count();
 
-        // Count the total comments and replies related to the post
-        $totalComments = Comments::where('post_id', $post->post_id)->count();
-        $totalReplies = Replies::whereIn('comment_id', function ($query) use ($post) {
-            $query->select('comment_id')->from('comments')->where('post_id', $post->post_id);
-        })->count();
+            // Count the total comments and replies related to the post
+            $totalComments = Comments::where('post_id', $post->post_id)->count();
+            $totalReplies = Replies::whereIn('comment_id', function ($query) use ($post) {
+                $query->select('comment_id')->from('comments')->where('post_id', $post->post_id);
+            })->count();
 
-        // Transform the post to match the required structure
-        return [
-            'author' => [
-                'identifier' => $post->author->identifier,
-                'profile_picture' => $post->author->profile_picture,
-                'user_fname' => $post->author->user_fname,
-                'user_lname' => $post->author->user_lname,
-                'user_id' => $post->author->user_id,
-            ],
-            'created_at' => $post->created_at->toDateTimeString(),
-            'image_post' => $post->imagePost ? [
-                'post_url' => $post->imagePost->post_url,
-            ] : null,
-            'isLove' => $isLove,
-            'isUnlike' => $isUnlike,
-            'post_id' => $post->post_id,
-            'text_post' => $post->textPost ? [
-                'post_text' => $post->textPost->post_text,
-            ] : null,
-            'totalLove' => $totalLove,
-            'totalUnlike' => $totalUnlike,
-            'total_comments' => $totalComments + $totalReplies,
-        ];
-    });
+            // Transform the post to match the required structure
+            return [
+                'author' => [
+                    'identifier' => $post->author->identifier,
+                    'profile_picture' => $post->author->profile_picture,
+                    'user_fname' => $post->author->user_fname,
+                    'user_lname' => $post->author->user_lname,
+                    'user_id' => $post->author->user_id,
+                ],
+                'created_at' => $post->created_at->toDateTimeString(),
+                'image_post' => $post->imagePost ? [
+                    'post_url' => $post->imagePost->post_url,
+                ] : null,
+                'isLove' => $isLove,
+                'isUnlike' => $isUnlike,
+                'post_id' => $post->post_id,
+                'text_post' => $post->textPost ? [
+                    'post_text' => $post->textPost->post_text,
+                ] : null,
+                'totalLove' => $totalLove,
+                'totalUnlike' => $totalUnlike,
+                'total_comments' => $totalComments + $totalReplies,
+            ];
+        });
 
-    // Return paginated posts as JSON
-    return response()->json($posts);
-}
+        // Return paginated posts as JSON
+        return response()->json($posts);
+    }
 
-    
-    
+
+
 
 
 

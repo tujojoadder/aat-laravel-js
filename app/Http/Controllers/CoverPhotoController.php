@@ -23,75 +23,75 @@ use Illuminate\Support\Facades\Storage;
 
 class CoverPhotoController extends Controller
 {
-    
-public function store(Request $request)
-{
-    // Validate the incoming request for multiple images
-    $this->validate($request, [
-        'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
 
-    $messages = [];
-    $uploadedImages = [];
+    public function store(Request $request)
+    {
+        // Validate the incoming request for multiple images
+        $this->validate($request, [
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-    // Define specific names for which we want to use the original file names
-    $specificNames = ['group', 'page', 'iaccount', 'user'];
+        $messages = [];
+        $uploadedImages = [];
 
-    // Check if any images are provided
-    if ($request->hasFile('images')) {
+        // Define specific names for which we want to use the original file names
+        $specificNames = ['group', 'page', 'iaccount', 'user'];
 
-        foreach ($request->file('images') as $image) {
-            try {
-                // Get the original file name
-                $originalFileName = $image->getClientOriginalName();
-                // Generate a unique filename for each image
-                $fileNameToUse = $originalFileName;
+        // Check if any images are provided
+        if ($request->hasFile('images')) {
 
-                // Check if the original file name matches any of the specific names
-                if (in_array(pathinfo($originalFileName, PATHINFO_FILENAME), $specificNames)) {
-                    // Use the original file name if it matches the specific names
+            foreach ($request->file('images') as $image) {
+                try {
+                    // Get the original file name
+                    $originalFileName = $image->getClientOriginalName();
+                    // Generate a unique filename for each image
                     $fileNameToUse = $originalFileName;
-                } else {
-                    // Generate a unique filename for other images
-                    $fileNameToUse = $image->hashName();
+
+                    // Check if the original file name matches any of the specific names
+                    if (in_array(pathinfo($originalFileName, PATHINFO_FILENAME), $specificNames)) {
+                        // Use the original file name if it matches the specific names
+                        $fileNameToUse = $originalFileName;
+                    } else {
+                        // Generate a unique filename for other images
+                        $fileNameToUse = $image->hashName();
+                    }
+
+                    // Move the image to the storage directory
+                    $path = $image->storeAs('cover_photo', $fileNameToUse, 'public');
+
+                    // Generate a public URL for the stored image
+                    $imageUrl = 'storage/cover_photo/' . $fileNameToUse;
+
+                    // Save the image record to the database
+                    $data = CoverPhoto::create([
+                        'cover_photo_id' => Str::uuid(),
+                        'image_url' => $imageUrl,
+                    ]);
+
+                    // Add the image details to the array
+                    $uploadedImages[] = [
+                        'file_name' => $fileNameToUse,
+                        'url' => $imageUrl,
+                    ];
+
+                    // Add a success message for each image
+                    $messages[] = 'Image successfully stored: ' . $imageUrl;
+                } catch (\Exception $e) {
+                    // Add an error message if storing an image fails
+                    $messages[] = 'Failed to store image: ' . $e->getMessage();
                 }
-
-                // Move the image to the storage directory
-                $path = $image->move(public_path('storage/cover_photo/'), $fileNameToUse);
-
-                // Generate a public URL for the stored image
-                $imageUrl = 'storage/cover_photo/' . $fileNameToUse;
-
-                // Save the image record to the database
-                $data = CoverPhoto::create([
-                    'cover_photo_id' => Str::uuid(),
-                    'image_url' => $imageUrl,
-                ]);
-
-                // Add the image details to the array
-                $uploadedImages[] = [
-                    'file_name' => $fileNameToUse,
-                    'url' => $imageUrl,
-                ];
-
-                // Add a success message for each image
-                $messages[] = 'Image successfully stored: ' . $imageUrl;
-            } catch (\Exception $e) {
-                // Add an error message if storing an image fails
-                $messages[] = 'Failed to store image: ' . $e->getMessage();
             }
+        } else {
+            // Add a message indicating that no images were provided
+            $messages[] = 'No images provided';
         }
-    } else {
-        // Add a message indicating that no images were provided
-        $messages[] = 'No images provided';
-    }
 
-    // Return the response including the messages and details of uploaded images
-    return response()->json([
-        'messages' => $messages,
-        'uploaded_images' => $uploadedImages,
-    ]);
-}
+        // Return the response including the messages and details of uploaded images
+        return response()->json([
+            'messages' => $messages,
+            'uploaded_images' => $uploadedImages,
+        ]);
+    }
 
 
     public function view(Request $request)
@@ -109,33 +109,33 @@ public function store(Request $request)
 
 
 
- /*    Set Cover Photo */
-   public function setCoverPhoto(Request $request)
-{
-    // Get authenticated user
-    $user = auth()->user();
+    /*    Set Cover Photo */
+    public function setCoverPhoto(Request $request)
+    {
+        // Get authenticated user
+        $user = auth()->user();
 
-    // Validate the incoming request to ensure 'image_id' is provided
-    $request->validate([
-        'image_id' => 'required|exists:cover_photos,cover_photo_id' // Ensure the provided image ID exists in the cover_photos table
-    ]);
+        // Validate the incoming request to ensure 'image_id' is provided
+        $request->validate([
+            'image_id' => 'required|exists:cover_photos,cover_photo_id' // Ensure the provided image ID exists in the cover_photos table
+        ]);
 
-    // Use a database transaction for safety
-    $coverPhoto = null; // Initialize the cover photo variable
-    DB::transaction(function () use ($request, $user, &$coverPhoto) {
-        // Find the cover photo by the provided 'image_id'
-        $coverPhoto = CoverPhoto::find($request->image_id);
+        // Use a database transaction for safety
+        $coverPhoto = null; // Initialize the cover photo variable
+        DB::transaction(function () use ($request, $user, &$coverPhoto) {
+            // Find the cover photo by the provided 'image_id'
+            $coverPhoto = CoverPhoto::find($request->image_id);
 
-        if ($coverPhoto) {
-            // Update the user's cover photo with the new image URL
-            $user->cover_photo = $coverPhoto->image_url;
-            $user->save();
-        }
-    });
+            if ($coverPhoto) {
+                // Update the user's cover photo with the new image URL
+                $user->cover_photo = $coverPhoto->image_url;
+                $user->save();
+            }
+        });
 
-    // Return the updated cover photo as a JSON response
-    return response()->json(['data' => $coverPhoto], 200);
-}
+        // Return the updated cover photo as a JSON response
+        return response()->json(['data' => $coverPhoto], 200);
+    }
 
 
 
@@ -183,19 +183,17 @@ public function store(Request $request)
         // Delete all records from the fprofile_picture table
         CoverPhoto::truncate();
 
-     // Define the directory path where images are stored
-     $directory = public_path('storage/cover_photo/');
+        // Define the directory path where images are stored (relative to public disk)
+        $directory = 'cover_photo';
 
-     // Get all files in the directory using File facade
-     $files = File::files($directory);
- 
-     // Delete each file individually
-     foreach ($files as $file) {
-         File::delete($file); // Deletes the file
-     }
- 
-     // Return a success response after deletion
-     return response()->json(['data' => 'All FProfile picture  deleted']);
-  
+        // Get all files in the directory using Storage facade
+        $files = Storage::disk('public')->files($directory);
+
+        // Delete each file individually
+        Storage::disk('public')->delete($files);
+
+        // Return a success response after deletion
+        return response()->json(['data' => 'All FProfile picture  deleted']);
+
     }
 }
