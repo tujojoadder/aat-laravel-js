@@ -89,14 +89,7 @@ class PagesController extends Controller
         $identifier = $this->generateIdentifier($identifierBase);
 
         try {
-            DB::transaction(function () use (
-                $pageId,
-                $identifier,
-                $pageName,
-                $pageDetails,
-                $userId,
-                $pageCategory
-            ) {
+            DB::transaction(function () use ($pageId, $identifier, $pageName, $pageDetails, $userId, $pageCategory) {
                 // Create the page
                 Pages::create([
                     'page_id' => $pageId,
@@ -105,8 +98,8 @@ class PagesController extends Controller
                     'page_details' => $pageDetails,
                     'page_creator' => $userId,
                     'page_admins' => $userId,
-                    'page_picture' => 'storage/mprofile_picture/page.jpg',
-                    'page_cover' => 'storage/cover_photo/page.jpg',
+                    'page_picture' => 'defaults/page.png',
+                    'page_cover' => 'defaults/cover.png',
                     'category' => $pageCategory,
                 ]);
 
@@ -371,7 +364,7 @@ class PagesController extends Controller
         // Return the filtered list of groups as an array with pagination metadata
         return response()->json([
             'data' => $pagesArray,
-            'current_page' => (int)$page,
+            'current_page' => (int) $page,
             'per_page' => $perPage,
             'total' => $totalItems,
             'total_pages' => $totalPages
@@ -417,7 +410,7 @@ class PagesController extends Controller
         // Return the filtered list of pages as an array with pagination metadata
         return response()->json([
             'data' => $pagesArray,
-            'current_page' => (int)$page,
+            'current_page' => (int) $page,
             'per_page' => $perPage,
             'total' => $totalItems,
             'total_pages' => $totalPages
@@ -463,7 +456,7 @@ class PagesController extends Controller
         // Return the filtered list of pages as an array with pagination metadata
         return response()->json([
             'data' => $pagesArray,
-            'current_page' => (int)$page,
+            'current_page' => (int) $page,
             'per_page' => $perPage,
             'total' => $totalItems,
             'total_pages' => $totalPages

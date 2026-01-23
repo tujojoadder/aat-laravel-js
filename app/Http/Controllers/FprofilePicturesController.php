@@ -35,24 +35,11 @@ class FprofilePicturesController extends Controller
 
             foreach ($request->file('images') as $image) {
                 try {
-                    // Get the original file name and extension
-                    $originalFileName = $image->getClientOriginalName();
-                    $fileExtension = $image->getClientOriginalExtension();
-
-                    // Generate a file name based on the condition
-                    if (stripos($originalFileName, 'female') !== false || stripos($originalFileName, 'others') !== false) {
-                        // Keep the original file name if it contains 'female' or 'others'
-                        $fileName = pathinfo($originalFileName, PATHINFO_FILENAME) . '.' . $fileExtension;
-                    } else {
-                        // Generate a unique file name for other cases
-                        $fileName = Str::uuid() . '.' . $fileExtension;
-                    }
-
                     // Move the image to the storage directory
-                    $path = $image->storeAs('fprofile_picture', $fileName, 'public');
+                    $path = $image->store('fprofile_picture', 'public');
 
                     // Generate a public URL for the stored image
-                    $imageUrl = 'storage/fprofile_picture/' . $fileName;
+                    $imageUrl = 'storage/' . $path;
 
                     // Save the image record to the database
                     $data = FprofilePictures::create([
@@ -62,7 +49,7 @@ class FprofilePicturesController extends Controller
 
                     // Add the image details to the array
                     $uploadedImages[] = [
-                        'file_name' => $fileName,
+                        'file_name' => basename($path),
                         'url' => $imageUrl,
                     ];
 

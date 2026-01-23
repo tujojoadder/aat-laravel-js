@@ -26,41 +26,41 @@ use Illuminate\Support\Facades\Mail;
 class LoginController extends Controller
 {
 
-// Function to generate a unique identifier with at least three numbers appended
-private function generateIdentifier($baseIdentifier)
-{
-    // If baseIdentifier is empty, generate a random six-letter string
-    if (empty($baseIdentifier)) {
-        $baseIdentifier = '';
-        for ($i = 0; $i < 6; $i++) {
-            $baseIdentifier .= chr(rand(97, 122)); // ASCII codes for lowercase letters (a-z)
+    // Function to generate a unique identifier with at least three numbers appended
+    private function generateIdentifier($baseIdentifier)
+    {
+        // If baseIdentifier is empty, generate a random six-letter string
+        if (empty($baseIdentifier)) {
+            $baseIdentifier = '';
+            for ($i = 0; $i < 6; $i++) {
+                $baseIdentifier .= chr(rand(97, 122)); // ASCII codes for lowercase letters (a-z)
+            }
         }
-    }
 
-    // Append an underscore (_) followed by two random letters
-    $letters = '_';
-    for ($i = 0; $i < 2; $i++) {
-        $letters .= chr(rand(97, 122)); // ASCII codes for lowercase letters (a-z)
-    }
-    $baseIdentifier .= $letters;
-
-    // Check if the generated identifier already exists
-    while (
-        User::where('identifier', $baseIdentifier)->exists() ||
-        Groups::where('identifier', $baseIdentifier)->exists() ||
-        Pages::where('identifier', $baseIdentifier)->exists() ||
-        IAccount::where('identifier', $baseIdentifier)->exists()
-    ) {
-        // If it does, append new random letters
+        // Append an underscore (_) followed by two random letters
         $letters = '_';
         for ($i = 0; $i < 2; $i++) {
             $letters .= chr(rand(97, 122)); // ASCII codes for lowercase letters (a-z)
         }
         $baseIdentifier .= $letters;
-    }
 
-    return $baseIdentifier;
-}
+        // Check if the generated identifier already exists
+        while (
+            User::where('identifier', $baseIdentifier)->exists() ||
+            Groups::where('identifier', $baseIdentifier)->exists() ||
+            Pages::where('identifier', $baseIdentifier)->exists() ||
+            IAccount::where('identifier', $baseIdentifier)->exists()
+        ) {
+            // If it does, append new random letters
+            $letters = '_';
+            for ($i = 0; $i < 2; $i++) {
+                $letters .= chr(rand(97, 122)); // ASCII codes for lowercase letters (a-z)
+            }
+            $baseIdentifier .= $letters;
+        }
+
+        return $baseIdentifier;
+    }
     /*  google login  */
     public function googleHandle(Request $request)
     {
@@ -85,19 +85,19 @@ private function generateIdentifier($baseIdentifier)
         }
     }
 
-/* React native google login  */
+    /* React native google login  */
     public function googleSignInOnNative(Request $request)
     {
         // Initialize the Google Client with your Web Client ID
-        $client = new Google_Client(['client_id' => '212461889410-pt3bcbmi4j56lgvvrc7vp21kc8805td2.apps.googleusercontent.com']); 
-    
+        $client = new Google_Client(['client_id' => '212461889410-pt3bcbmi4j56lgvvrc7vp21kc8805td2.apps.googleusercontent.com']);
+
         // Verify the Google ID token
         $payload = $client->verifyIdToken($request->token); // Verify the token from the React Native app
-    
+
         if ($payload) {
             $email = $payload['email']; // Extract email from the payload
             $user = User::where('email', $email)->first(); // Check if the user already exists
-    
+
             if ($user) {
                 // User found, generate API token and return
                 $token = $user->createToken('user')->plainTextToken;
@@ -151,31 +151,31 @@ private function generateIdentifier($baseIdentifier)
 
         // Concatenate birthdate components into a single date format
         $birthdate = $request->formData['birthdate_year'] . '-' . $request->formData['birthdate_month'] . '-' . $request->formData['birthdate_day'];
-        
-        
+
+
         $formData = $validatedData['formData'];
         // Set the default profile photo based on gender
         $photoPath = '';
 
-       /*<<<---  we have to store male,female,others and etc default image on .jpg formate --->>> */
+        /*<<<---  we have to store male,female,others and etc default image on .jpg formate --->>> */
         switch (cleanInput($formData['gender'])) {
             case 'male':
-                $photoPath = 'storage/mprofile_picture/male.jpg';
+                $photoPath = 'defaults/user.png';
                 break;
             case 'female':
-                $photoPath = 'storage/fprofile_picture/female.jpg';
+                $photoPath = 'defaults/user.png';
                 break;
             default:
-                $photoPath = 'storage/fprofile_picture/others.jpg';
+                $photoPath = 'defaults/user.png';
         }
 
 
 
         // Create the user
-        return DB::transaction(function () use ($request, $photoPath, $birthdate, $validatedData,$formData) {
+        return DB::transaction(function () use ($request, $photoPath, $birthdate, $validatedData, $formData) {
 
             // If validation passes, extract the validated data
-          
+
             $email = cleanInput($request->input('email'));
 
             // Other data
@@ -197,10 +197,10 @@ private function generateIdentifier($baseIdentifier)
 
             // Generate the identifier
             $identifier = $this->generateIdentifier($fullName);
-           $userId=Str::uuid();
+            $userId = Str::uuid();
             // Create the user
             $newUser = User::create([
-                'user_id' =>$userId ,
+                'user_id' => $userId,
                 'user_fname' => $fname,
                 'user_lname' => $lname,
                 'email' => $email,
@@ -209,15 +209,15 @@ private function generateIdentifier($baseIdentifier)
                 'gender' => $gender,
                 'birthdate' => $birthdate,
                 'identifier' => $identifier,
-                'cover_photo' => 'storage/cover_photo/user.jpg'
+                'cover_photo' => 'defaults/cover.png'
             ]);
 
 
             About::create([
                 'about_id' => Str::uuid(),
                 'user_id' => $userId,
-                'relationship_status' =>'single',
-                
+                'relationship_status' => 'single',
+
             ]);
 
 
@@ -225,11 +225,11 @@ private function generateIdentifier($baseIdentifier)
             // Generate token for the user
             $token = $newUser->createToken('user')->plainTextToken;
 
-            return response()->json(['message' => 'Registration successful', 'token' => $token,'data'=>$newUser]);
+            return response()->json(['message' => 'Registration successful', 'token' => $token, 'data' => $newUser]);
         });
     }
 
-    
+
 
 
 
@@ -251,7 +251,7 @@ private function generateIdentifier($baseIdentifier)
                 return response()->json(['message' => 'passwordInvalid']);
             } else {
                 $token = $user->createToken('login')->plainTextToken;
-                return response()->json(['message' => 'sucessful', 'token' => $token,'data'=>$user]);
+                return response()->json(['message' => 'sucessful', 'token' => $token, 'data' => $user]);
             }
         } else {
             return response()->json(['message' => 'noEmail']);
@@ -302,10 +302,10 @@ private function generateIdentifier($baseIdentifier)
     {
 
         $token = cleanInput($request->token);
-        $emailuser=PasswordReset::where('token',$token)->first();
+        $emailuser = PasswordReset::where('token', $token)->first();
 
         //we will move 404 
-        PasswordReset::where('token',$token)->firstOrFail();
+        PasswordReset::where('token', $token)->firstOrFail();
 
         //Delete Token older then 1 minute
         $formatted = Carbon::now()->subMinutes(1);
@@ -314,30 +314,31 @@ private function generateIdentifier($baseIdentifier)
         if ($user) {
             $user->delete();
             return response()->json(['message' => 'Token validation time over']);
-        }else{
+        } else {
             //user accessing before 1 minute 
-            return response()->json(['success' => 'success','email'=>$emailuser->email]);
+            return response()->json(['success' => 'success', 'email' => $emailuser->email]);
 
         }
 
     }
-    public function confirmpassword(Request $request) {
+    public function confirmpassword(Request $request)
+    {
 
 
-        $password=cleanInput($request->password);
-        $confirm_password=cleanInput($request->confirm_password);
-if ($password ==$confirm_password ) {
-    $user=User::where('email',$request->email)->first();
-    if ($user) { 
-        $user->password = Hash::make($password);
-        $user->save();
-        return response()->json(['message' => 'sucess'], 200);
-    } else {
-        return response()->json(['message' => 'User not found'], 404);
-    }
-}else{
-    return response()->json(['message' =>'Passwords do not match']);
-}
+        $password = cleanInput($request->password);
+        $confirm_password = cleanInput($request->confirm_password);
+        if ($password == $confirm_password) {
+            $user = User::where('email', $request->email)->first();
+            if ($user) {
+                $user->password = Hash::make($password);
+                $user->save();
+                return response()->json(['message' => 'sucess'], 200);
+            } else {
+                return response()->json(['message' => 'User not found'], 404);
+            }
+        } else {
+            return response()->json(['message' => 'Passwords do not match']);
+        }
 
     }
 
@@ -349,14 +350,14 @@ if ($password ==$confirm_password ) {
         try {
             // Retrieve the authenticated user using auth() helper
             $user = auth()->user();
-    
+
             if (!$user) {
                 return response()->json(['message' => 'No authenticated user found'], 401);
             }
-    
+
             // Revoke the token for the current user
             $user->currentAccessToken()->delete();
-    
+
             return response()->json(['message' => 'Logged out successfully'], 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -365,6 +366,6 @@ if ($password ==$confirm_password ) {
             ], 500);
         }
     }
-    
+
 
 }

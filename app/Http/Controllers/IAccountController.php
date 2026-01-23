@@ -103,8 +103,8 @@ class IAccountController extends Controller
             'identifier' => $identifier,
             'iaccount_name' => $iaccountName,
             'iaccount_creator' => $userId,
-            'iaccount_picture' => 'storage/mprofile_picture/iaccount.jpg',
-            'iaccount_cover' => 'storage/cover_photo/iaccount.jpg',
+            'iaccount_picture' => 'defaults/iaccount.png',
+            'iaccount_cover' => 'defaults/cover.png',
         ]);
 
         return response()->json([
@@ -219,9 +219,8 @@ class IAccountController extends Controller
             ]);
 
             // Handle image
-            $customFileName = $request->file('image')->hashName();
-            $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
-            $imageUrl = 'storage/upload/images/' . $customFileName;
+            $path = $request->file('image')->store('upload/images', 'public');
+            $imageUrl = 'storage/' . $path;
             ImagePosts::create([
                 'image_posts_id' => Str::uuid(),
                 'post_id' => $post_id,
@@ -239,9 +238,8 @@ class IAccountController extends Controller
             $message = 'Text successfully stored';
         } elseif (!$request->filled('text') && $request->hasFile('image')) {
 
-            $customFileName = $request->file('image')->hashName();
-            $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
-            $imageUrl = 'storage/upload/images/' . $customFileName;
+            $path = $request->file('image')->store('upload/images', 'public');
+            $imageUrl = 'storage/' . $path;
             ImagePosts::create([
                 'image_posts_id' => Str::uuid(),
                 'post_id' => $post_id,

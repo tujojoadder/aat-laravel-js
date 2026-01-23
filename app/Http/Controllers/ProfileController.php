@@ -449,13 +449,11 @@ class ProfileController extends Controller
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $fileNameToUse = $image->hashName();
-
             // Store in public/profile_pictures
-            $path = $image->storeAs('public/profile_pictures', $fileNameToUse);
+            $path = $image->store('profile_pictures', 'public');
 
             // Generate URL (storage/profile_pictures/filename)
-            $imageUrl = 'storage/profile_pictures/' . $fileNameToUse;
+            $imageUrl = 'storage/' . $path;
 
             // Update user
             $user->profile_picture = $imageUrl;
@@ -481,13 +479,11 @@ class ProfileController extends Controller
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $fileNameToUse = $image->hashName();
-
             // Store in public/cover_photos
-            $path = $image->storeAs('public/cover_photos', $fileNameToUse);
+            $path = $image->store('cover_photos', 'public');
 
             // Generate URL
-            $imageUrl = 'storage/cover_photos/' . $fileNameToUse;
+            $imageUrl = 'storage/' . $path;
 
             // Update user
             $user->cover_photo = $imageUrl;

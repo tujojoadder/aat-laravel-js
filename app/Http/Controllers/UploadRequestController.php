@@ -22,75 +22,75 @@ class UploadRequestController extends Controller
 {
 
     public function userprofile_request(Request $request)
-{
-    $this->validate($request, [
-        'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'visibility' => 'required|in:public,private,only_me',
-    ]);
+    {
+        $this->validate($request, [
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'visibility' => 'required|in:public,private,only_me',
+        ]);
 
-    $user = auth()->user();
-    $isBlueTikActive = $user->blueticks && $user->bluetik_activated_at && now()->diffInDays($user->bluetik_activated_at) <= 30;
-    
-    // Define max uploads based on Blue Tik status
-    $maxUploadsAllowed = $isBlueTikActive ? 15 : 1;
-    $timeFrame = $isBlueTikActive ? $user->bluetik_activated_at : Carbon::now()->subDays(30);
-    
-    // Delete old non-pending requests before the defined timeframe
-    UploadRequest::where('uploadrequest_by', $user->user_id)
-        ->where('uploadrequest_on_id', $user->user_id)
-        ->where('uploadrequest_on_type', 'user')
-        ->where('type', 'user_profile')
-        ->whereNot('status', 'pending')
-        ->where('created_at', '<', $timeFrame)
-        ->delete();
-    
-    // Count uploads within the active period
-    $uploadsCurrentPeriod = UploadRequest::where('uploadrequest_by', $user->user_id)
-        ->where('uploadrequest_on_id', $user->user_id)
-        ->where('uploadrequest_on_type', 'user')
-        ->where('type', 'user_profile')
-        ->whereNot('status', 'pending')
-        ->where('posted_at', '>=', $timeFrame)
-        ->count();
-    
-    if ($uploadsCurrentPeriod >= $maxUploadsAllowed) {
-        return response()->json(['message' => 'You have reached the maximum upload limit for this period'], 400);
-    }
-    
-    DB::transaction(function () use ($request, $user) {
-        // Check for an existing pending request and delete the associated image
-        $existingRequest = UploadRequest::where('uploadrequest_by', $user->user_id)
+        $user = auth()->user();
+        $isBlueTikActive = $user->blueticks && $user->bluetik_activated_at && now()->diffInDays($user->bluetik_activated_at) <= 30;
+
+        // Define max uploads based on Blue Tik status
+        $maxUploadsAllowed = $isBlueTikActive ? 15 : 1;
+        $timeFrame = $isBlueTikActive ? $user->bluetik_activated_at : Carbon::now()->subDays(30);
+
+        // Delete old non-pending requests before the defined timeframe
+        UploadRequest::where('uploadrequest_by', $user->user_id)
             ->where('uploadrequest_on_id', $user->user_id)
             ->where('uploadrequest_on_type', 'user')
             ->where('type', 'user_profile')
-            ->where('status', 'pending')
-            ->first();
-        
-        if ($existingRequest) {
-            Storage::delete('public/upload/images/' . basename($existingRequest->photo_url));
-        }
-        
-        // Store the new image
-        $fileName = $request->file('image')->hashName();
-        $path = $request->file('image')->storeAs('public/upload/images', $fileName);
-        
-        // Create new upload request
-        UploadRequest::create([
-            'uploadrequest_id' => Str::uuid(),
-            'uploadrequest_on_id' => $user->user_id,
-            'uploadrequest_on_type' => 'user',
-            'uploadrequest_by' => $user->user_id,
-            'photo_url' => Storage::url($path),
-            'type' => 'user_profile',
-            'status' => 'pending',
-            'audience' => $request->visibility
-        ]);
-    });
-    
-    return response()->json(['message' => 'Profile picture request successful']);
-}
+            ->whereNot('status', 'pending')
+            ->where('created_at', '<', $timeFrame)
+            ->delete();
 
-/* We need to modify all below code accoding userprofile_request controller  */
+        // Count uploads within the active period
+        $uploadsCurrentPeriod = UploadRequest::where('uploadrequest_by', $user->user_id)
+            ->where('uploadrequest_on_id', $user->user_id)
+            ->where('uploadrequest_on_type', 'user')
+            ->where('type', 'user_profile')
+            ->whereNot('status', 'pending')
+            ->where('posted_at', '>=', $timeFrame)
+            ->count();
+
+        if ($uploadsCurrentPeriod >= $maxUploadsAllowed) {
+            return response()->json(['message' => 'You have reached the maximum upload limit for this period'], 400);
+        }
+
+        DB::transaction(function () use ($request, $user) {
+            // Check for an existing pending request and delete the associated image
+            $existingRequest = UploadRequest::where('uploadrequest_by', $user->user_id)
+                ->where('uploadrequest_on_id', $user->user_id)
+                ->where('uploadrequest_on_type', 'user')
+                ->where('type', 'user_profile')
+                ->where('status', 'pending')
+                ->first();
+
+            if ($existingRequest) {
+                Storage::delete('public/upload/images/' . basename($existingRequest->photo_url));
+            }
+
+            // Store the new image
+            // Store the new image
+            $path = $request->file('image')->store('upload/images', 'public');
+
+            // Create new upload request
+            UploadRequest::create([
+                'uploadrequest_id' => Str::uuid(),
+                'uploadrequest_on_id' => $user->user_id,
+                'uploadrequest_on_type' => 'user',
+                'uploadrequest_by' => $user->user_id,
+                'photo_url' => 'storage/' . $path,
+                'type' => 'user_profile',
+                'status' => 'pending',
+                'audience' => $request->visibility
+            ]);
+        });
+
+        return response()->json(['message' => 'Profile picture request successful']);
+    }
+
+    /* We need to modify all below code accoding userprofile_request controller  */
 
     //User Cover Photo Request
     public function usercover_request(Request $request)
@@ -136,14 +136,11 @@ class UploadRequestController extends Controller
                         $existingRequest->delete();
                     }
 
-                    // Generate a unique filename for the image
-                    $customFileName = $request->file('image')->hashName();
-
                     // Store the image
-                    $path = $request->file('image')->storeAs('public/upload/images', $customFileName);
+                    $path = $request->file('image')->store('upload/images', 'public');
 
                     // Generate a URL for the stored image
-                    $imageUrl = Storage::url($path);
+                    $imageUrl = 'storage/' . $path;
 
                     // Create the new image post request
                     UploadRequest::create([
@@ -242,14 +239,11 @@ class UploadRequestController extends Controller
                                 $existingRequest->delete();
                             }
 
-                            // Generate a unique filename for the image
-                            $customFileName = $request->file('image')->hashName();
-
                             // Store the image
-                            $path = $request->file('image')->storeAs('public/upload/images', $customFileName);
+                            $path = $request->file('image')->store('upload/images', 'public');
 
                             // Generate a URL for the stored image
-                            $imageUrl = Storage::url($path);
+                            $imageUrl = 'storage/' . $path;
 
                             // Create the new group profile image post request
                             UploadRequest::create([
@@ -353,14 +347,11 @@ class UploadRequestController extends Controller
                                 $existingRequest->delete();
                             }
 
-                            // Generate a unique filename for the image
-                            $customFileName = $request->file('image')->hashName();
-
                             // Store the image
-                            $path = $request->file('image')->storeAs('public/upload/images', $customFileName);
+                            $path = $request->file('image')->store('upload/images', 'public');
 
                             // Generate a URL for the stored image
-                            $imageUrl = Storage::url($path);
+                            $imageUrl = 'storage/' . $path;
 
                             // Create the new group profile image post request
                             UploadRequest::create([
@@ -474,14 +465,11 @@ class UploadRequestController extends Controller
                                 $existingRequest->delete();
                             }
 
-                            // Generate a unique filename for the image
-                            $customFileName = $request->file('image')->hashName();
-
                             // Store the image
-                            $path = $request->file('image')->storeAs('public/upload/images', $customFileName);
+                            $path = $request->file('image')->store('upload/images', 'public');
 
                             // Generate a URL for the stored image
-                            $imageUrl = Storage::url($path);
+                            $imageUrl = 'storage/' . $path;
 
                             // Create the new group profile image post request
                             UploadRequest::create([
@@ -588,14 +576,11 @@ class UploadRequestController extends Controller
                                 $existingRequest->delete();
                             }
 
-                            // Generate a unique filename for the image
-                            $customFileName = $request->file('image')->hashName();
-
                             // Store the image
-                            $path = $request->file('image')->storeAs('public/upload/images', $customFileName);
+                            $path = $request->file('image')->store('upload/images', 'public');
 
                             // Generate a URL for the stored image
-                            $imageUrl = Storage::url($path);
+                            $imageUrl = 'storage/' . $path;
 
                             // Create the new group profile image post request
                             UploadRequest::create([
@@ -647,10 +632,10 @@ class UploadRequestController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
         $iaccountId = cleanInput($iaccountId);
-        $isiaccountId=IAccount::find($iaccountId);
-      if (!$isiaccountId) {
-        return response()->json(['message' => 'IAccount not founded'], 400);
-    }
+        $isiaccountId = IAccount::find($iaccountId);
+        if (!$isiaccountId) {
+            return response()->json(['message' => 'IAccount not founded'], 400);
+        }
         if ($isiaccountId->iaccount_creator != $userId) {
             return response()->json(['message' => 'You are not owner of this IAccount'], 400);
         }
@@ -669,7 +654,7 @@ class UploadRequestController extends Controller
 
             if ($uploadsLast30Days < $maxUploadsAllowed) {
                 // Start a database transaction
-                DB::transaction(function () use ($request, $user, $userId,$iaccountId) {
+                DB::transaction(function () use ($request, $user, $userId, $iaccountId) {
                     // Check if there is an existing pending request with type 'user_profile' for the user
                     $existingRequest = UploadRequest::where('uploadrequest_on_id', $iaccountId)
                         ->where('uploadrequest_on_type', 'iaccount')
@@ -688,14 +673,11 @@ class UploadRequestController extends Controller
                         $existingRequest->delete();
                     }
 
-                    // Generate a unique filename for the image
-                    $customFileName = $request->file('image')->hashName();
-
                     // Store the image
-                    $path = $request->file('image')->storeAs('public/upload/images', $customFileName);
+                    $path = $request->file('image')->store('upload/images', 'public');
 
                     // Generate a URL for the stored image
-                    $imageUrl = Storage::url($path);
+                    $imageUrl = 'storage/' . $path;
 
                     // Create the new image post request
                     UploadRequest::create([

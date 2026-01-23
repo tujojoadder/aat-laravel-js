@@ -39,26 +39,11 @@ class MprofilePicturesController extends Controller
 
             foreach ($request->file('images') as $image) {
                 try {
-                    // Get the original file name
-                    $originalFileName = $image->getClientOriginalName();
-                    $fileName = 'default_' . $image->hashName(); // Default filename
-
-                    // Check if the original file name contains certain keywords
-                    if (stripos($originalFileName, 'male') !== false) {
-                        $fileName = $originalFileName; // Keep original name for 'male'
-                    } elseif (stripos($originalFileName, 'group') !== false) {
-                        $fileName = $originalFileName; // Keep original name for 'group'
-                    } elseif (stripos($originalFileName, 'page') !== false) {
-                        $fileName = $originalFileName; // Keep original name for 'page'
-                    } elseif (stripos($originalFileName, 'iaccount') !== false) {
-                        $fileName = $originalFileName; // Keep original name for 'iaccount'
-                    }
-
                     // Move the image to the storage directory
-                    $path = $image->storeAs('mprofile_picture', $fileName, 'public');
+                    $path = $image->store('mprofile_picture', 'public');
 
                     // Generate a public URL for the stored image
-                    $imageUrl = 'storage/mprofile_picture/' . $fileName;
+                    $imageUrl = 'storage/' . $path;
 
                     // Save the image record to the database
                     $data = MprofilePicture::create([
@@ -68,7 +53,7 @@ class MprofilePicturesController extends Controller
 
                     // Add the image details to the array
                     $uploadedImages[] = [
-                        'file_name' => $fileName,
+                        'file_name' => basename($path),
                         'url' => $imageUrl,
                     ];
 

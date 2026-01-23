@@ -67,11 +67,9 @@ class PostsController extends Controller
                 ]);
 
                 // Handle image
-                $customFileName = $request->file('image')->hashName();
-
                 // Move file to public directory using Storage facade
-                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
-                $imageUrl = 'storage/upload/images/' . $customFileName;
+                $path = $request->file('image')->store('upload/images', 'public');
+                $imageUrl = 'storage/' . $path;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -88,11 +86,9 @@ class PostsController extends Controller
                 ]);
                 return response()->json(['message' => 'Text successfully stored']);
             } elseif (!$request->filled('text') && $request->hasFile('image')) {
-                $customFileName = $request->file('image')->hashName();
-
                 // Move file to public directory using Storage facade
-                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
-                $imageUrl = 'storage/upload/images/' . $customFileName;
+                $path = $request->file('image')->store('upload/images', 'public');
+                $imageUrl = 'storage/' . $path;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -162,10 +158,9 @@ class PostsController extends Controller
                 ]);
 
                 // Handle image
-                $customFileName = $request->file('image')->hashName();
                 // Move file to public directory using Storage facade
-                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
-                $imageUrl = 'storage/upload/images/' . $customFileName;
+                $path = $request->file('image')->store('upload/images', 'public');
+                $imageUrl = 'storage/' . $path;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -182,10 +177,9 @@ class PostsController extends Controller
                 ]);
                 return response()->json(['message' => 'Text successfully stored']);
             } elseif (!$request->filled('text') && $request->hasFile('image')) {
-                $customFileName = $request->file('image')->hashName();
                 // Move file to public directory using Storage facade
-                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
-                $imageUrl = 'storage/upload/images/' . $customFileName;
+                $path = $request->file('image')->store('upload/images', 'public');
+                $imageUrl = 'storage/' . $path;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -247,10 +241,9 @@ class PostsController extends Controller
                 ]);
 
                 // Handle image
-                $customFileName = $request->file('image')->hashName();
                 // Move file to public directory directly
-                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
-                $imageUrl = 'storage/upload/images/' . $customFileName;
+                $path = $request->file('image')->store('upload/images', 'public');
+                $imageUrl = 'storage/' . $path;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -267,10 +260,9 @@ class PostsController extends Controller
                 ]);
                 return response()->json(['message' => 'Text successfully stored']);
             } elseif (!$request->filled('text') && $request->hasFile('image')) {
-                $customFileName = $request->file('image')->hashName();
                 // Move file to public directory directly
-                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
-                $imageUrl = 'storage/upload/images/' . $customFileName;
+                $path = $request->file('image')->store('upload/images', 'public');
+                $imageUrl = 'storage/' . $path;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -329,10 +321,9 @@ class PostsController extends Controller
                 ]);
 
                 // Handle image
-                $customFileName = $request->file('image')->hashName();
                 // Move file to public directory directly
-                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
-                $imageUrl = 'storage/upload/images/' . $customFileName;
+                $path = $request->file('image')->store('upload/images', 'public');
+                $imageUrl = 'storage/' . $path;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),
@@ -349,10 +340,9 @@ class PostsController extends Controller
                 ]);
                 return response()->json(['message' => 'Text successfully stored']);
             } elseif (!$request->filled('text') && $request->hasFile('image')) {
-                $customFileName = $request->file('image')->hashName();
                 // Move file to public directory directly
-                $path = $request->file('image')->storeAs('upload/images', $customFileName, 'public');
-                $imageUrl = 'storage/upload/images/' . $customFileName;
+                $path = $request->file('image')->store('upload/images', 'public');
+                $imageUrl = 'storage/' . $path;
 
                 ImagePosts::create([
                     'image_posts_id' => Str::uuid(),

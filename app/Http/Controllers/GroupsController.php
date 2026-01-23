@@ -35,7 +35,7 @@ class GroupsController extends Controller
             for ($i = 0; $i < 6; $i++) {
                 $baseIdentifier .= chr(rand(97, 122)); // ASCII codes for lowercase letters (a-z)
             }
-        } 
+        }
 
         // Append an underscore (_) followed by two random letters
         $letters = '_';
@@ -89,14 +89,7 @@ class GroupsController extends Controller
         $identifier = $this->generateIdentifier($identifierBase);
 
         try {
-            DB::transaction(function () use (
-                $groupId,
-                $identifier,
-                $groupName,
-                $groupDetails,
-                $user,
-                $audience
-            ) {
+            DB::transaction(function () use ($groupId, $identifier, $groupName, $groupDetails, $user, $audience) {
                 // Create the group
                 Groups::create([
                     'group_id' => $groupId,
@@ -106,8 +99,8 @@ class GroupsController extends Controller
                     'group_creator' => $user->user_id,
                     'group_admins' => $user->user_id,
                     'audience' => $audience,
-                    'group_picture' => 'storage/mprofile_picture/group.jpg',
-                    'group_cover' => 'storage/cover_photo/group.jpg',
+                    'group_picture' => 'defaults/group.png',
+                    'group_cover' => 'defaults/cover.png',
                 ]);
 
                 // Associate the user with the group
@@ -416,7 +409,7 @@ class GroupsController extends Controller
         // Return the filtered list of groups as an array with pagination metadata
         return response()->json([
             'data' => $groupsArray,
-            'current_page' => (int)$page,
+            'current_page' => (int) $page,
             'per_page' => $perPage,
             'total' => $totalItems,
             'total_pages' => $totalPages
@@ -463,7 +456,7 @@ class GroupsController extends Controller
         // Return the filtered list of groups as an array with pagination metadata
         return response()->json([
             'data' => $groupsArray,
-            'current_page' => (int)$page,
+            'current_page' => (int) $page,
             'per_page' => $perPage,
             'total' => $totalItems,
             'total_pages' => $totalPages
@@ -512,7 +505,7 @@ class GroupsController extends Controller
         // Return the filtered list of groups as an array with pagination metadata
         return response()->json([
             'data' => $groupsArray,
-            'current_page' => (int)$page,
+            'current_page' => (int) $page,
             'per_page' => $perPage,
             'total' => $totalItems,
             'total_pages' => $totalPages
@@ -566,7 +559,7 @@ class GroupsController extends Controller
         // Return the filtered list of groups as an array with pagination metadata
         return response()->json([
             'data' => $groupsArray,
-            'current_page' => (int)$page,
+            'current_page' => (int) $page,
             'per_page' => $perPage,
             'total' => $totalItems,
             'total_pages' => $totalPages
@@ -668,12 +661,12 @@ class GroupsController extends Controller
 
             // Count the total comments related to the post
             $totalComments = Comments::where('post_id', $post->post_id)->count();
-    
+
             // Count the total replies related to all comments of the post
             $totalReplies = Replies::whereIn('comment_id', function ($query) use ($post) {
                 $query->select('comment_id')->from('comments')->where('post_id', $post->post_id);
             })->count();
-    
+
 
 
             // Add the values to the post object
@@ -681,8 +674,8 @@ class GroupsController extends Controller
             $post->isUnlike = $isUnlike;
             $post->totalLove = $totalLove;
             $post->totalUnlike = $totalUnlike;
-        $post->total_comments = $totalComments+$totalReplies;
-          
+            $post->total_comments = $totalComments + $totalReplies;
+
             return $post;
         });
         return response()->json($posts);
@@ -875,19 +868,19 @@ class GroupsController extends Controller
                 ->count();
             // Count the total comments related to the post
             $totalComments = Comments::where('post_id', $post->post_id)->count();
-    
+
             // Count the total replies related to all comments of the post
             $totalReplies = Replies::whereIn('comment_id', function ($query) use ($post) {
                 $query->select('comment_id')->from('comments')->where('post_id', $post->post_id);
             })->count();
-    
+
             // Add the values to the post object
             $post->isLove = $isLove;
             $post->isUnlike = $isUnlike;
             $post->totalLove = $totalLove;
             $post->totalUnlike = $totalUnlike;
-            $post->total_comments = $totalComments+$totalReplies;
-          
+            $post->total_comments = $totalComments + $totalReplies;
+
             return $post;
         });
 

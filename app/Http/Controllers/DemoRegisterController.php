@@ -31,13 +31,13 @@ class DemoRegisterController extends Controller
         $photoPath = '';
         switch ($request->input('gender')) {
             case 'male':
-                $photoPath = 'storage/defaultProfile/male.png';
+                $photoPath = 'defaults/user.png';
                 break;
             case 'female':
-                $photoPath = 'storage/defaultProfile/female.png';
+                $photoPath = 'defaults/user.png';
                 break;
             default:
-                $photoPath = 'storage/defaultProfile/others.jpeg';
+                $photoPath = 'defaults/user.png';
         }
         return DB::transaction(function () use ($request, $photoPath) {
             $user = User::where('email', $request->email)->first();
@@ -65,13 +65,15 @@ class DemoRegisterController extends Controller
     }
 
 
-    public function loaddashboard(Request $request){
+    public function loaddashboard(Request $request)
+    {
         $user = $request->user();
 
         return $user;
     }
 
-    public function chat(Request $request){
+    public function chat(Request $request)
+    {
         return "Hello";
     }
 }

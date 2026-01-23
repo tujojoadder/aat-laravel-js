@@ -35,7 +35,7 @@ class BluetickUserController extends Controller
     /* post_type--->>>user */
     /* request_for--->>>profile_picture */
     /* 10 request limit for 7 days */
-    
+
     public function uploadprofilepicture(Request $request)
     {
         // Validate the request data
@@ -51,9 +51,9 @@ class BluetickUserController extends Controller
         if ($user->blueticks) {
             // Check if the user has already uploaded 10 profile pictures in the last 7 days
             $uploadsLast7Days = BluetikPost::where('author_id', $user->user_id)
-                ->where('post_type','user')
-                ->where('request_for','profile_picture')
-                ->whereDate('posted_at','>=', now()->subDays(7)) // Filter posts within the last 7 days
+                ->where('post_type', 'user')
+                ->where('request_for', 'profile_picture')
+                ->whereDate('posted_at', '>=', now()->subDays(7)) // Filter posts within the last 7 days
                 ->count();
 
             if ($uploadsLast7Days < 11) {
@@ -79,20 +79,17 @@ class BluetickUserController extends Controller
                         'author_id' => $user->user_id,
                         'post_type' => 'general',
                         'timeline_ids' => $user->user_id, // Because profile pictures cannot be tagged
-                        'audience' => cleanInput($request->audience),       
+                        'audience' => cleanInput($request->audience),
                     ];
 
                     // Create the main post
                     $post = Posts::create($postData);
 
-                    // Generate a unique filename for the image
-                    $customFileName = $request->file('image')->hashName();
-
                     // Store the image
-                    $path = $request->file('image')->storeAs('public/upload/images', $customFileName);
+                    $path = $request->file('image')->store('upload/images', 'public');
 
                     // Generate a URL for the stored image
-                    $imageUrl = Storage::url($path);
+                    $imageUrl = 'storage/' . $path;
 
                     // Create the image post
                     ImagePosts::create([
@@ -327,9 +324,9 @@ class BluetickUserController extends Controller
                 return response()->json(['message' => 'The identifier is already in use.'], 422);
             }
 
-            $iaccountId = IAccount::where('iaccount_id',$iaccount)
-            ->where('iaccount_creator',$userId)
-            ->first();
+            $iaccountId = IAccount::where('iaccount_id', $iaccount)
+                ->where('iaccount_creator', $userId)
+                ->first();
             if (!$iaccountId) {
                 return response()->json(['message' => 'You are not owner of this IAccount']);
             }

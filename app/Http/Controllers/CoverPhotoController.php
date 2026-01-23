@@ -42,25 +42,11 @@ class CoverPhotoController extends Controller
 
             foreach ($request->file('images') as $image) {
                 try {
-                    // Get the original file name
-                    $originalFileName = $image->getClientOriginalName();
-                    // Generate a unique filename for each image
-                    $fileNameToUse = $originalFileName;
-
-                    // Check if the original file name matches any of the specific names
-                    if (in_array(pathinfo($originalFileName, PATHINFO_FILENAME), $specificNames)) {
-                        // Use the original file name if it matches the specific names
-                        $fileNameToUse = $originalFileName;
-                    } else {
-                        // Generate a unique filename for other images
-                        $fileNameToUse = $image->hashName();
-                    }
-
                     // Move the image to the storage directory
-                    $path = $image->storeAs('cover_photo', $fileNameToUse, 'public');
+                    $path = $image->store('cover_photo', 'public');
 
                     // Generate a public URL for the stored image
-                    $imageUrl = 'storage/cover_photo/' . $fileNameToUse;
+                    $imageUrl = 'storage/' . $path;
 
                     // Save the image record to the database
                     $data = CoverPhoto::create([
@@ -70,7 +56,7 @@ class CoverPhotoController extends Controller
 
                     // Add the image details to the array
                     $uploadedImages[] = [
-                        'file_name' => $fileNameToUse,
+                        'file_name' => basename($path),
                         'url' => $imageUrl,
                     ];
 
