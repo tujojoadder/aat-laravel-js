@@ -9,6 +9,7 @@ use App\Http\Controllers\StoryController;
 use App\Http\Controllers\UserController;
 use App\Models\Story;
 use App\Models\User;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\File;
 
@@ -38,7 +39,7 @@ Route::post('/submitanswers/{story_id}', [HadithController::class, 'submitAnswer
 //get random Story
 Route::get('/randomstory', [HadithController::class, 'showRandomStory'])
     ->name('showRandomStory');
-//get ques for story
+//get ques for story   
 Route::get('/view-questions/{story_id}', [HadithController::class, 'viewQuestions'])
     ->name('view-questions');
 
@@ -66,7 +67,7 @@ Route::get('/auth/google/callback', [LoginController::class, 'googleHandle']);
 
 
 
-Route::get('storage:link', function () {
+/* Route::get('storage:link', function () {
     $storageLink = public_path('storage');
 
     // Delete if it exists
@@ -78,4 +79,22 @@ Route::get('storage:link', function () {
     Artisan::call('storage:link');
 
     return "Storage link recreated successfully.";
+});
+ */
+
+Route::get('/clear-cache', function () {
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    Artisan::call('config:cache');
+
+    return "Cache cleared";
+});
+
+Route::get('/generate-docs', function () {
+
+    Artisan::call('scribe:generate');
+
+    return "Docs Generated";
 });

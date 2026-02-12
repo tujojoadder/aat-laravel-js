@@ -1,0 +1,5016 @@
+openapi: 3.0.3
+info:
+  title: 'surukori API Documentation'
+  description: ''
+  version: 1.0.0
+servers:
+  -
+    url: 'http://surukori.top'
+tags:
+  -
+    name: Endpoints
+    description: ''
+  -
+    name: Groups
+    description: ''
+components:
+  securitySchemes:
+    default:
+      type: apiKey
+      name: Authorization
+      in: header
+      description: 'Use a Sanctum token like: Bearer your_token_here'
+security:
+  -
+    default: []
+paths:
+  /api/googlehandle:
+    post:
+      summary: ''
+      operationId: postApiGooglehandle
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+  /api/additionalinformation:
+    post:
+      summary: ''
+      operationId: postApiAdditionalinformation
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                formData:
+                  type: object
+                  description: ''
+                  example: []
+                  properties:
+                    gender:
+                      type: string
+                      description: ''
+                      example: male
+                      enum:
+                        - male
+                        - female
+                        - others
+                    fname:
+                      type: string
+                      description: 'Must not be greater than 50 characters.'
+                      example: i
+                    lname:
+                      type: string
+                      description: 'Must not be greater than 50 characters.'
+                      example: 'y'
+                    password:
+                      type: string
+                      description: 'Must be at least 8 characters.'
+                      example: pBNvYg
+                    birthdate_day:
+                      type: integer
+                      description: 'Must be between 1 and 31.'
+                      example: 2
+                    birthdate_month:
+                      type: integer
+                      description: 'Must be between 1 and 12.'
+                      example: 1
+                    birthdate_year:
+                      type: string
+                      description: 'Must be a valid date in the format <code>Y</code>.'
+                      example: '2026'
+                  required:
+                    - gender
+                    - fname
+                    - lname
+                    - password
+                    - birthdate_day
+                    - birthdate_month
+                    - birthdate_year
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: zbailey@example.net
+              required:
+                - email
+  /api/google-sign-in:
+    post:
+      summary: ''
+      operationId: postApiGoogleSignIn
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+  /api/login:
+    post:
+      summary: ''
+      operationId: postApiLogin
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: gbailey@example.net
+                password:
+                  type: string
+                  description: 'Must be at least 8 characters.'
+                  example: '+-0pBNvYgxwmi/#iw'
+              required:
+                - email
+                - password
+  /api/forgotpassword:
+    post:
+      summary: ''
+      operationId: postApiForgotpassword
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: gbailey@example.net
+              required:
+                - email
+  /api/resetpassword:
+    post:
+      summary: ''
+      operationId: postApiResetpassword
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+  /api/confirmpassword:
+    post:
+      summary: ''
+      operationId: postApiConfirmpassword
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+  /api/broadcasting/auth:
+    get:
+      summary: 'Authenticate the request for channel access.'
+      operationId: authenticateTheRequestForChannelAccess
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/user:
+    post:
+      summary: ''
+      operationId: postApiUser
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+  /api/profile:
+    get:
+      summary: ''
+      operationId: getApiProfile
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/hadith/insert:
+    post:
+      summary: ''
+      operationId: postApiHadithInsert
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hadith:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - hadith
+  /api/storyandques/create:
+    post:
+      summary: ''
+      operationId: postApiStoryandquesCreate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hadith_id:
+                  type: string
+                  description: ''
+                  example: architecto
+                questions:
+                  type: array
+                  description: ''
+                  example:
+                    - architecto
+                  items:
+                    type: string
+                currectAnswers:
+                  type: array
+                  description: ''
+                  example:
+                    - architecto
+                  items:
+                    type: string
+                wrongAnswers:
+                  type: array
+                  description: ''
+                  example:
+                    - architecto
+                  items:
+                    type: string
+              required:
+                - hadith_id
+                - questions
+                - currectAnswers
+                - wrongAnswers
+  /api/register:
+    post:
+      summary: ''
+      operationId: postApiRegister
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gender:
+                  type: string
+                  description: ''
+                  example: male
+                  enum:
+                    - male
+                    - female
+                    - others
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: zbailey@example.net
+                fname:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: i
+                lname:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'y'
+                password:
+                  type: string
+                  description: 'Must be at least 8 characters.'
+                  example: pBNvYg
+                birthdate:
+                  type: string
+                  description: 'Must be a valid date.'
+                  example: '2026-02-12T03:29:56'
+              required:
+                - gender
+                - email
+                - fname
+                - lname
+                - password
+                - birthdate
+  /api/demoregister:
+    post:
+      summary: ''
+      operationId: postApiDemoregister
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gender:
+                  type: string
+                  description: ''
+                  example: male
+                  enum:
+                    - male
+                    - female
+                    - others
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: zbailey@example.net
+                fname:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: i
+                lname:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'y'
+                password:
+                  type: string
+                  description: 'Must be at least 8 characters.'
+                  example: pBNvYg
+                birthdate:
+                  type: string
+                  description: 'Must be a valid date.'
+                  example: '2026-02-12T03:29:56'
+              required:
+                - gender
+                - email
+                - fname
+                - lname
+                - password
+                - birthdate
+  /api/fpicturestore:
+    post:
+      summary: ''
+      operationId: postApiFpicturestore
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: array
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                  items:
+                    type: string
+                    format: binary
+              required:
+                - images
+  /api/viewfpicturestore:
+    get:
+      summary: ''
+      operationId: getApiViewfpicturestore
+      description: ''
+      parameters: []
+      responses:
+        500:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'Server Error'
+                properties:
+                  message:
+                    type: string
+                    example: 'Server Error'
+      tags:
+        - Endpoints
+  /api/deletefprofilepicture:
+    delete:
+      summary: ''
+      operationId: deleteApiDeletefprofilepicture
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+  /api/setfpicture:
+    post:
+      summary: ''
+      operationId: postApiSetfpicture
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  description: 'no change. The <code>image_url</code> of an existing record in the fprofile_pictures table.'
+                  example: architecto
+                user_id:
+                  type: string
+                  description: change.
+                  example: architecto
+              required:
+                - image
+                - user_id
+  /api/mpicturestore:
+    post:
+      summary: ''
+      operationId: postApiMpicturestore
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: array
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                  items:
+                    type: string
+                    format: binary
+              required:
+                - images
+  /api/viewmpicturestore:
+    get:
+      summary: ''
+      operationId: getApiViewmpicturestore
+      description: ''
+      parameters: []
+      responses:
+        500:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'Server Error'
+                properties:
+                  message:
+                    type: string
+                    example: 'Server Error'
+      tags:
+        - Endpoints
+  /api/deletemprofilepicture:
+    delete:
+      summary: ''
+      operationId: deleteApiDeletemprofilepicture
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+  /api/coverphotostore:
+    post:
+      summary: ''
+      operationId: postApiCoverphotostore
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: array
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                  items:
+                    type: string
+                    format: binary
+              required:
+                - images
+  /api/deletecoverphoto:
+    delete:
+      summary: ''
+      operationId: deleteApiDeletecoverphoto
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+  /api/userdetails:
+    get:
+      summary: ''
+      operationId: getApiUserdetails
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/update-profile-picture:
+    post:
+      summary: ''
+      operationId: postApiUpdateProfilePicture
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+              required:
+                - image
+  /api/update-cover-photo:
+    post:
+      summary: ''
+      operationId: postApiUpdateCoverPhoto
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+              required:
+                - image
+  /api/uploadprofilepicture:
+    post:
+      summary: ''
+      operationId: postApiUploadprofilepicture
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                audience:
+                  type: string
+                  description: ''
+                  example: public
+                  enum:
+                    - public
+                    - private
+                    - only_me
+              required:
+                - image
+                - audience
+  /api/users/updateusername:
+    put:
+      summary: ''
+      operationId: putApiUsersUpdateusername
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+  /api/users/updategender:
+    put:
+      summary: ''
+      operationId: putApiUsersUpdategender
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+  /api/users/updatebirthdate:
+    put:
+      summary: ''
+      operationId: putApiUsersUpdatebirthdate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                birthdate_day:
+                  type: integer
+                  description: 'Must be between 1 and 31.'
+                  example: 2
+                birthdate_month:
+                  type: integer
+                  description: 'Must be between 1 and 12.'
+                  example: 2
+                birthdate_year:
+                  type: string
+                  description: 'Must be a valid date in the format <code>Y</code>.'
+                  example: '2026'
+              required:
+                - birthdate_day
+                - birthdate_month
+                - birthdate_year
+  /api/users/updateprivacysetting:
+    put:
+      summary: ''
+      operationId: putApiUsersUpdateprivacysetting
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                privacy_setting:
+                  type: string
+                  description: ''
+                  example: public
+                  enum:
+                    - public
+                    - locked
+              required:
+                - privacy_setting
+  '/api/profile/{user_id}':
+    get:
+      summary: ''
+      operationId: getApiProfileUser_id
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: b
+              required:
+                - userId
+    parameters:
+      -
+        in: path
+        name: user_id
+        description: 'The ID of the user.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/friendsuggestionhome:
+    get:
+      summary: ''
+      operationId: getApiFriendsuggestionhome
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  '/api/userdetails/{id}':
+    get:
+      summary: ''
+      operationId: getApiUserdetailsId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the userdetail.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/sendfriendrequest:
+    post:
+      summary: ''
+      operationId: postApiSendfriendrequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                receiver_id:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: b
+              required:
+                - receiver_id
+  /api/cancelfriendrequest:
+    post:
+      summary: ''
+      operationId: postApiCancelfriendrequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                receiver_id:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: b
+              required:
+                - receiver_id
+  /api/users/friendrequestlist:
+    get:
+      summary: ''
+      operationId: getApiUsersFriendrequestlist
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/managefriendrequest:
+    post:
+      summary: ''
+      operationId: postApiManagefriendrequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                decision:
+                  type: string
+                  description: ''
+                  example: accepted
+                  enum:
+                    - accepted
+                    - rejected
+              required:
+                - decision
+  /api/friends/unfriend:
+    delete:
+      summary: ''
+      operationId: deleteApiFriendsUnfriend
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                useridtoremove:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: b
+              required:
+                - useridtoremove
+  /api/auth-friend-requests:
+    get:
+      summary: ''
+      operationId: getApiAuthFriendRequests
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getsuggestionfriends:
+    get:
+      summary: ''
+      operationId: getApiGetsuggestionfriends
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/sentfriendrequest:
+    get:
+      summary: ''
+      operationId: getApiSentfriendrequest
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/post/create:
+    post:
+      summary: ''
+      operationId: postApiPostCreate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image.'
+                  nullable: true
+                text:
+                  type: string
+                  description: 'Must not be greater than 20000 characters.'
+                  example: b
+                  nullable: true
+                image_or_text:
+                  type: string
+                  description: 'This field is required when none of <code>image</code> and <code>text</code> are present.'
+                  example: null
+                audience:
+                  type: string
+                  description: ''
+                  example: public
+                  enum:
+                    - public
+                    - private
+                    - only_me
+              required:
+                - audience
+  '/api/group/{groupId}/post/create':
+    post:
+      summary: ''
+      operationId: postApiGroupGroupIdPostCreate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image.'
+                  nullable: true
+                text:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: b
+                  nullable: true
+                groupId:
+                  type: string
+                  description: ''
+                  example: architecto
+                image_or_text:
+                  type: string
+                  description: 'This field is required when none of <code>image</code> and <code>text</code> are present.'
+                  example: null
+              required:
+                - groupId
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/page/{pageId}/post/create':
+    post:
+      summary: ''
+      operationId: postApiPagePageIdPostCreate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image.'
+                  nullable: true
+                text:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: b
+                  nullable: true
+                pageId:
+                  type: string
+                  description: ''
+                  example: architecto
+                image_or_text:
+                  type: string
+                  description: 'This field is required when none of <code>image</code> and <code>text</code> are present.'
+                  example: null
+              required:
+                - pageId
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/post/{postid}/delete':
+    delete:
+      summary: ''
+      operationId: deleteApiPostPostidDelete
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                postId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: b
+              required:
+                - postId
+    parameters:
+      -
+        in: path
+        name: postid
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/users/profilepicture/uploadrequest:
+    post:
+      summary: ''
+      operationId: postApiUsersProfilepictureUploadrequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                visibility:
+                  type: string
+                  description: ''
+                  example: public
+                  enum:
+                    - public
+                    - private
+                    - only_me
+              required:
+                - image
+                - visibility
+  '/api/users/{reuestid}/profilepicture/handle':
+    post:
+      summary: ''
+      operationId: postApiUsersReuestidProfilepictureHandle
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                decision:
+                  type: string
+                  description: ''
+                  example: approved
+                  enum:
+                    - approved
+                    - rejected
+                    - accepted
+              required:
+                - decision
+    parameters:
+      -
+        in: path
+        name: reuestid
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/users/coverphoto/uploadrequest:
+    post:
+      summary: ''
+      operationId: postApiUsersCoverphotoUploadrequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                visibility:
+                  type: string
+                  description: ''
+                  example: public
+                  enum:
+                    - public
+                    - private
+                    - only_me
+              required:
+                - image
+                - visibility
+  '/api/users/{reuestid}/coverphoto/handle':
+    post:
+      summary: ''
+      operationId: postApiUsersReuestidCoverphotoHandle
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                decision:
+                  type: string
+                  description: ''
+                  example: approved
+                  enum:
+                    - approved
+                    - rejected
+                    - accepted
+              required:
+                - decision
+    parameters:
+      -
+        in: path
+        name: reuestid
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/user/update/identifier:
+    put:
+      summary: ''
+      operationId: putApiUserUpdateIdentifier
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+  '/api/groups/{groupid}/photo/uploadrequest':
+    post:
+      summary: ''
+      operationId: postApiGroupsGroupidPhotoUploadrequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                visibility:
+                  type: string
+                  description: ''
+                  example: public
+                  enum:
+                    - public
+                    - private
+                    - only_me
+                groupId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'n'
+              required:
+                - image
+                - visibility
+                - groupId
+    parameters:
+      -
+        in: path
+        name: groupid
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/groups/{reuestid}/grouppicture/handle':
+    post:
+      summary: ''
+      operationId: postApiGroupsReuestidGrouppictureHandle
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                decision:
+                  type: string
+                  description: ''
+                  example: approved
+                  enum:
+                    - approved
+                    - rejected
+                    - accepted
+              required:
+                - decision
+    parameters:
+      -
+        in: path
+        name: reuestid
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/group/{reuestid}/groupcoverphoto/coverphoto/handle':
+    post:
+      summary: ''
+      operationId: postApiGroupReuestidGroupcoverphotoCoverphotoHandle
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                decision:
+                  type: string
+                  description: ''
+                  example: approved
+                  enum:
+                    - approved
+                    - rejected
+                    - accepted
+              required:
+                - decision
+    parameters:
+      -
+        in: path
+        name: reuestid
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/groups/{groupId}/update/identifier':
+    put:
+      summary: ''
+      operationId: putApiGroupsGroupIdUpdateIdentifier
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/page/{groupid}/photo/uploadrequest':
+    post:
+      summary: ''
+      operationId: postApiPageGroupidPhotoUploadrequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                visibility:
+                  type: string
+                  description: ''
+                  example: public
+                  enum:
+                    - public
+                    - private
+                    - only_me
+                pageId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'n'
+              required:
+                - image
+                - visibility
+                - pageId
+    parameters:
+      -
+        in: path
+        name: groupid
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/page/{reuestid}/pageprofile/handle':
+    post:
+      summary: ''
+      operationId: postApiPageReuestidPageprofileHandle
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                decision:
+                  type: string
+                  description: ''
+                  example: approved
+                  enum:
+                    - approved
+                    - rejected
+                    - accepted
+              required:
+                - decision
+    parameters:
+      -
+        in: path
+        name: reuestid
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/page/coverphoto/{groupid}/uploadrequest':
+    post:
+      summary: ''
+      operationId: postApiPageCoverphotoGroupidUploadrequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                visibility:
+                  type: string
+                  description: ''
+                  example: public
+                  enum:
+                    - public
+                    - private
+                    - only_me
+                pageId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'n'
+              required:
+                - image
+                - visibility
+                - pageId
+    parameters:
+      -
+        in: path
+        name: groupid
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/page/{reuestid}/coverphoto/handle':
+    post:
+      summary: ''
+      operationId: postApiPageReuestidCoverphotoHandle
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                decision:
+                  type: string
+                  description: ''
+                  example: approved
+                  enum:
+                    - approved
+                    - rejected
+                    - accepted
+              required:
+                - decision
+    parameters:
+      -
+        in: path
+        name: reuestid
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/page/{pageId}/update/identifier':
+    put:
+      summary: ''
+      operationId: putApiPagePageIdUpdateIdentifier
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/iaccount/{iaccountId}/photo/uploadrequest':
+    post:
+      summary: ''
+      operationId: postApiIaccountIaccountIdPhotoUploadrequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+              required:
+                - image
+    parameters:
+      -
+        in: path
+        name: iaccountId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/iaccount/{reuestid}/iaccountprofile/handle':
+    post:
+      summary: ''
+      operationId: postApiIaccountReuestidIaccountprofileHandle
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                decision:
+                  type: string
+                  description: ''
+                  example: approved
+                  enum:
+                    - approved
+                    - rejected
+                    - accepted
+              required:
+                - decision
+    parameters:
+      -
+        in: path
+        name: reuestid
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/user/post/create:
+    post:
+      summary: ''
+      operationId: postApiUserPostCreate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image.'
+                  nullable: true
+                text:
+                  type: string
+                  description: 'Must not be greater than 20000 characters.'
+                  example: b
+                  nullable: true
+                image_or_text:
+                  type: string
+                  description: 'This field is required when none of <code>image</code> and <code>text</code> are present.'
+                  example: null
+                audience:
+                  type: string
+                  description: ''
+                  example: public
+                  enum:
+                    - public
+                    - private
+                    - only_me
+              required:
+                - audience
+  '/api/group/joinrequest/{groupId}':
+    post:
+      summary: ''
+      operationId: postApiGroupJoinrequestGroupId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                groupId:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - groupId
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/group/managejoinrequest/{requestedId}':
+    post:
+      summary: ''
+      operationId: postApiGroupManagejoinrequestRequestedId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                decision:
+                  type: string
+                  description: ''
+                  example: rejected
+                  enum:
+                    - accepted
+                    - rejected
+                requestedId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'n'
+              required:
+                - decision
+                - requestedId
+    parameters:
+      -
+        in: path
+        name: requestedId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/group/post/create:
+    post:
+      summary: ''
+      operationId: postApiGroupPostCreate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image.'
+                  nullable: true
+                text:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: b
+                  nullable: true
+                groupId:
+                  type: string
+                  description: ''
+                  example: architecto
+                image_or_text:
+                  type: string
+                  description: 'This field is required when none of <code>image</code> and <code>text</code> are present.'
+                  example: null
+              required:
+                - groupId
+  /api/create-page:
+    post:
+      summary: ''
+      operationId: postApiCreatePage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page_name:
+                  type: string
+                  description: 'Must not be greater than 40 characters.'
+                  example: b
+                page_details:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: 'n'
+                category:
+                  type: string
+                  description: 'Must not be greater than 40 characters.'
+                  example: g
+              required:
+                - page_name
+                - page_details
+                - category
+  '/api/page/{pageId}/followorunfollow':
+    post:
+      summary: ''
+      operationId: postApiPagePageIdFolloworunfollow
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pageId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: b
+              required:
+                - pageId
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/page/addadmin/{pageId}/{newAdminId}':
+    post:
+      summary: ''
+      operationId: postApiPageAddadminPageIdNewAdminId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: newAdminId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/get-pages-where-admin:
+    get:
+      summary: ''
+      operationId: getApiGetPagesWhereAdmin
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/get-pages-liked:
+    get:
+      summary: ''
+      operationId: getApiGetPagesLiked
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/get-pages-suggestion:
+    get:
+      summary: ''
+      operationId: getApiGetPagesSuggestion
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  '/api/pagedetails/{id}':
+    get:
+      summary: ''
+      operationId: getApiPagedetailsId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the pagedetail.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/page/{pageId}/members':
+    get:
+      summary: ''
+      operationId: getApiPagePageIdMembers
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/page/post/create/{pageId}':
+    post:
+      summary: ''
+      operationId: postApiPagePostCreatePageId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image.'
+                  nullable: true
+                text:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: b
+                  nullable: true
+                pageId:
+                  type: string
+                  description: ''
+                  example: architecto
+                image_or_text:
+                  type: string
+                  description: 'This field is required when none of <code>image</code> and <code>text</code> are present.'
+                  example: null
+              required:
+                - pageId
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/page/{pageId}/post':
+    get:
+      summary: ''
+      operationId: getApiPagePageIdPost
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/page/{pageId}/update/name':
+    put:
+      summary: ''
+      operationId: putApiPagePageIdUpdateName
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 40 characters.'
+                  example: b
+                pageId:
+                  type: string
+                  description: 'Must not be greater than 40 characters.'
+                  example: 'n'
+              required:
+                - name
+                - pageId
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/page/{pageId}/update/details':
+    put:
+      summary: ''
+      operationId: putApiPagePageIdUpdateDetails
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                details:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: b
+                pageId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'n'
+              required:
+                - details
+                - pageId
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/getspecificpageposts:
+    get:
+      summary: ''
+      operationId: getApiGetspecificpageposts
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getspecificpagephotos:
+    get:
+      summary: ''
+      operationId: getApiGetspecificpagephotos
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getspecificpagemember:
+    get:
+      summary: ''
+      operationId: getApiGetspecificpagemember
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getspecificpagememberformanage:
+    get:
+      summary: ''
+      operationId: getApiGetspecificpagememberformanage
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  '/api/page/join/{pageId}':
+    post:
+      summary: ''
+      operationId: postApiPageJoinPageId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/page/leave/{pageId}':
+    post:
+      summary: ''
+      operationId: postApiPageLeavePageId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/pages/{pageId}/update/name':
+    put:
+      summary: ''
+      operationId: putApiPagesPageIdUpdateName
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 40 characters.'
+                  example: b
+                pageId:
+                  type: string
+                  description: 'Must not be greater than 40 characters.'
+                  example: 'n'
+              required:
+                - name
+                - pageId
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/pages/{pageId}/update/details':
+    put:
+      summary: ''
+      operationId: putApiPagesPageIdUpdateDetails
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                details:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: b
+                pageId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'n'
+              required:
+                - details
+                - pageId
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/page/post/create:
+    post:
+      summary: ''
+      operationId: postApiPagePostCreate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image.'
+                  nullable: true
+                text:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: b
+                  nullable: true
+                pageId:
+                  type: string
+                  description: ''
+                  example: architecto
+                image_or_text:
+                  type: string
+                  description: 'This field is required when none of <code>image</code> and <code>text</code> are present.'
+                  example: null
+              required:
+                - pageId
+  '/api/pages/{pageId}/update/location':
+    put:
+      summary: ''
+      operationId: putApiPagesPageIdUpdateLocation
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                location:
+                  type: string
+                  description: 'Must not be greater than 100 characters.'
+                  example: b
+                pageId:
+                  type: string
+                  description: 'Must not be greater than 40 characters.'
+                  example: 'n'
+              required:
+                - location
+                - pageId
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/pages/{pageId}/update/phone':
+    put:
+      summary: ''
+      operationId: putApiPagesPageIdUpdatePhone
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  description: 'Must not be greater than 30 characters.'
+                  example: b
+                pageId:
+                  type: string
+                  description: 'Must not be greater than 40 characters.'
+                  example: 'n'
+              required:
+                - phone
+                - pageId
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/pages/{pageId}/update/email':
+    put:
+      summary: ''
+      operationId: putApiPagesPageIdUpdateEmail
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'Must be a valid email address. Must not be greater than 50 characters.'
+                  example: gbailey@example.net
+                pageId:
+                  type: string
+                  description: 'Must not be greater than 40 characters.'
+                  example: m
+              required:
+                - email
+                - pageId
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/page/{pageId}/add-admin/{newAdmin}':
+    post:
+      summary: ''
+      operationId: postApiPagePageIdAddAdminNewAdmin
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: newAdmin
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/page/{pageId}/kick-out-member/{memberId}':
+    delete:
+      summary: ''
+      operationId: deleteApiPagePageIdKickOutMemberMemberId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: pageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: memberId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/iaccount/create:
+    post:
+      summary: ''
+      operationId: postApiIaccountCreate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                iaccount_name:
+                  type: string
+                  description: 'Must not be greater than 30 characters.'
+                  example: b
+              required:
+                - iaccount_name
+  /api/iaccount/randomposts:
+    get:
+      summary: ''
+      operationId: getApiIaccountRandomposts
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/get-your-iaccounts:
+    get:
+      summary: ''
+      operationId: getApiGetYourIaccounts
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/get-iaccounts-liked:
+    get:
+      summary: ''
+      operationId: getApiGetIaccountsLiked
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  '/api/iaccountdetails/{id}':
+    get:
+      summary: ''
+      operationId: getApiIaccountdetailsId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the iaccountdetail.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/getspecificiaccountposts:
+    get:
+      summary: ''
+      operationId: getApiGetspecificiaccountposts
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getspecificichannelphotos:
+    get:
+      summary: ''
+      operationId: getApiGetspecificichannelphotos
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getspecificiaccountfollowerids:
+    get:
+      summary: ''
+      operationId: getApiGetspecificiaccountfollowerids
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  '/api/iaccount/join/{iChannelId}':
+    post:
+      summary: ''
+      operationId: postApiIaccountJoinIChannelId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: iChannelId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/iaccount/leave/{iChannelId}':
+    post:
+      summary: ''
+      operationId: postApiIaccountLeaveIChannelId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: iChannelId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/iaccount/{iChannelId}/update/name':
+    put:
+      summary: ''
+      operationId: putApiIaccountIChannelIdUpdateName
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 40 characters.'
+                  example: b
+                iChannelId:
+                  type: string
+                  description: 'Must not be greater than 40 characters.'
+                  example: 'n'
+              required:
+                - name
+                - iChannelId
+    parameters:
+      -
+        in: path
+        name: iChannelId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/iaccount/post/create:
+    post:
+      summary: ''
+      operationId: postApiIaccountPostCreate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image.'
+                  nullable: true
+                text:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: b
+                  nullable: true
+                iChannelId:
+                  type: string
+                  description: ''
+                  example: architecto
+                image_or_text:
+                  type: string
+                  description: 'This field is required when none of <code>image</code> and <code>text</code> are present.'
+                  example: null
+              required:
+                - iChannelId
+  '/api/iaccount/getfollowers/{iaccountId}':
+    get:
+      summary: ''
+      operationId: getApiIaccountGetfollowersIaccountId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: iaccountId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/user/get/followingiaccount:
+    get:
+      summary: ''
+      operationId: getApiUserGetFollowingiaccount
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  '/api/iaccount/{iaccountId}/followorunfollow':
+    post:
+      summary: ''
+      operationId: postApiIaccountIaccountIdFolloworunfollow
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                iaccountId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: b
+              required:
+                - iaccountId
+    parameters:
+      -
+        in: path
+        name: iaccountId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/iaccount/{iaccountId}/update/identifier':
+    put:
+      summary: ''
+      operationId: putApiIaccountIaccountIdUpdateIdentifier
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: iaccountId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/iaccount/{iaccountId}/post/create':
+    post:
+      summary: ''
+      operationId: postApiIaccountIaccountIdPostCreate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                  nullable: true
+                text:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: b
+                  nullable: true
+                iaccountId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'n'
+                image_or_text:
+                  type: string
+                  description: 'This field is required when none of <code>image</code> and <code>text</code> are present.'
+                  example: null
+              required:
+                - iaccountId
+    parameters:
+      -
+        in: path
+        name: iaccountId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/iaccount/{iaccountId}/getpost':
+    get:
+      summary: ''
+      operationId: getApiIaccountIaccountIdGetpost
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: iaccountId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/iaccount/followingaccounts/getposts:
+    get:
+      summary: ''
+      operationId: getApiIaccountFollowingaccountsGetposts
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/iaccount/getposts:
+    get:
+      summary: ''
+      operationId: getApiIaccountGetposts
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  '/api/posts/{postId}/comments':
+    post:
+      summary: ''
+      operationId: postApiPostsPostIdComments
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                postId:
+                  type: string
+                  description: ''
+                  example: architecto
+                comment_text:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: 'n'
+              required:
+                - postId
+                - comment_text
+    get:
+      summary: ''
+      operationId: getApiPostsPostIdComments
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                postId:
+                  type: string
+                  description: 'The <code>post_id</code> of an existing record in the posts table.'
+                  example: architecto
+              required:
+                - postId
+    parameters:
+      -
+        in: path
+        name: postId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/post/{postId}/deletecomment':
+    delete:
+      summary: ''
+      operationId: deleteApiPostPostIdDeletecomment
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                commentId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: b
+              required:
+                - commentId
+    parameters:
+      -
+        in: path
+        name: postId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/comments/{commentId}/reply-count':
+    get:
+      summary: ''
+      operationId: getApiCommentsCommentIdReplyCount
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: commentId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/comments/{commentId}/replies':
+    post:
+      summary: ''
+      operationId: postApiCommentsCommentIdReplies
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                commentId:
+                  type: string
+                  description: ''
+                  example: architecto
+                reply_text:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: 'n'
+              required:
+                - commentId
+                - reply_text
+    get:
+      summary: ''
+      operationId: getApiCommentsCommentIdReplies
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                CommentID:
+                  type: string
+                  description: 'The <code>comment_id</code> of an existing record in the comments table.'
+                  example: architecto
+              required:
+                - CommentID
+    parameters:
+      -
+        in: path
+        name: commentId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/reply/{commentId}/replies':
+    post:
+      summary: ''
+      operationId: postApiReplyCommentIdReplies
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                commentId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: b
+                parent_reply_id:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'n'
+                reply_text:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: g
+              required:
+                - commentId
+                - parent_reply_id
+                - reply_text
+    parameters:
+      -
+        in: path
+        name: commentId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/like/toggle/{reactionType}/{likeOnType}/{likeOnId}':
+    post:
+      summary: ''
+      operationId: postApiLikeToggleReactionTypeLikeOnTypeLikeOnId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                likeOnType:
+                  type: string
+                  description: ''
+                  example: post
+                  enum:
+                    - post
+                    - comment
+                    - reply
+                likeOnId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'n'
+                reactionType:
+                  type: string
+                  description: ''
+                  example: love
+                  enum:
+                    - love
+                    - sad
+                    - angry
+              required:
+                - likeOnType
+                - likeOnId
+                - reactionType
+    parameters:
+      -
+        in: path
+        name: reactionType
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: likeOnType
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: likeOnId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/like/wholiked/{likeOnType}/{likeOnId}':
+    get:
+      summary: ''
+      operationId: getApiLikeWholikedLikeOnTypeLikeOnId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                likeOnType:
+                  type: string
+                  description: ''
+                  example: post
+                  enum:
+                    - post
+                    - comment
+                    - reply
+                likeOnId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'n'
+              required:
+                - likeOnType
+                - likeOnId
+    parameters:
+      -
+        in: path
+        name: likeOnType
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: likeOnId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/logout:
+    post:
+      summary: ''
+      operationId: postApiLogout
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+  '/api/report/create/{ReportOnType}/{ReportOnId}':
+    post:
+      summary: ''
+      operationId: postApiReportCreateReportOnTypeReportOnId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ReportOnType:
+                  type: string
+                  description: 'Must not be greater than 15 characters.'
+                  example: b
+                ReportOnId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'n'
+              required:
+                - ReportOnType
+                - ReportOnId
+    parameters:
+      -
+        in: path
+        name: ReportOnType
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: ReportOnId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/message:
+    get:
+      summary: ''
+      operationId: getApiMessage
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/chat:
+    post:
+      summary: ''
+      operationId: postApiChat
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+  /api/get-random-hadith:
+    get:
+      summary: ''
+      operationId: getApiGetRandomHadith
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/setdayhadith:
+    post:
+      summary: ''
+      operationId: postApiSetdayhadith
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hadith_id:
+                  type: string
+                  description: 'The <code>hadith_id</code> of an existing record in the hadith table.'
+                  example: architecto
+              required:
+                - hadith_id
+  /api/getdayhadiths:
+    get:
+      summary: ''
+      operationId: getApiGetdayhadiths
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/likedayhadith:
+    post:
+      summary: ''
+      operationId: postApiLikedayhadith
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                day_hadith_id:
+                  type: string
+                  description: 'The <code>day_hadith_id</code> of an existing record in the day_hadiths table.'
+                  example: architecto
+              required:
+                - day_hadith_id
+  /api/dayhadithdetails:
+    post:
+      summary: ''
+      operationId: postApiDayhadithdetails
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+  /api/getposts:
+    get:
+      summary: ''
+      operationId: getApiGetposts
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getspecificuserposts:
+    get:
+      summary: ''
+      operationId: getApiGetspecificuserposts
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getspecificuserphotos:
+    get:
+      summary: ''
+      operationId: getApiGetspecificuserphotos
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getspecificuserfollower:
+    get:
+      summary: ''
+      operationId: getApiGetspecificuserfollower
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getspecificuserfollowing:
+    get:
+      summary: ''
+      operationId: getApiGetspecificuserfollowing
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getspecificuserfriendids:
+    get:
+      summary: ''
+      operationId: getApiGetspecificuserfriendids
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getauthuserposts:
+    get:
+      summary: ''
+      operationId: getApiGetauthuserposts
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getauthuserphotos:
+    get:
+      summary: ''
+      operationId: getApiGetauthuserphotos
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getauthuserfollower:
+    get:
+      summary: ''
+      operationId: getApiGetauthuserfollower
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getauthuserfollowing:
+    get:
+      summary: ''
+      operationId: getApiGetauthuserfollowing
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/getauthuserfriendids:
+    get:
+      summary: ''
+      operationId: getApiGetauthuserfriendids
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/setmprofile:
+    post:
+      summary: ''
+      operationId: postApiSetmprofile
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                image_id:
+                  type: string
+                  description: 'The <code>profile_picture_id</code> of an existing record in the mprofile_pictures table.'
+                  example: architecto
+              required:
+                - image_id
+  /api/setfprofile:
+    post:
+      summary: ''
+      operationId: postApiSetfprofile
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                image_id:
+                  type: string
+                  description: 'The <code>profile_picture_id</code> of an existing record in the fprofile_pictures table.'
+                  example: architecto
+              required:
+                - image_id
+  /api/about/createorupdate:
+    post:
+      summary: ''
+      operationId: postApiAboutCreateorupdate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                location:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: true
+                relationshipStatus:
+                  type: string
+                  description: ''
+                  example: single
+                  enum:
+                    - single
+                    - married
+                    - divorced
+                work:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: g
+                  nullable: true
+                education:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: z
+                  nullable: true
+              required:
+                - relationshipStatus
+  /api/getabout:
+    get:
+      summary: ''
+      operationId: getApiGetabout
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  '/api/about/{id}':
+    get:
+      summary: ''
+      operationId: getApiAboutId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the about.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/viewcoverphotostore:
+    get:
+      summary: ''
+      operationId: getApiViewcoverphotostore
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/setcoverphoto:
+    post:
+      summary: ''
+      operationId: postApiSetcoverphoto
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                image_id:
+                  type: string
+                  description: 'The <code>cover_photo_id</code> of an existing record in the cover_photos table.'
+                  example: architecto
+              required:
+                - image_id
+  /api/random-hadith:
+    post:
+      summary: ''
+      operationId: postApiRandomHadith
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+  '/api/get-random-question/{hadithId}':
+    post:
+      summary: ''
+      operationId: postApiGetRandomQuestionHadithId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+    parameters:
+      -
+        in: path
+        name: hadithId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/check-answer:
+    post:
+      summary: ''
+      operationId: postApiCheckAnswer
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                question_id:
+                  type: string
+                  description: ''
+                  example: architecto
+                selected_answer:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - question_id
+                - selected_answer
+  /api/get-current-story:
+    get:
+      summary: ''
+      operationId: getApiGetCurrentStory
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  '/api/toggle-love/{loveOnType}/{loveOnId}':
+    post:
+      summary: ''
+      operationId: postApiToggleLoveLoveOnTypeLoveOnId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                loveOnType:
+                  type: string
+                  description: ''
+                  example: post
+                  enum:
+                    - post
+                    - comment
+                    - reply
+                loveOnId:
+                  type: string
+                  description: 'Must not be greater than 40 characters.'
+                  example: 'n'
+              required:
+                - loveOnType
+                - loveOnId
+    parameters:
+      -
+        in: path
+        name: loveOnType
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: loveOnId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/toggle-unlike/{unlikeOnType}/{unlikeOnId}':
+    post:
+      summary: ''
+      operationId: postApiToggleUnlikeUnlikeOnTypeUnlikeOnId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                unlikeOnType:
+                  type: string
+                  description: ''
+                  example: post
+                  enum:
+                    - post
+                    - comment
+                    - reply
+                unlikeOnId:
+                  type: string
+                  description: 'Must not be greater than 40 characters.'
+                  example: 'n'
+              required:
+                - unlikeOnType
+                - unlikeOnId
+    parameters:
+      -
+        in: path
+        name: unlikeOnType
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: unlikeOnId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/chatmessage:
+    post:
+      summary: ''
+      operationId: postApiChatmessage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                receiver_id:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                message:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - receiver_id
+                - message
+  /api/loadchat:
+    get:
+      summary: ''
+      operationId: getApiLoadchat
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                receiver_id:
+                  type: string
+                  description: 'Must not be greater than 46 characters.'
+                  example: b
+              required:
+                - receiver_id
+  /api/message/delete:
+    delete:
+      summary: ''
+      operationId: deleteApiMessageDelete
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the chat table.'
+                  example: architecto
+              required:
+                - message_id
+  /api/toggoleuserfollow:
+    post:
+      summary: ''
+      operationId: postApiToggoleuserfollow
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  description: 'The <code>user_id</code> of an existing record in the users table.'
+                  example: architecto
+              required:
+                - userId
+  /api/get-auth-user-deatils:
+    get:
+      summary: ''
+      operationId: getApiGetAuthUserDeatils
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+  /api/group/create:
+    post:
+      summary: ''
+      operationId: postApiGroupCreate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Groups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                group_name:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: b
+                group_details:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: 'n'
+                audience:
+                  type: string
+                  description: ''
+                  example: public
+                  enum:
+                    - public
+                    - private
+                    - only_me
+              required:
+                - group_name
+                - group_details
+                - audience
+  '/api/group/addmember/{groupId}/{newMember}':
+    post:
+      summary: ''
+      operationId: postApiGroupAddmemberGroupIdNewMember
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Groups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                groupId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: b
+                newMember:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'n'
+              required:
+                - groupId
+                - newMember
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: newMember
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/groups/{groupId}/add-admin/{newAdmin}':
+    post:
+      summary: ''
+      operationId: postApiGroupsGroupIdAddAdminNewAdmin
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Groups
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: newAdmin
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/groups/{groupId}/kick-out-member/{memberId}':
+    delete:
+      summary: ''
+      operationId: deleteApiGroupsGroupIdKickOutMemberMemberId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Groups
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: memberId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/groups/{groupId}/members':
+    get:
+      summary: ''
+      operationId: getApiGroupsGroupIdMembers
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Groups
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/groups/{groupId}/posts':
+    get:
+      summary: ''
+      operationId: getApiGroupsGroupIdPosts
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Groups
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/groups/{groupId}/update/name':
+    put:
+      summary: ''
+      operationId: putApiGroupsGroupIdUpdateName
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Groups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 40 characters.'
+                  example: b
+                groupId:
+                  type: string
+                  description: 'Must not be greater than 40 characters.'
+                  example: 'n'
+              required:
+                - name
+                - groupId
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/groups/{groupId}/update/details':
+    put:
+      summary: ''
+      operationId: putApiGroupsGroupIdUpdateDetails
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Groups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                details:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: b
+                groupId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'n'
+              required:
+                - details
+                - groupId
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/groups/joined-not-admin:
+    get:
+      summary: ''
+      operationId: getApiGroupsJoinedNotAdmin
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Groups
+  /api/groups/joined-not-admin-right:
+    get:
+      summary: ''
+      operationId: getApiGroupsJoinedNotAdminRight
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Groups
+  '/api/groups/join/{groupId}':
+    post:
+      summary: ''
+      operationId: postApiGroupsJoinGroupId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Groups
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/groups/leave/{groupId}':
+    post:
+      summary: ''
+      operationId: postApiGroupsLeaveGroupId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Groups
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/groups/joined-admin:
+    get:
+      summary: ''
+      operationId: getApiGroupsJoinedAdmin
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Groups
+  /api/groups/suggestions:
+    get:
+      summary: ''
+      operationId: getApiGroupsSuggestions
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Groups
+  '/api/groupdetails/{id}':
+    get:
+      summary: ''
+      operationId: getApiGroupdetailsId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Groups
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the groupdetail.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/getspecificgroupposts:
+    get:
+      summary: ''
+      operationId: getApiGetspecificgroupposts
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Groups
+  /api/getspecificgrouppostapprovalrequestes:
+    get:
+      summary: ''
+      operationId: getApiGetspecificgrouppostapprovalrequestes
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Groups
+  /api/getspecificgroupphotos:
+    get:
+      summary: ''
+      operationId: getApiGetspecificgroupphotos
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Groups
+  /api/getspecificgroupmember:
+    get:
+      summary: ''
+      operationId: getApiGetspecificgroupmember
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Groups
+  /api/getspecificgroupmembermanage:
+    get:
+      summary: ''
+      operationId: getApiGetspecificgroupmembermanage
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Groups
+  '/api/groups/join-request-private/{groupId}':
+    post:
+      summary: ''
+      operationId: postApiGroupsJoinRequestPrivateGroupId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Groups
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/groups/cancel-join-request/{groupId}':
+    delete:
+      summary: ''
+      operationId: deleteApiGroupsCancelJoinRequestGroupId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Groups
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/group/join-requests:
+    get:
+      summary: ''
+      operationId: getApiGroupJoinRequests
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Groups
+  /api/managejoingrouprequest:
+    post:
+      summary: ''
+      operationId: postApiManagejoingrouprequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Groups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                decision:
+                  type: string
+                  description: ''
+                  example: cancel
+                  enum:
+                    - add
+                    - cancel
+                groupId:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: 'n'
+                sender_id:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: g
+              required:
+                - decision
+                - groupId
+                - sender_id
+  '/api/groups/{groupId}/posts/{postId}/approve':
+    post:
+      summary: ''
+      operationId: postApiGroupsGroupIdPostsPostIdApprove
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Groups
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: postId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/groups/{groupId}/posts/{postId}/reject':
+    delete:
+      summary: ''
+      operationId: deleteApiGroupsGroupIdPostsPostIdReject
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Groups
+    parameters:
+      -
+        in: path
+        name: groupId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: postId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/group/randomposts:
+    get:
+      summary: ''
+      operationId: getApiGroupRandomposts
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Groups

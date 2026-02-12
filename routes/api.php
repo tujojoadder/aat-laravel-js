@@ -48,6 +48,7 @@ use PHPUnit\TextUI\XmlConfiguration\GroupCollection;
 //<-- public Routes -->
 
 /* for google React js */
+
 Route::post('/googlehandle', [LoginController::class, 'googlehandle']);
 Route::post('/additionalinformation', [LoginController::class, 'additionalinformation']);
 
@@ -56,7 +57,7 @@ Route::post('/google-sign-in', [LoginController::class, 'googleSignInOnNative'])
 
 /* normal login */
 Route::post('/login', [LoginController::class, 'login']);
-//forgot password
+//forgot password  
 Route::post('/forgotpassword', [LoginController::class, 'forgotpassword']);
 //password reset
 Route::post('/resetpassword', [LoginController::class, 'resetpassword']);
@@ -810,9 +811,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
        /* only react native */
        Route::get('/get-auth-user-deatils', [ProfileController::class, 'authUserDetails']);
-
-
-
-
-
 });

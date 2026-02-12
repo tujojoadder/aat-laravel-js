@@ -24,6 +24,15 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+
+/**
+ * Get posts in a group
+ * 
+ * @authenticated
+ * @group Groups
+ */
+
+
 class GroupsController extends Controller
 {
     // Function to generate a unique identifier with at least three numbers appended
